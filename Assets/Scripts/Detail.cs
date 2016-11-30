@@ -4,11 +4,23 @@ using UnityEngine.EventSystems;
 
 namespace Assets.Scripts
 {
+    /// <summary>
+    ///   
+    ///   Z
+    ///   ^
+    ///   |
+    ///   |   + + +
+    ///   |    o o
+    ///   |   + + +
+    ///   +-------------- > X
+    ///                  
+    /// 
+    /// </summary>
     [RequireComponent(typeof(BoxCollider))]
     public class Detail : MonoBehaviour, IPointerUpHandler, IPointerDownHandler, IDragHandler
     {
         private int _sizeX;
-        private int _sizeY;
+        private int _sizeZ;
         private Vector3[] _raysOrigins;
         private Vector3[] _connectorsLocalPos;
         private int _holdingConnector;
@@ -19,16 +31,35 @@ namespace Assets.Scripts
             // Определяем по размерам коллайдера тип детали и локальные координаты всех ее коннекторов
             var collider = GetComponent<Collider>();
 
-            _sizeX = (int) collider.bounds.size.x;
-            _sizeY = (int) collider.bounds.size.z;
+            _sizeX = (int) (collider.bounds.size.x + 1) / 2;
+            _sizeZ = (int) (collider.bounds.size.z + 1) / 2;
 
-            _raysOrigins = new Vector3[_sizeX * _sizeY];
-            _connectorsLocalPos = new Vector3[_sizeX * _sizeY];
+            var totalConnectors = _sizeX * _sizeZ + (_sizeX - 1) * (_sizeZ - 1);
 
-            for (var i = 0; i < _connectorsLocalPos.Length; i++) {
-                _connectorsLocalPos[i] = new Vector3((i + _sizeX) % _sizeX - _sizeX / 2,
-                                                              - i / _sizeX + _sizeY / 2);
+            _raysOrigins = new Vector3[totalConnectors];
+            _connectorsLocalPos = new Vector3[totalConnectors];
+
+            for (var i = 0; i < _connectorsLocalPos.Length; i++)
+            {
+                var m = 2 * _sizeX - 1;
+                var y = Index2Row(i);
+                var offsetX = y.IsOdd() ? 1 : 0;
+                var x = Index2Column(i) * 2 + offsetX;
+                Debug.Log(x + " " + y);
+                _connectorsLocalPos[i] = new Vector3(x - _sizeX + 1,
+                                                  - (y - _sizeZ + 1));
             }
+        }
+
+        private int Index2Row(int i)
+        {
+            var m = 2 * _sizeX - 1;
+            return 2 * (i / m) + ((i + m) % m) / _sizeX;
+        }
+
+        private int Index2Column(int i) {
+            var m = 2 * _sizeX - 1;
+            return (((i + m) % m) % _sizeX);
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -127,7 +158,8 @@ namespace Assets.Scripts
 
             // Округляем координаты точки, вычисляем вектор переноса и перемещаем деталь
             var hitPoint = minRayHitInfo.Value.point;
-            var newPos = new Vector3((float) Math.Round(hitPoint.x), (float) Math.Round(hitPoint.y), (float) Math.Round(hitPoint.z))/* + minRayHitInfo.Value.normal*/;
+            var isCrossConnector = !Index2Row(minRayIndex).IsOdd(); Debug.Log(isCrossConnector + " " + minRayIndex);
+            var newPos = isCrossConnector ? hitPoint.AlignAsCross() : hitPoint.AlignAsSquare()/* + minRayHitInfo.Value.normal*/;
             var offset = newPos - transform.TransformPoint(_connectorsLocalPos[minRayIndex]);
 
             transform.Translate(offset, Space.World);
