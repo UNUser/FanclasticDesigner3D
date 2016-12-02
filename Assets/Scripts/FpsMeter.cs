@@ -9,7 +9,7 @@ namespace Assets.Scripts {
         private int frameCount = 0;
         private float dt = 0f;
         private float fps = 0f;
-        private float updateRate = 4f;  // 4 updates per sec.
+        private float updateRate = 10f;  // 4 updates per sec.
 
         private void Update() {
             frameCount++;

@@ -31,23 +31,19 @@ namespace Assets.Scripts
             // Определяем по размерам коллайдера тип детали и локальные координаты всех ее коннекторов
             var collider = GetComponent<Collider>();
 
-            _sizeX = (int) (collider.bounds.size.x + 1) / 2;
-            _sizeZ = (int) (collider.bounds.size.z + 1) / 2;
+            _sizeX = (int) collider.bounds.size.x - 1;
+            _sizeZ = (int) collider.bounds.size.z - 1;
 
-            var totalConnectors = _sizeX * _sizeZ + (_sizeX - 1) * (_sizeZ - 1);
+            var totalConnectors = _sizeX * _sizeZ;
 
             _raysOrigins = new Vector3[totalConnectors];
             _connectorsLocalPos = new Vector3[totalConnectors];
 
             for (var i = 0; i < _connectorsLocalPos.Length; i++)
             {
-                var m = 2 * _sizeX - 1;
-                var y = Index2Row(i);
-                var offsetX = y.IsOdd() ? 1 : 0;
-                var x = Index2Column(i) * 2 + offsetX;
-                Debug.Log(x + " " + y);
-                _connectorsLocalPos[i] = new Vector3(x - _sizeX + 1,
-                                                  - (y - _sizeZ + 1));
+                _connectorsLocalPos[i] = new Vector3((i + _sizeX) % _sizeX - _sizeX / 2,
+                                                              -i / _sizeX + _sizeZ / 2);
+
             }
         }
 
@@ -107,7 +103,7 @@ namespace Assets.Scripts
             FindObjectOfType<ApplicationController>().SelectedDetail = this;
         }
 
-        public void Rotate(Vector3 axis)
+        public void Rotate(Vector3 axis)  // TODO при поворотах коннекторы могут встать в запрещенные позиции, нужно проверять
         {
             transform.Rotate(axis, 90);
 
@@ -121,9 +117,9 @@ namespace Assets.Scripts
             }
         }
 
-        public void OnDrag(PointerEventData eventData)
-        {
-            var newPointerPos = Input.mousePosition;
+        public void OnDrag(PointerEventData eventData) // TODO коллайдеры, которые сейчас больше реальных размеров модели, хоть и помогают округлять в нужную сторону положение
+        {                                              // TODO коннекторов, влияют на область, за которую деталь можно "схватить" указателем, так что возможно лучше просто делать приращение
+            var newPointerPos = Input.mousePosition;   // TODO точки попадания луча в сторону луча поверхности, в которую попал луч.
 
             if (_prevPointerPos == newPointerPos)
                 return;
@@ -158,11 +154,26 @@ namespace Assets.Scripts
 
             // Округляем координаты точки, вычисляем вектор переноса и перемещаем деталь
             var hitPoint = minRayHitInfo.Value.point;
-            var isCrossConnector = !Index2Row(minRayIndex).IsOdd(); Debug.Log(isCrossConnector + " " + minRayIndex);
-            var newPos = isCrossConnector ? hitPoint.AlignAsCross() : hitPoint.AlignAsSquare()/* + minRayHitInfo.Value.normal*/;
+            //var isCrossConnector = !(minRayIndex / _sizeX).IsOdd() && !(minRayIndex % _sizeZ).IsOdd(); Debug.Log(isCrossConnector + " " + minRayIndex);
+            var one =  _sizeX * ((minRayIndex / _sizeX) & 1);
+            var two = (minRayIndex - one) & 1;
+            var index = minRayIndex - one - two;
+//            Debug.Log(minRayIndex + " " + " " + one + " " + two + " " + index);
+            var toNearest = _connectorsLocalPos[index] - _connectorsLocalPos[minRayIndex];
+            var toZero = transform.TransformPoint(_connectorsLocalPos[0]) -
+                         transform.TransformPoint(_connectorsLocalPos[minRayIndex]);
+            var alignment = GetAlignment(hitPoint + toZero);
+            alignment += hitPoint.y < 0.5 ? new Vector3(0f, -alignment.y, 0f) : Vector3.zero;
+            var newPos = hitPoint + alignment/* + minRayHitInfo.Value.normal*/;
+//            Debug.Log("Hit: " + hitPoint + ", Pos: " + newPos + ", Alignment: " + alignment + ", connector: " + minRayIndex + ", toZero: " + toZero);
             var offset = newPos - transform.TransformPoint(_connectorsLocalPos[minRayIndex]);
 
             transform.Translate(offset, Space.World);
+        }
+
+        private Vector3 GetAlignment(Vector3 vector)
+        {
+            return vector.AlignAsCross() - vector;
         }
 
         public void OnPointerUp(PointerEventData eventData)
@@ -171,13 +182,13 @@ namespace Assets.Scripts
         }
 
         // Update is called once per frame
-        private void Update()
-        {
-            for (var i = 0; i < _raysOrigins.Length; i++) {
-                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], Color.red, 0.1f);
-            }
-//            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, Color.red, 1);
-            
-        }
+//        private void Update()
+//        {
+//            for (var i = 0; i < _raysOrigins.Length; i++) {
+//                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], Color.red, 0.1f);
+//            }
+////            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, Color.red, 1);
+//            
+//        }
     }
 }

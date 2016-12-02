@@ -23,9 +23,9 @@ namespace Assets.Scripts {
                                 AlignValue(isOddAlignment, vector.y), 
                                 AlignValue(isOddAlignment, vector.z));
 
-            Debug.Log("Old: " + vector + ", new: " + v + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
+            /*Debug.Log("Old: " + vector + ", new: " + v + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
                                 + (Mathf.RoundToInt(vector.y) & 1) + " "
-                                + (Mathf.RoundToInt(vector.z) & 1) + " " + sum);
+                                + (Mathf.RoundToInt(vector.z) & 1) + " " + sum);*/
             return v;
         }
 
@@ -67,9 +67,9 @@ namespace Assets.Scripts {
                                 maxDeltaIndex == 1 ? newValue : roundY,
                                 maxDeltaIndex == 2 ? newValue : roundZ);
 
-            Debug.Log("Old: " + vector + ", new: " + v + ", isOddAlignment: " + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
+            /*Debug.Log("Old: " + vector + ", new: " + v + ", isOddAlignment: " + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
                                 + (Mathf.RoundToInt(vector.y) & 1) + " "
-                                + (Mathf.RoundToInt(vector.z) & 1) + " " + sum);
+                                + (Mathf.RoundToInt(vector.z) & 1) + " " + sum);*/
             return v;
         }
 
