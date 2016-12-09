@@ -2,27 +2,26 @@
 using UnityEngine.UI;
 
 namespace Assets.Scripts {
-    class FpsMeter : MonoBehaviour
+    public class FpsMeter : MonoBehaviour
     {
         public Text Text;
+        public float UpdatesPerSecond = 10f;
 
-        private int frameCount = 0;
-        private float dt = 0f;
-        private float fps = 0f;
-        private float updateRate = 10f;  // 4 updates per sec.
+        private int _frameCount;
+        private float _dt;
+        private float _fps;
 
         private void Update() {
-            frameCount++;
-            dt += Time.deltaTime;
+            _frameCount++;
+            _dt += Time.deltaTime;
 
-            if (dt > 1.0 / updateRate) {
-                fps = frameCount / dt;
-                frameCount = 0;
-                dt -= 1f / updateRate;
+            if (_dt > 1.0 / UpdatesPerSecond) {
+                _fps = _frameCount / _dt;
+                _frameCount = 0;
+                _dt -= 1f / UpdatesPerSecond;
 
-                Text.text = fps.ToString("F");
+                Text.text = _fps.ToString("F");
             }
         }
-
     }
 }

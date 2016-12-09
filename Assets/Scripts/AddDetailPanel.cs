@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts {
 
-    class AddDetailPanel : MonoBehaviour
+    public class AddDetailPanel : MonoBehaviour
     {
         public GameObject ColorSetterPrefab;
         public Transform ColorsContent;

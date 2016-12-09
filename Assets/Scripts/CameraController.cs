@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+
 namespace Assets.Scripts {
 
-    class Base : MonoBehaviour, IPointerDownHandler, IDragHandler
+    public class CameraController : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
-
+        public Camera Camera;
         public float SpeedX = 1;
         public float SpeedY = 1;
+
+        public float FocusingSpeed = 3f;
 
         public GameObject FocusSetter;
         public Image SetFocusButtonImage;
@@ -20,42 +22,23 @@ namespace Assets.Scripts {
             get { return _focus; }
             set
             {
+                _prevFocus = _focus;
                 _focus = value;
-                _camera.transform.LookAt(_focus);
+                _focusingProgress = 0f;
             }
         }
 
         private Vector3 _focus;
+        private Vector3 _prevFocus;
+        private float _focusingProgress = 1f;
+
         private Vector3 _prevMousePos;
-        private Camera _camera;
 
 
         private void Start()
         {
-            _camera = Camera.main;
-            _camera.transform.RotateAround(Vector3.zero, Vector3.right, 45);
-
-
-            var mesh = GetComponent<MeshFilter>();
-            var normals = new List<Vector3>();
-
-//            foreach (var normal in mesh.mesh.normals) {
-//                Debug.Log("Before: " + normal);
-//            }
-
-            foreach (var normal in mesh.mesh.normals)
-            {
-                normals.Add(-normal);
-            }
-            mesh.mesh.SetNormals(normals);
-//            mesh.mesh.RecalculateNormals();
-
-//            foreach (var normal in mesh.mesh.normals) {
-//                Debug.Log("After: " + normal);
-//            }
-//            foreach (var normal in normals) {
-//                Debug.Log("Normals: " + normal);
-//            } 
+            Focus = Vector3.zero;
+            _prevFocus = Focus;
         }
 
         public void OnSetFocusButtonClick()
@@ -87,22 +70,23 @@ namespace Assets.Scripts {
             var newMousePos = Input.mousePosition;
             var offset = newMousePos - _prevMousePos;
 
-            var v1 = _camera.transform.position - _focus;
-            var v2 = Vector3.ProjectOnPlane(v1, Vector3.up);
+            var v1 = Camera.transform.position - _focus;
 
-            var axis = Vector3.Cross(v1, v2);
+            var axis = Vector3.Cross(v1, Vector3.up);
             var curr = Vector3.Angle(v1, Vector3.up);
             var angel = offset.y * SpeedY;
+            var alpha = 180 - Mathf.Acos(Mathf.Min((_focus.y - 1) / v1.magnitude, 1)) * Mathf.Rad2Deg;
 
             if (Math.Abs(angel) > 0)
             {
-                angel = angel > 0                    //Mathf.Clamp заменить
-                    ? Math.Min(80 - curr, angel)
+                angel = angel > 0
+                    ? Math.Min(Mathf.Min(170, alpha) - curr, angel)
                     : Math.Max(angel, 10 - curr);
             }
-   
-            _camera.transform.RotateAround(_focus, axis, angel);
-            _camera.transform.RotateAround(_focus, Vector3.up, offset.x * SpeedX);
+           
+
+            Camera.transform.RotateAround(_focus, axis, -angel);
+            Camera.transform.RotateAround(_focus, Vector3.up, offset.x * SpeedX);
 
             _prevMousePos = newMousePos;
         }
@@ -113,10 +97,20 @@ namespace Assets.Scripts {
         public float MaxDistance = 100f;
         public float MinDistance = 5f;
 
+        private void Focusing()
+        {
+            if (_focusingProgress >= 1f) return;
+
+            _focusingProgress += Time.deltaTime * FocusingSpeed;
+            var currentPoint = Vector3.Lerp(_prevFocus, Focus, _focusingProgress); //TODO тут нужно лерпать угол, а то если из далека идет, то неравномерно получается, в конце быстро
+            Camera.transform.LookAt(currentPoint);
+        }
 
         private void Update() {
 
-            var oldCameraPos = _camera.transform.position - _focus;
+            Focusing();
+
+            var oldCameraPos = Camera.transform.position - _focus;
             float distanceDelta;
 
 #if UNITY_STANDALONE || UNITY_EDITOR
@@ -150,10 +144,11 @@ namespace Assets.Scripts {
             distanceDelta = deltaMagnitudeDiff * PinchZoomSpeed;
             
 #endif
+            var curr = Vector3.Angle(oldCameraPos, Vector3.up);
+            var maxDistance = curr > 90 ? (_focus.y - 1) / (Mathf.Cos((180 - curr) * Mathf.Deg2Rad)) : MaxDistance;
+            var newDistance = Mathf.Clamp(oldCameraPos.magnitude + distanceDelta, MinDistance, maxDistance);
 
-            var newDistance = Mathf.Clamp(oldCameraPos.magnitude + distanceDelta, MinDistance, MaxDistance);
-
-            _camera.transform.position = _focus + oldCameraPos.normalized * newDistance; //Debug.Log(distanceDelta + " " + oldCameraPos.magnitude + " " + _camera.transform.position.magnitude);
+            Camera.transform.position = _focus + oldCameraPos.normalized * newDistance; //Debug.Log(distanceDelta + " " + oldCameraPos.magnitude + " " + _camera.transform.position.magnitude);
         }
 
 

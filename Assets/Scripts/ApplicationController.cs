@@ -1,13 +1,25 @@
 ﻿using UnityEngine;
 
 namespace Assets.Scripts {
-    class ApplicationController : MonoBehaviour
+    public class ApplicationController : MonoBehaviour
     {
         public Material[] DetailColors;
 
-        public Detail SelectedDetail { get; set; }
-        //{ return _selecteDetail; } set { _selecteDetail = value; } }
-//        private Detail _selecteDetail = null;
+        public Detail SelectedDetail
+        {
+            get { return _selectedDetail; }
+            set
+            {
+                if (_selectedDetail != null)
+                {
+                    _selectedDetail.IsSelected = false;
+                }
+                _selectedDetail = value;
+                _selectedDetail.IsSelected = true;
+            }
+        }
+
+        private Detail _selectedDetail = null;
 
         public void RotateSelectedByX() {
             if (SelectedDetail == null) return;

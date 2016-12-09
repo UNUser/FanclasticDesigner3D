@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace Assets.Scripts {
 
-    class DetailButton : MonoBehaviour, IPointerUpHandler, IDragHandler
+    public class DetailButton : MonoBehaviour, IPointerUpHandler, IDragHandler
     {
         private GameObject _detailPrefab;
         private Detail _newDetail;
@@ -31,7 +31,8 @@ namespace Assets.Scripts {
                 //TODO тут покрасивше как-то переделать
                 _newDetail.GetComponent<MeshRenderer>().material = FindObjectOfType<AddDetailPanel>().ActiveColor;
                 _newDetail.transform.position = Vector3.down * 5; //TODO (если мы отпустили кнопку на фоне "неба", то созданная деталь останется под плоскостью)
-                _newDetail.OnPointerDown(null);
+                _newDetail.OnPointerClick(null);
+                _newDetail.OnBeginDrag(null);
                 _isDrag = true;
             }
 
