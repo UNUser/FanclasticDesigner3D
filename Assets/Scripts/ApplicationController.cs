@@ -5,7 +5,7 @@ namespace Assets.Scripts {
     {
         public Material[] DetailColors;
 
-        public Detail SelectedDetail
+        public DetailBase SelectedDetail
         {
             get { return _selectedDetail; }
             set
@@ -15,11 +15,14 @@ namespace Assets.Scripts {
                     _selectedDetail.IsSelected = false;
                 }
                 _selectedDetail = value;
-                _selectedDetail.IsSelected = true;
+                if (value != null)
+                {
+                    _selectedDetail.IsSelected = true;
+                }
             }
         }
 
-        private Detail _selectedDetail = null;
+        private DetailBase _selectedDetail = null;
 
         public void RotateSelectedByX() {
             if (SelectedDetail == null) return;

@@ -4,6 +4,19 @@ using UnityEngine;
 namespace Assets.Scripts {
     public static class Extentions {
 
+
+        public static DetailsGroup RootParent(this Transform transform) {
+            return transform.root.GetComponent<DetailsGroup>(); 
+        }
+
+        public static void SetRootParent(this Transform transform, Transform value) {
+                if (transform.parent != null) {
+                    transform.parent.GetComponent<DetailsGroup>().ChildDetached();
+                }
+                transform.SetParent(value != null ? value.transform : null);
+        }
+
+
         /// <summary>
         /// Выравнивание координат вектора по сетке крестовых коннекторов (все координаты вектора должны быть целые и либо все четные, либо все нечетные)
         /// Если ForceAlignment указан None, то выравнивание идет в сторону четности большинства координат вектора

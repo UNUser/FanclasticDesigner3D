@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -16,102 +17,49 @@ namespace Assets.Scripts
     ///                  
     /// 
     /// </summary>
-    [RequireComponent(typeof(BoxCollider))]
-    public class Detail : MonoBehaviour, IPointerUpHandler, IBeginDragHandler, IDragHandler, IPointerClickHandler
+    [RequireComponent(typeof (BoxCollider))]
+    public class Detail : DetailBase, IBeginDragHandler, IDragHandler, IPointerClickHandler
     {
-        public bool IsSelected
+        public override Bounds Bounds
         {
-            get { return _isSelected; }
-            set
-            {
-                _isSelected = value;
-//                _renderer.material.shader = _isSelected ? _selectedShader : _originalShader;
-                gameObject.layer = LayerMask.NameToLayer(_isSelected ? "SelectedItem" : "Default");;
-            }
+            get { return GetComponent<Renderer>().bounds; }
         }
 
         private int _sizeX;
         private int _sizeZ;
         private Vector3[] _raysOrigins;
         private Vector3[] _connectorsLocalPos;
+//        private List<Transform> _currentConnections; 
         private int _holdingConnector;
         private Vector3 _prevPointerPos;
-        private bool _isSelected;
 
-        private MeshRenderer _renderer;
-//        private Shader _originalShader;
-//        private Shader _selectedShader;
         private static Material _selectedMaterial;
 
 
         private void Awake()
         {
-            _renderer = GetComponent<MeshRenderer>();
-
-//            _selectedShader = Shader.Find("Outlined/Diffuse");
-//            _originalShader = Shader.Find("Standard");
-
-//            Shader shader;
-//
-//            try
-//            {
-//                shader = ShaderUtil.CreateShaderAsset("Shader \"Lines/Colored Blended\" {" +
-//                                          "SubShader { Pass { " +
-//                                          "    Blend SrcAlpha OneMinusSrcAlpha " +
-//                                          "    ZWrite Off Cull Off Fog { Mode Off } " +
-//                                          "    BindChannels {" +
-//                                          "      Bind \"vertex\", vertex Bind \"color\", color }" +
-//                                          "} } }");
-//            }
-//            catch (Exception)
-//            {
-//                
-//                Debug.Log("Catch!");
-//                return;
-//            }
-
-//            if (_selectedMaterial == null)
-//            {
-//                _selectedMaterial = new Material(Shader.Find("Standard"/*"SelectedBox/Colored Blended"*/))
-//                {
-//                    hideFlags = HideFlags.HideAndDontSave,
-//                    shader = {hideFlags = HideFlags.HideAndDontSave}
-//                };
-//            }
-
             // Определяем по размерам коллайдера тип детали и локальные координаты всех ее коннекторов
             var collider = GetComponent<Collider>();
 
             _sizeX = (int) collider.bounds.size.x - 1;
             _sizeZ = (int) collider.bounds.size.z - 1;
 
-            var totalConnectors = _sizeX * _sizeZ;
+            var totalConnectors = _sizeX*_sizeZ;
 
             _raysOrigins = new Vector3[totalConnectors];
             _connectorsLocalPos = new Vector3[totalConnectors];
 
             for (var i = 0; i < _connectorsLocalPos.Length; i++)
             {
-                _connectorsLocalPos[i] = new Vector3((i + _sizeX) % _sizeX - _sizeX / 2,
-                                                              -i / _sizeX + _sizeZ / 2);
+                _connectorsLocalPos[i] = new Vector3(i % _sizeX - _sizeX / 2,
+                                                    -i / _sizeX + _sizeZ / 2);
 
             }
         }
 
-        private int Index2Row(int i)
-        {
-            var m = 2 * _sizeX - 1;
-            return 2 * (i / m) + ((i + m) % m) / _sizeX;
-        }
-
-        private int Index2Column(int i) {
-            var m = 2 * _sizeX - 1;
-            return (((i + m) % m) % _sizeX);
-        }
-
         public void OnBeginDrag(PointerEventData eventData)
         {
-            if (!_isSelected) return;
+            if (!IsSelected) return;
 
 #if !UNITY_STANDALONE && !UNITY_EDITOR
 
@@ -125,7 +73,7 @@ namespace Assets.Scripts
             // 1. Бросаем луч в то место, на которое нажал пользователь
             if (!Physics.Raycast(pointerRay, out hitInfo))
             {
-                Debug.LogError("OnMouseDown without raycast hit!");
+                Debug.LogError("OnBeginDrag without raycast hit!");
                 return;
             }
 
@@ -145,48 +93,53 @@ namespace Assets.Scripts
                 }
             }
 
+            _prevPointerPos = Input.mousePosition;
+
             // Затем пересчитываем положения начала лучей, которые будем бросать от камеры через коннекторы детали
             // (при этом луч, исходящий из камеры должен попадать в тот коннектор, за который мы "держим" деталь)
-            var holdingConnectorOffset = _connectorsLocalPos[_holdingConnector];
             var cameraOffset = Camera.main.transform.position - transform.position;
+            var holdingConnectorOffset = cameraOffset - transform.TransformDirection(_connectorsLocalPos[_holdingConnector]);
+            var rootParent = transform.RootParent();
 
-            for (var i = 0; i < _raysOrigins.Length; i++) {
-                _raysOrigins[i] = transform.TransformPoint(_connectorsLocalPos[i] - holdingConnectorOffset) + cameraOffset;
-            }
-
-            _prevPointerPos = Input.mousePosition;
+            if (rootParent != null)
+                rootParent.SetRaycastOrigins(holdingConnectorOffset);
+            else
+                SetRaycastOrigins(holdingConnectorOffset);
+            
         }
 
-        public void Rotate(Vector3 axis)  // TODO при поворотах коннекторы могут встать в запрещенные позиции, нужно проверять
+        public override void SetRaycastOrigins(Vector3 offset)
         {
-            transform.Rotate(axis, 90);
-
-            var deltaFirst = transform.TransformPoint(_connectorsLocalPos[0]).y;
-            var deltaLast = transform.TransformPoint(_connectorsLocalPos[_connectorsLocalPos.Length - 1]).y;
-            var deltaMin = Mathf.Min(deltaFirst, deltaLast);
-
-            if (deltaMin < 0)
-            {
-                transform.Translate(Vector3.up * (int) -deltaMin, Space.World);
+            for (var i = 0; i < _raysOrigins.Length; i++) {
+                _raysOrigins[i] = transform.TransformPoint(_connectorsLocalPos[i]) + offset;
             }
+        }
 
-            var alignment = GetAlignment(transform.TransformPoint(_connectorsLocalPos[0]));
+        public override void Rotate(Vector3 axis)
+        {
+            transform.Rotate(axis, 90, Space.World);
 
-            transform.Translate(alignment, Space.World);
+            var newPos = transform.position;
+
+            AlignPosition(ref newPos);
+            var offset = newPos - transform.position;
+            transform.Translate(offset, Space.World);
         }
 
         // TODO Кучу кода можно по идее заменить используя Physics.BoxCast!!!! (только не кидает ли он еще больше лучей?)
-        public void OnDrag(PointerEventData eventData) // TODO коллайдеры, которые сейчас больше реальных размеров модели, хоть и помогают округлять в нужную сторону положение
-        {                                              // TODO коннекторов, влияют на область, за которую деталь можно "схватить" указателем, так что возможно лучше просто делать приращение
+        public void OnDrag(PointerEventData eventData)
+            // TODO коллайдеры, которые сейчас больше реальных размеров модели, хоть и помогают округлять в нужную сторону положение
+        {
+            // TODO коннекторов, влияют на область, за которую деталь можно "схватить" указателем, так что возможно лучше просто делать приращение
 
-           if (!_isSelected) return;
+            if (!IsSelected) return;
 
 #if !UNITY_STANDALONE && !UNITY_EDITOR
 
             if (Input.touchCount > 1) return;
 #endif
 
-           var newPointerPos = Input.mousePosition;   
+            var newPointerPos = Input.mousePosition;
 
             if (_prevPointerPos == newPointerPos)
                 return;
@@ -195,99 +148,132 @@ namespace Assets.Scripts
 
             // Определяем новое направление, которое указывает пользователь
             var newDirection = Camera.main.ScreenPointToRay(newPointerPos).direction;
+            Detail raycaster;
+            int rayOriginIndex;
+            var rootParent = transform.RootParent();
 
+            var minRayHitInfo = rootParent != null 
+                ? rootParent.CastDetailAndGetClosestHit(newDirection, out raycaster, out rayOriginIndex) 
+                : CastDetailAndGetClosestHit(newDirection, out raycaster, out rayOriginIndex);
+
+            // Этот луч указывает новое положение соответствующего коннектора
+            if (minRayHitInfo == null)
+                return;
+
+            // Округляем координаты точки, вычисляем вектор переноса и перемещаем деталь
+            var hitPoint = minRayHitInfo.Value.point;
+//            var centerOffset = sender.transform.position - sourcePoint;
+            var curroffset = hitPoint - raycaster.transform.TransformPoint(raycaster._connectorsLocalPos[rayOriginIndex]);
+            var newPos = raycaster.transform.position + curroffset;//hitPoint + centerOffset;
+
+            _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
+
+            raycaster.AlignPosition(ref newPos);
+
+
+            var connections = GetConnections(newPos);
+//            UpdateConnections(connections);
+            if (hitPoint.y > 0 && connections.Count == 0)
+                return;
+
+            var offset = newPos - raycaster.transform.position;
+            if (rootParent != null)
+                rootParent.transform.Translate(offset, Space.World);
+            else
+                transform.Translate(offset, Space.World);
+        }
+
+
+        private Ray _debugRay;
+
+
+        public override RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster, out int rayOriginIndex)
+        {
             // Кидаем лучи, идущие  в новом направлении параллельно через все коннекторы детали и определяем самый короткий из них
-            var minRayIndex = -1;
             RaycastHit? minRayHitInfo = null;
             LayerMask layerMask = ~(1 << LayerMask.NameToLayer("SelectedItem"));
+
+            raycaster = this;
+            rayOriginIndex = -1;
 
             for (var i = 0; i < _raysOrigins.Length; i++)
             {
                 RaycastHit hitInfo;
 
-                if (Physics.Raycast(_raysOrigins[i], newDirection, out hitInfo, Mathf.Infinity, layerMask))
+                if (Physics.Raycast(_raysOrigins[i], direction, out hitInfo, Mathf.Infinity, layerMask))
                 {
                     if (minRayHitInfo == null || hitInfo.distance < minRayHitInfo.Value.distance)
                     {
                         minRayHitInfo = hitInfo;
-                        minRayIndex = i;
+                        rayOriginIndex = i;
                     }
                 }
             }
-            
-            // Этот луч указывает новое положение соответствующего коннектора
-            if (minRayHitInfo == null) 
-                return;
 
-            // Округляем координаты точки, вычисляем вектор переноса и перемещаем деталь
-            var hitPoint = minRayHitInfo.Value.point;
-            //var isCrossConnector = !(minRayIndex / _sizeX).IsOdd() && !(minRayIndex % _sizeZ).IsOdd(); Debug.Log(isCrossConnector + " " + minRayIndex);
-//            var one =  _sizeX * ((minRayIndex / _sizeX) & 1);
-//            var two = (minRayIndex - one) & 1;
-//            var index = minRayIndex - one - two;
-//            Debug.Log(minRayIndex + " " + " " + one + " " + two + " " + index);
-//            var toNearest = _connectorsLocalPos[index] - _connectorsLocalPos[minRayIndex];
-            var toZero = transform.TransformPoint(_connectorsLocalPos[0]) -
-                         transform.TransformPoint(_connectorsLocalPos[minRayIndex]);
-            var alignment = GetAlignment(hitPoint + toZero);
-//            alignment += hitPoint.y < 0.5 ? new Vector3(0f, -alignment.y, 0f) : Vector3.zero;
-//            if (hitPoint.y < 0.5)
-//                alignment.y = 0;
-            var newPos = hitPoint + alignment/* + minRayHitInfo.Value.normal*/;
-//            Debug.Log("Hit: " + hitPoint + ", Pos: " + newPos + ", Alignment: " + alignment + ", connector: " + minRayIndex + ", toZero: " + toZero);
-            var offset = newPos - transform.TransformPoint(_connectorsLocalPos[minRayIndex]);
+            return minRayHitInfo;
+        }
 
-            if (offset == Vector3.zero) return;
-//            else Debug.Log("Offset: " + offset);
+        public void AlignPosition(ref Vector3 pos)
+        {
+            var bottomPointIndex = CorrectHeightAboveFloor(ref pos);
 
-//            Debug.Log("Before: " + transform.position);
+            var offsetFromCurrentPos = pos - transform.position;
+            var bottomPointPos = transform.TransformPoint(_connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
+            var alignment = bottomPointPos.AlignAsCross() - bottomPointPos;
 
-            transform.Translate(offset, Space.World);
+            pos += alignment;
+        }
 
-//            Debug.Log("After: " + transform.position + " " + HasConnection() + " " + alignment.y);
+        private int CorrectHeightAboveFloor(ref Vector3 pos)
+        {
+            var offsetFromCurrentPos = pos - transform.position;
+            var heightFirst = transform.TransformPoint(_connectorsLocalPos[0]).y + offsetFromCurrentPos.y;
+            var heightLast = transform.TransformPoint(_connectorsLocalPos[_connectorsLocalPos.Length - 1]).y +
+                             offsetFromCurrentPos.y;
 
-            if (!HasConnection() && hitPoint.y > 0)
+            var bottomPointIndex = heightLast < heightFirst ? _connectorsLocalPos.Length - 1 : 0;
+            var heightMin = Mathf.Min(heightFirst, heightLast);
+
+            if (heightMin < 0)
             {
-                transform.Translate(-offset, Space.World);
-//                Debug.Log("Done! " + transform.position);
+                pos.y += Mathf.Abs(heightMin);
             }
-        }
 
-        private Vector3 GetAlignment(Vector3 vector)
-        {
-            return vector.AlignAsCross() - vector;
-        }
-
-        public void OnPointerUp(PointerEventData eventData)
-        {
-            
+            return bottomPointIndex;
         }
 
         // Update is called once per frame
-        private void Update()
-        {
+//        private void Update()
+//        {
 //            for (var i = 0; i < _raysOrigins.Length; i++) {
 //                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], Color.red, 0.1f);
 //            }
 //            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, Color.red, 1);
 //            if (IsSelected)
 //                Debug.Log(HasConnection());
-        }
+//            Debug.DrawRay(_debugRay.origin, _debugRay.direction, Color.red, 0.1f);
+//        }
 
         public void OnPointerClick(PointerEventData eventData)
         {
-//            if (IsSelected) return; 
+            if (IsSelected) return; 
 //
 //            IsSelected = true;
 
             //TODO переделать?
-            FindObjectOfType<ApplicationController>().SelectedDetail = this;
+            var app = FindObjectOfType<ApplicationController>();
+            app.SelectedDetail = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
+
+            var rootParent = transform.RootParent();
+            app.SelectedDetail = rootParent != null ? (DetailBase) rootParent : this;
 
 //            mat.SetFloat("_intencity");
         }
 
-        void CreateLineMaterial() {
-            if (!_selectedMaterial) {
+        private void CreateLineMaterial()
+        {
+            if (!_selectedMaterial)
+            {
                 // Unity has a built-in shader that is useful for drawing
                 // simple colored things.
                 var shader = Shader.Find("Hidden/Internal-Colored");
@@ -303,72 +289,142 @@ namespace Assets.Scripts
             }
         }
 
-        void OnRenderObject() {
+        private void OnRenderObject()
+        {
 
-            if (!_isSelected) return;
+            if (!IsSelected) return;
 
             var mesh = GetComponent<MeshFilter>().mesh;
             var ext = mesh.bounds.extents;
-            
+
             CreateLineMaterial();
             _selectedMaterial.SetPass(0);
-            
+
             GL.PushMatrix();
             GL.Begin(GL.LINES);
-                GL.Color(Color.green);          
-                for (var i = 0; i < 4; i++)
+            GL.Color(Color.green);
+            for (var i = 0; i < 4; i++)
+            {
+                // - + +, + + -, - - -, + - +
+                var begin = new Vector3(ext.x*(i.IsOdd() ? 1 : -1), ext.y*(i/2 < 1 ? 1 : -1), ext.z*(i%3 == 0 ? 1 : -1));
+                var beginGL = transform.TransformPoint(begin);
+                for (var j = 0; j < 3; j++)
                 {
-                    // - + +, + + -, - - -, + - +
-                    var begin = new Vector3(ext.x * (i.IsOdd() ? 1 : -1), ext.y * (i / 2 < 1 ? 1 : -1), ext.z * ((3 + i) % 3 == 0 ? 1 : -1));
-                    var beginGL = transform.TransformPoint(begin);
-                    for (var j = 0; j < 3; j++) {
-                        GL.Vertex3(beginGL.x, beginGL.y, beginGL.z);
-                        var end = begin;
-                        end[j] *= -1;
-                        var endGL = transform.TransformPoint(end);
-                        GL.Vertex3(endGL.x, endGL.y, endGL.z);
-                    }
+                    GL.Vertex3(beginGL.x, beginGL.y, beginGL.z);
+                    var end = begin;
+                    end[j] *= -1;
+                    var endGL = transform.TransformPoint(end);
+                    GL.Vertex3(endGL.x, endGL.y, endGL.z);
                 }
+            }
             GL.End();
             GL.PopMatrix();
         }
 
-        public bool HasConnection()
+        /// <summary>
+        /// Имеет ли эта деталь соединения с другими деталями когда находится в позиции pos.
+        /// Если pos == null, то берется текущая позиция детали.
+        /// </summary>
+        public override List<Transform> GetConnections(Vector3? pos = null)
         {
+            var detailPos = pos ?? transform.position;
             var col = GetComponent<BoxCollider>();
-            LayerMask layerMask = ~(1 << LayerMask.NameToLayer("SelectedItem") | 1 << LayerMask.NameToLayer("Workspace"));
+            var overlapArea = col.bounds;
+            var connections = new List<Transform>();
 
-            var neighbors = Physics.OverlapBox(col.bounds.center, col.bounds.extents, Quaternion.identity, layerMask); //TODO если будет жрать память, то можно заменить на NonAlloc версию
-            string list = string.Empty;
+            overlapArea.center = detailPos;
+            LayerMask layerMask =
+                ~(1 << LayerMask.NameToLayer("SelectedItem") | 1 << LayerMask.NameToLayer("Workspace"));
+
+            var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
+                //TODO если будет жрать память, то можно заменить на NonAlloc версию
+            
             foreach (var neighbor in neighbors)
             {
                 if (neighbor == col) continue;
 
-                var colMin = col.bounds.min;
+                var colMin = overlapArea.min;
                 var neighborMin = neighbor.bounds.min;
-                var colMax = col.bounds.max;
+                var colMax = overlapArea.max;
                 var neighborMax = neighbor.bounds.max;
 
-                var intersectionMin = new Vector3(Mathf.Max(colMin.x, neighborMin.x), Mathf.Max(colMin.y, neighborMin.y), Mathf.Max(colMin.z, neighborMin.z));
-                var intersectionMax = new Vector3(Mathf.Min(colMax.x, neighborMax.x), Mathf.Min(colMax.y, neighborMax.y), Mathf.Min(colMax.z, neighborMax.z));
+                var intersectionMin = new Vector3(Mathf.Max(colMin.x, neighborMin.x), Mathf.Max(colMin.y, neighborMin.y),
+                    Mathf.Max(colMin.z, neighborMin.z));
+                var intersectionMax = new Vector3(Mathf.Min(colMax.x, neighborMax.x), Mathf.Min(colMax.y, neighborMax.y),
+                    Mathf.Min(colMax.z, neighborMax.z));
 
-                var v = intersectionMax - intersectionMin; // у всех координат размеры больше 1 и минимум у двух координат размеры больше 2
+                var v = intersectionMax - intersectionMin;
+                    // у всех координат размеры больше 1 и минимум у двух координат размеры больше 2
                 var test = Mathf.Min(v.x, 2) + Math.Min(v.y, 2) + Math.Min(v.z, 2) > 5;
 
-//                Debug.DrawLine(intersectionMin, intersectionMax, Color.red);
-//                Debug.Log(v + " " + test);
-
                 if (test)
-                    return true;
-
-
-
-                list += neighbor.gameObject.name + " ";
+                    connections.Add(neighbor.transform);
             }
-//            if (!string.IsNullOrEmpty(list))
-//                Debug.Log(list + ", center = " + col.bounds.center + ", extents = " + col.bounds.extents);
 
-            return false;
+            return connections;
         }
+
+        public override void UpdateConnections()
+        {
+            var connections = GetConnections();
+            var parent = transform.parent;
+
+            if (connections.Count == 0)
+            {
+                if (parent != null)
+                {
+                    transform.SetRootParent(null);
+                    if (parent.childCount == 1)
+                    {
+                        var lastChild = parent.GetChild(0);
+
+                        lastChild.parent = parent.parent;
+                        Destroy(parent.gameObject);
+                    }
+                }
+
+                return;
+            }
+
+            foreach (var connection in connections)
+            {
+                if (connection.root == transform.root) continue;
+
+//                if (parent == null)
+//                {
+                    ConnectWith(connection);
+//                }
+            }
+        }
+
+        //TODO сделать присоединение детали к группе и группы к детали одинаковым (без создания новой группы)
+        public void ConnectWith(Transform detail)
+        {
+//            Debug.Log("Connect! other: " + detail.gameObject.name + ", this:" + gameObject.name);
+
+//             group = detail.RootParent() ?? transform.RootParent();
+
+            if (detail.RootParent() != null)
+            {
+                var root = detail.root;
+                transform.root.SetParent(root);
+                return;
+            }
+
+            if (transform.RootParent() != null) {
+                var root = transform.root;
+                detail.root.SetParent(root);
+                return;
+            }
+
+            var newGroup = new GameObject("DetailsGroup");
+            newGroup.AddComponent<DetailsGroup>();
+            newGroup.transform.position = (detail.position + transform.position) / 2f;
+
+            detail.SetParent(newGroup.transform);
+            transform.SetParent(newGroup.transform);
+        }
+
+
     }
 }

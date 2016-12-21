@@ -9,10 +9,22 @@ namespace Assets.Scripts {
     public class CameraController : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         public Camera Camera;
-        public float SpeedX = 1;
-        public float SpeedY = 1;
+
+        public float RotationFloorSpeed = 0.3f;
+        public float TiltingFloorSpeed = 0.3f;
+
+        public float TiltingFloorAngelMax = 170f;
+        public float TiltingFloorAngelMin = 10f;
 
         public float FocusingSpeed = 3f;
+        public float MovementSpeed = 600f;
+
+        public float PinchZoomSpeed = 0.5f;
+        public float ScrollZoomSpeed = 0.5f;
+
+        public float MaxDistance = 100f;
+        public float MinDistance = 5f;
+        public float MinHeight = 1f;
 
         public GameObject FocusSetter;
         public Image SetFocusButtonImage;
@@ -22,15 +34,13 @@ namespace Assets.Scripts {
             get { return _focus; }
             set
             {
-                _prevFocus = _focus;
                 _focus = value;
-                _focusingProgress = 0f;
+                _isFocusing = true;
             }
         }
 
         private Vector3 _focus;
-        private Vector3 _prevFocus;
-        private float _focusingProgress = 1f;
+        private bool _isFocusing;
 
         private Vector3 _prevMousePos;
 
@@ -38,7 +48,6 @@ namespace Assets.Scripts {
         private void Start()
         {
             Focus = Vector3.zero;
-            _prevFocus = Focus;
         }
 
         public void OnSetFocusButtonClick()
@@ -64,8 +73,12 @@ namespace Assets.Scripts {
             _prevMousePos = Input.mousePosition;
         }
 
-        public void OnDrag(PointerEventData eventData)
-        {
+        public void OnDrag(PointerEventData eventData) {
+
+#if !UNITY_STANDALONE && !UNITY_EDITOR
+
+            if (Input.touchCount > 1) return;
+#endif
 
             var newMousePos = Input.mousePosition;
             var offset = newMousePos - _prevMousePos;
@@ -74,37 +87,48 @@ namespace Assets.Scripts {
 
             var axis = Vector3.Cross(v1, Vector3.up);
             var curr = Vector3.Angle(v1, Vector3.up);
-            var angel = offset.y * SpeedY;
-            var alpha = 180 - Mathf.Acos(Mathf.Min((_focus.y - 1) / v1.magnitude, 1)) * Mathf.Rad2Deg;
+            var angel = offset.y * TiltingFloorSpeed;
+            var alpha = 180 - Mathf.Acos(Mathf.Min((_focus.y - MinHeight) / v1.magnitude, 1)) * Mathf.Rad2Deg;
 
             if (Math.Abs(angel) > 0)
             {
                 angel = angel > 0
-                    ? Math.Min(Mathf.Min(170, alpha) - curr, angel)
-                    : Math.Max(angel, 10 - curr);
+                    ? Math.Min(Mathf.Min(TiltingFloorAngelMax, alpha) - curr, angel)
+                    : Math.Max(angel, TiltingFloorAngelMin - curr);
             }
            
 
             Camera.transform.RotateAround(_focus, axis, -angel);
-            Camera.transform.RotateAround(_focus, Vector3.up, offset.x * SpeedX);
+            Camera.transform.RotateAround(_focus, Vector3.up, offset.x * RotationFloorSpeed);
 
             _prevMousePos = newMousePos;
         }
-
-        public float PinchZoomSpeed = 0.5f;
-        public float ScrollZoomSpeed = 0.5f;
-
-        public float MaxDistance = 100f;
-        public float MinDistance = 5f;
-
+        
         private void Focusing()
         {
-            if (_focusingProgress >= 1f) return;
+            if (!_isFocusing) return;
 
-            _focusingProgress += Time.deltaTime * FocusingSpeed;
-            var currentPoint = Vector3.Lerp(_prevFocus, Focus, _focusingProgress); //TODO тут нужно лерпать угол, а то если из далека идет, то неравномерно получается, в конце быстро
-            Camera.transform.LookAt(currentPoint);
-        }
+            var cameraPos = Camera.transform.position;
+            var targetDirection = Focus - cameraPos;
+            var newDirection = Vector3.RotateTowards(Camera.transform.forward, targetDirection,
+                Time.deltaTime * FocusingSpeed, Mathf.Infinity);
+
+            Camera.transform.LookAt(cameraPos + newDirection);
+
+            var distanceExcess = Mathf.Max((Focus - cameraPos).magnitude - MaxDistance, 0f);
+            var targetPosition = cameraPos + Camera.transform.forward * distanceExcess;
+
+            targetPosition.y = Mathf.Max(MinHeight, targetPosition.y);
+
+            var newPosition = Vector3.MoveTowards(cameraPos, targetPosition, Time.deltaTime * MovementSpeed);
+
+            Camera.transform.position = newPosition;
+
+            if (newDirection == targetDirection && newPosition == targetPosition)
+            {
+                _isFocusing = false;
+            }
+    }
 
         private void Update() {
 
@@ -145,37 +169,10 @@ namespace Assets.Scripts {
             
 #endif
             var curr = Vector3.Angle(oldCameraPos, Vector3.up);
-            var maxDistance = curr > 90 ? (_focus.y - 1) / (Mathf.Cos((180 - curr) * Mathf.Deg2Rad)) : MaxDistance;
+            var maxDistance = curr > 90 ? (_focus.y - MinHeight) / (Mathf.Cos((180 - curr) * Mathf.Deg2Rad)) : MaxDistance;
             var newDistance = Mathf.Clamp(oldCameraPos.magnitude + distanceDelta, MinDistance, maxDistance);
 
-            Camera.transform.position = _focus + oldCameraPos.normalized * newDistance; //Debug.Log(distanceDelta + " " + oldCameraPos.magnitude + " " + _camera.transform.position.magnitude);
+            Camera.transform.position = _focus + oldCameraPos.normalized * newDistance;
         }
-
-
-//        void OnRenderObject() {
-////            CreateLineMaterial();
-////            lineMaterial.SetPass(0);
-//
-//            var rows = 64;
-//            var columns = 64;
-//
-//            GL.PushMatrix();
-//            GL.Begin(GL.LINES);
-//            GL.Color(Color.grey);
-//            /* Horizontal lines. */
-//            for (int i = -rows / 2; i <= rows / 2; i++) {
-//                GL.Vertex3(-columns / 2, 0, i);
-//                GL.Vertex3(columns / 2, 0, i);
-//            }
-//            /* Vertical lines. */
-//            for (int i = -columns / 2; i <= columns / 2; i++) {
-//                GL.Vertex3(i, 0, -rows);
-//                GL.Vertex3(i, 0, rows);
-//            }
-//            GL.End();
-//            GL.PopMatrix();
-//        }
-
-
     }
 }

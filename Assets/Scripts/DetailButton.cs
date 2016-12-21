@@ -19,7 +19,7 @@ namespace Assets.Scripts {
         {
             if (!_isDrag) return;
 
-            _newDetail.OnPointerUp(null);
+//            _newDetail.OnPointerUp(null);
             _isDrag = false;
         }
 
