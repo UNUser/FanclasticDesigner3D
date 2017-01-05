@@ -30,7 +30,7 @@ namespace Assets.Scripts {
 //            }
 //        }
 
-        public abstract List<Transform> GetConnections(Vector3? pos = null);
+        public abstract List<Detail> GetConnections(Vector3? pos = null);
         public abstract void UpdateConnections();
 
         public abstract void SetRaycastOrigins(Vector3 offset);

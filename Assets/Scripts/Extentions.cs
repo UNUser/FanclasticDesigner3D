@@ -1,12 +1,42 @@
 ﻿using System;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Assets.Scripts {
     public static class Extentions {
 
+        public static Bounds Overlap(Bounds box1, Bounds box2)
+        {
+            var intersection = new Bounds();
 
-        public static DetailsGroup RootParent(this Transform transform) {
-            return transform.root.GetComponent<DetailsGroup>(); 
+            var min1 = box1.min;
+            var min2 = box2.min;
+            var max1 = box1.max;
+            var max2 = box2.max;
+
+            var intersectionMin = new Vector3(Mathf.Max(min1.x, min2.x), Mathf.Max(min1.y, min2.y),
+                Mathf.Max(min1.z, min2.z));
+            var intersectionMax = new Vector3(Mathf.Min(max1.x, max2.x), Mathf.Min(max1.y, max2.y),
+                Mathf.Min(max1.z, max2.z));
+
+            intersection.SetMinMax(intersectionMin, intersectionMax);
+
+            return intersection;
+        }
+
+        public static float MaxSize(this Bounds bounds)
+        {
+            return Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
+        }
+
+        public static bool Valid(this Bounds bounds) {
+            return bounds.size.x > 0 && bounds.size.y > 0 && bounds.size.z > 0;
+        }
+
+        public static DetailBase RootParent(this Transform transform)
+        {
+            return Object.FindObjectOfType<ApplicationController>().SelectedDetail.GetComponent<DetailBase>();
+                //transform.root.GetComponent<DetailBase>();
         }
 
         public static void SetRootParent(this Transform transform, Transform value) {

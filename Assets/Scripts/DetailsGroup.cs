@@ -22,9 +22,86 @@ namespace Assets.Scripts {
             }
         }
 
-        //        private readonly List<IMovable> _childs = new List<IMovable>();
+        public int DetailsCount
+        {
+            get { return _connections.Count; }
+        }
 
-//        private bool _isSelected;
+        private readonly Dictionary<Detail, List<Detail>> _connections = new Dictionary<Detail, List<Detail>>();
+
+        public void Add (Detail detail, List<Detail> neighbors)
+        {
+//            List<Detail> value;
+
+//            if (_connections.TryGetValue(detail, out value))
+//            {
+//                Debug.LogError("Detail already belong the group!");
+//            }
+            neighbors = neighbors ?? new List<Detail>();
+
+            _connections.Add(detail, neighbors);
+            foreach (var neighbour in neighbors)
+            {
+                _connections[neighbour].Add(detail);
+            }
+            detail.transform.SetParent(transform);
+        }
+
+        public void Consume(DetailsGroup group, Dictionary<Detail, List<Detail>> connections)
+        {
+            connections = connections ?? new Dictionary<Detail, List<Detail>>();
+
+            foreach (var connection in group._connections)
+            {
+                List<Detail> newNeighbours;
+
+                if (connections.TryGetValue(connection.Key, out newNeighbours))
+                {
+                    connection.Value.AddRange(newNeighbours);
+                    foreach (var newNeighbour in newNeighbours)
+                    {
+                        _connections[newNeighbour].Add(connection.Key);
+                    }
+                }
+                _connections.Add(connection.Key, connection.Value);
+                connection.Key.transform.SetParent(transform);
+            }
+            Destroy(group.gameObject);
+        }
+
+        public void Remove(Detail detail)
+        {
+            var neighbours = _connections[detail];
+
+            foreach (var neighbour in neighbours)
+            {
+                _connections[neighbour].Remove(detail);
+            }
+            _connections.Remove(detail);
+            detail.transform.SetParent(null);
+
+            if (DetailsCount == 1) {
+                var lastChild = transform.GetChild(0);
+
+                lastChild.SetParent(null);
+                Destroy(gameObject);
+            }
+
+        }
+
+        public void UpdateConnections(Detail detail, List<Detail> newNeighbours)
+        {
+            foreach (var oldNeighbour in _connections[detail])
+            {
+                if (!newNeighbours.Contains(oldNeighbour))
+                {
+                    _connections[oldNeighbour].Remove(detail);
+                }
+            }
+
+            _connections[detail] = newNeighbours;
+        }
+
         public override Bounds Bounds
         {
             get
@@ -101,7 +178,7 @@ namespace Assets.Scripts {
             transform.Translate(offset, Space.World);
         }
 
-        public override List<Transform> GetConnections(Vector3? pos = null) 
+        public override List<Detail> GetConnections(Vector3? pos = null) 
         {
             throw new System.NotImplementedException();
         }
@@ -132,5 +209,27 @@ namespace Assets.Scripts {
             Debug.LogError("Wrong bounds in details group!");
             return null; 
         }
+
+//        public void CombineChildren() {
+//            MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();
+//            CombineInstance[] combine = new CombineInstance[meshFilters.Length];
+//            int i = 0;
+//            while (i < meshFilters.Length) {
+//                combine[i].mesh = meshFilters[i].sharedMesh;
+//                combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+////                meshFilters[i].gameObject.SetActive(false);
+//                i++;
+//            }
+//            var meshFilter = transform.GetComponent<MeshFilter>() ?? gameObject.AddComponent<MeshFilter>();
+//
+//            if (meshFilter == null)
+//                meshFilter = gameObject.AddComponent<MeshFilter>();
+//
+//            Debug.Log(meshFilter);
+//             
+//            meshFilter.mesh = new Mesh();
+//            meshFilter.mesh.CombineMeshes(combine);
+//            transform.gameObject.SetActive(true);
+//        }
     }
 }
