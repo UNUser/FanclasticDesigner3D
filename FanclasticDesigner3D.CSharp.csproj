@@ -75,6 +75,7 @@
     <Compile Include="Assets\Scripts\Extentions.cs" />
     <Compile Include="Assets\Scripts\FpsMeter.cs" />
     <Compile Include="Assets\Scripts\IMovable.cs" />
+    <Compile Include="Assets\Scripts\SelectedGroup.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />
 </Project>

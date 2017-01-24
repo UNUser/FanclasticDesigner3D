@@ -45,6 +45,7 @@ namespace Assets.Scripts {
         public void RemoveSelected() {
             if (SelectedDetail == null) return;
 
+            SelectedDetail.Detach();
             Destroy(SelectedDetail.gameObject);
         }
     }

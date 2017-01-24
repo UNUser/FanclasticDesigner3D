@@ -39,12 +39,12 @@ namespace Assets.Scripts {
                 //transform.root.GetComponent<DetailBase>();
         }
 
-        public static void SetRootParent(this Transform transform, Transform value) {
-                if (transform.parent != null) {
-                    transform.parent.GetComponent<DetailsGroup>().ChildDetached();
-                }
-                transform.SetParent(value != null ? value.transform : null);
-        }
+//        public static void SetRootParent(this Transform transform, Transform value) {
+//                if (transform.parent != null) {
+//                    transform.parent.GetComponent<DetailsGroup>().ChildDetached();
+//                }
+//                transform.SetParent(value != null ? value.transform : null);
+//        }
 
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace Assets.Scripts
     /// 
     /// </summary>
     [RequireComponent(typeof (BoxCollider))]
-    public class Detail : DetailBase, IBeginDragHandler, IDragHandler, IPointerClickHandler
+    public class Detail : DetailBase, IBeginDragHandler, IDragHandler, IPointerUpHandler, IPointerDownHandler
     {
         public override Bounds Bounds
         {
@@ -32,14 +33,28 @@ namespace Assets.Scripts
                 var parent = transform.parent;
                 return parent == null ? null : parent.GetComponent<DetailsGroup>();
             }
-//            set
-//            {
-//                if (Group != null)
-//                {
-//                    Group.Remove(this);
-//                }
-//            }
+            set
+            {
+                if (Group == value) return;
+
+                if (Group != null)
+                {
+                    Group.Remove(this);
+                }
+
+                if (value == null)
+                {
+                    transform.SetParent(null);
+                    return;
+                }
+                value.Add(this);
+            }
         }
+
+        public DetailLinks Links { get { return _links; } }
+        public HashSet<Detail> Connections { get { return _links.Connections; } }
+        public HashSet<Detail> Touches { get { return _links.Touches; } }
+        public HashSet<HashSet<Detail>> ImplicitConnections { get { return _links.ImplicitConnections; } }
 
         private int _sizeX;
         private int _sizeZ;
@@ -48,12 +63,16 @@ namespace Assets.Scripts
 //        private List<Transform> _currentConnections; 
         private int _holdingConnector;
         private Vector3 _prevPointerPos;
+        private bool _isClick;
+        private bool _isLongClick;
 
         private static Material _selectedMaterial;
 
+//        private readonly HashSet<Detail> _connections = new HashSet<Detail>();
+//        private readonly HashSet<Detail> _touches = new HashSet<Detail>();
+//        private readonly HashSet<HashSet<Detail>> _implicitConnections = new HashSet<HashSet<Detail>>();
 
-        private readonly HashSet<Detail> _weakNeighbours = new HashSet<Detail>();
-        private readonly List<List<Detail>> _weakConnections = new List<List<Detail>>();
+        private readonly DetailLinks _links = new DetailLinks();
 
         private void Awake()
         {
@@ -78,6 +97,8 @@ namespace Assets.Scripts
 
         public void OnBeginDrag(PointerEventData eventData)
         {
+            _isLongClick = _isClick = false;
+
             if (!IsSelected) return;
 
 #if !UNITY_STANDALONE && !UNITY_EDITOR
@@ -120,6 +141,27 @@ namespace Assets.Scripts
             var holdingConnectorOffset = cameraOffset - transform.TransformDirection(_connectorsLocalPos[_holdingConnector]);
 
             transform.RootParent().SetRaycastOrigins(holdingConnectorOffset);
+        }
+
+        public override void Detach()
+        {
+            var group = Group;
+
+            if (group == null) return;
+
+            var emptyLinks = new DetailLinks();
+            var lostConnections = new HashSet<Detail>(_links.Connections);
+
+            foreach (var detail in _links.Touches)
+            {
+                if (detail._links.HasWeakConnectionsWith(this))
+                {
+                    lostConnections.Add(detail);
+                }
+            }
+
+            UpdateLinks(emptyLinks);
+            group.UpdateContinuity(lostConnections); // TODO передавать Links
         }
 
         public override void SetRaycastOrigins(Vector3 offset)
@@ -184,38 +226,34 @@ namespace Assets.Scripts
             raycaster.AlignPosition(ref newPos);
 
 
-            var connections = GetConnections(newPos);
+            if (newPos == transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
+
 //            UpdateConnections(connections);
 
 
-//            int i = 1;
-//            foreach (var weakConnection in _weakConnections) {
-//                Debug.Log("Connection " + i++ + ":");
+////            int i = 1;
+////            foreach (var weakConnection in _weakConnections) {
+////                Debug.Log("Connection " + i++ + ":");
+////
+////                foreach (var detail in weakConnection) {
+////                    Debug.Log("    " + detail.name);
+////                }
+////            }
 //
-//                foreach (var detail in weakConnection) {
-//                    Debug.Log("    " + detail.name);
-//                }
+//
+//            Debug.Log("Weak neighbours:");
+//
+//
+//            foreach (var weakNeighgour in _touches) {
+//                Debug.Log("    " + weakNeighgour.name);
+//                
 //            }
+            var connections = transform.RootParent().GetLinks(newPos);
 
+            if (hitPoint.y > 0 && !connections.HasConnections) return;
 
-            Debug.Log("Weak neighbours:");
-
-
-            foreach (var weakNeighgour in _weakNeighbours) {
-                Debug.Log("    " + weakNeighgour.name);
-                
-            }
-
-
-            if (hitPoint.y > 0 && connections.Count == 0 && _weakConnections.Count == 0)
-            {
-                GetConnections(); ////// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                return;
-            }
-
-
-
-            transform.RootParent().UpdateConnections(); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            transform.RootParent().Detach();
+            transform.RootParent().UpdateLinks(connections); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 
@@ -291,19 +329,40 @@ namespace Assets.Scripts
 //            Debug.DrawRay(_debugRay.origin, _debugRay.direction, Color.red, 0.1f);
 //        }
 
-        public void OnPointerClick(PointerEventData eventData)
+        public void OnPointerUp(PointerEventData eventData)
         {
-            if (IsSelected) return; 
+            var isGroupSelected = Group != null && Group.IsSelected;
+
+            if (!_isClick && !_isLongClick) return;
+
+            if (IsSelected && !isGroupSelected && !_isClick)
+            {
+                _isClick = false;
+                return;
+            }
+
+            if (_isLongClick)
+            {
+                _isLongClick = false;
+                return;
+            }
+
+//            if (IsSelected) return;
+
+            _isClick = false;
+            _isLongClick = false;
 //
 //            IsSelected = true;
 
             //TODO переделать?
             var app = FindObjectOfType<ApplicationController>();
             app.SelectedDetail = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
-            app.SelectedDetail = transform.root.GetComponent<DetailBase>();
+            app.SelectedDetail = this; Debug.Log("Detail selected!");
 
 //            mat.SetFloat("_intencity");
         }
+
+
 
         private void CreateLineMaterial()
         {
@@ -360,12 +419,12 @@ namespace Assets.Scripts
         /// Имеет ли эта деталь соединения с другими деталями когда находится в позиции pos.
         /// Если pos == null, то берется текущая позиция детали.
         /// </summary>
-        public override List<Detail> GetConnections(Vector3? pos = null) //TODO сейчас никак не учитывается, что деталь может прикрепляться между двух уже соединенных деталей
+        public override DetailLinks GetLinks(Vector3? pos = null) 
         {
             var detailPos = pos ?? transform.position;
             var col = GetComponent<BoxCollider>();
             var overlapArea = col.bounds;
-            var connections = new List<Detail>();
+            var links = new DetailLinks();
 
             overlapArea.center = detailPos;
             LayerMask layerMask =
@@ -373,7 +432,6 @@ namespace Assets.Scripts
 
             var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
                 //TODO если будет жрать память, то можно заменить на NonAlloc версию
-            var newWeakNeighbours = new HashSet<Detail>();
             var overlaps = new Dictionary<Detail, Bounds>();
 
             foreach (var neighbor in neighbors)
@@ -394,50 +452,53 @@ namespace Assets.Scripts
                 
                 if (test)
                 {
-                    connections.Add(detail);
+                    links.Connections.Add(detail);
                 }
                 else if (weakTest)
                 {
-                    newWeakNeighbours.Add(detail);
+                    links.Touches.Add(detail);
                     overlaps[detail] = overlap;
                 }
             }
 
-            UpdateWeakNeighbours(newWeakNeighbours);
-            UpdateWeakConnections(overlaps);
+            GetImplicitConnections(links, overlaps);
 
-            return connections;
+            return links;
         }
 
         private void UpdateWeakNeighbours(HashSet<Detail> newWeakNeighbours)
         {
             var addWeakNeighbours = new HashSet<Detail>(newWeakNeighbours);
-            addWeakNeighbours.ExceptWith(_weakNeighbours);
+            addWeakNeighbours.ExceptWith(_links.Touches);
 
-            var removeWeakNeighbours = new HashSet<Detail>(_weakNeighbours);
+            var removeWeakNeighbours = new HashSet<Detail>(_links.Touches);
             removeWeakNeighbours.ExceptWith(newWeakNeighbours);
 
             foreach (var newWeakNeighbour in addWeakNeighbours)
             {
-                newWeakNeighbour._weakNeighbours.Add(this);
+                newWeakNeighbour._links.Touches.Add(this);
             }
 
-            _weakNeighbours.UnionWith(addWeakNeighbours);
+            _links.Touches.UnionWith(addWeakNeighbours);
 
             foreach (var removeWeakNeighbour in removeWeakNeighbours) {
-                removeWeakNeighbour._weakNeighbours.Remove(this);
+                removeWeakNeighbour._links.Touches.Remove(this);
             }
 
-            _weakNeighbours.ExceptWith(removeWeakNeighbours);
+            _links.Touches.ExceptWith(removeWeakNeighbours);
         }
 
-        private void UpdateWeakConnections(Dictionary<Detail, Bounds> overlaps)
+        private void UpdateImplicitConnections(HashSet<HashSet<Detail>> implicitConnections)
         {
-            _weakConnections.Clear();
+            _links.ImplicitConnections.Clear();
+            _links.ImplicitConnections.UnionWith(implicitConnections);
+        }
 
+        private void GetImplicitConnections(DetailLinks links, Dictionary<Detail, Bounds> overlaps)
+        {
             var groups = new Dictionary<DetailsGroup, HashSet<Detail>>();
 
-            foreach (var weakNeighbour in _weakNeighbours)
+            foreach (var weakNeighbour in links.Touches)
             {
                 var neighbourGroup = weakNeighbour.Group;
 
@@ -447,10 +508,10 @@ namespace Assets.Scripts
                 groups[neighbourGroup].Add(weakNeighbour);
             }
 
-            foreach (var overlap in overlaps)
-            {
-                Debug.Log("overlaps (MaxMinCenter): " + overlap.Value.max + " " + overlap.Value.min + " " + overlap.Value.center);
-            }
+//            foreach (var overlap in overlaps)
+//            {
+//                Debug.Log("overlaps (MaxMinCenter): " + overlap.Value.max + " " + overlap.Value.min + " " + overlap.Value.center);
+//            }
 
             foreach (var group in groups)
             {
@@ -468,14 +529,14 @@ namespace Assets.Scripts
 
                         var overlap12 = Extentions.Overlap(overlaps[weakNeighbour1], overlaps[weakNeighbour2]);
 
-                        Debug.Log("overlap12 (MaxMinCenter): " + overlap12.max + " " + overlap12.min + " " + overlap12.center);
+//                        Debug.Log("overlap12 (MaxMinCenter): " + overlap12.max + " " + overlap12.min + " " + overlap12.center);
 
                         // у всех координат размеры больше 0
                         if (!overlap12.Valid()) continue;
 
                         if (CheckOverlapForWeakTwoDetailsConnection(overlap12))
                         {
-                            _weakConnections.Add(new List<Detail> {weakNeighbour1, weakNeighbour2});
+                            links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2 });
                             continue;
                         }
 
@@ -513,13 +574,12 @@ namespace Assets.Scripts
                                     if (CheckOverlapForWeakTwoDetailsConnection(oversizedDetailsOverlap)) continue;
                                 }
 
-                                _weakConnections.Add(new List<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3, weakNeighbour4 });
+                                links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3, weakNeighbour4 });
                             }
                         }
                     }
                 }
             }
-
         }
 
         private bool CheckDetailForWeakFourDetailsConnection(ref Bounds commonOverlap, Bounds detailOverlap,
@@ -535,100 +595,149 @@ namespace Assets.Scripts
         }
 
         private bool CheckOverlapForWeakTwoDetailsConnection(Bounds overlap)
-        {Debug.Log(overlap.size);
+        {
             // у одной координаты размер больше 1 и у еще одной больше 2
             return Mathf.Min(overlap.size.x, 2) + Math.Min(overlap.size.y, 2) + Math.Min(overlap.size.z, 2) > 3;
         }
 
-        public override void UpdateConnections()
+        private void UpdateConnections(HashSet<Detail> newConnections)
         {
-            var connections = GetConnections();
+            var connectionsToAdd = new HashSet<Detail>(newConnections);
+            connectionsToAdd.ExceptWith(_links.Connections);
 
-            if (connections.Count == 0)
-            {
-                if (Group != null)
-                {
-                    Group.Remove(this);
-                }
-                return;
+            var connectionsToRemove = new HashSet<Detail>(_links.Connections);
+            connectionsToRemove.ExceptWith(newConnections);
+
+            foreach (var newConnection in connectionsToAdd) {
+                newConnection._links.Connections.Add(this);
             }
 
-            DetailsGroup newGroup = null;
+            _links.Connections.UnionWith(connectionsToAdd);
 
-            foreach (var connection in connections) {
-                if (connection.Group != null) {
-                    if (newGroup == null || newGroup.DetailsCount < connection.Group.DetailsCount) {
-                        newGroup = connection.Group;
-                    }
-                }
+            foreach (var removeConnection in connectionsToRemove) {
+                removeConnection._links.Connections.Remove(this);
             }
 
-            if (newGroup == null) {
-                var newObj = new GameObject("DetailsGroup");
-                newGroup = newObj.AddComponent<DetailsGroup>();
-                newGroup.transform.position = transform.position;
-            }
+            _links.Connections.ExceptWith(connectionsToRemove);
+        }
 
-            foreach (var connection in connections)
-            {
-                var currentGroup = connection.Group;
+        public override void UpdateLinks(DetailLinks newLinks = null)
+        {
+            newLinks = newLinks ?? GetLinks();
 
-                if (currentGroup == newGroup) continue;
+            UpdateConnections(newLinks.Connections);
+            UpdateWeakNeighbours(newLinks.Touches);
+            UpdateImplicitConnections(newLinks.ImplicitConnections);
 
-                if (currentGroup != null)
-                {
-                    newGroup.Consume(currentGroup, null);
-                }
-                else
-                {
-                    newGroup.Add(connection, null);
+
+            var connectionsGroups = new HashSet<DetailsGroup>();
+            var freeDetails = new HashSet<Detail>();
+
+            foreach (var detail in newLinks.Connections) {
+                if (detail.Group == null) {
+                    freeDetails.Add(detail);
+                } else { 
+                    connectionsGroups.Add(detail.Group);
                 }
             }
 
-            if (newGroup != Group)
-            {
-                if (Group != null)
-                {
-                    Group.Remove(this);
+            foreach (var connection in newLinks.ImplicitConnections) {
+                foreach (var detail in connection) {
+                    connectionsGroups.Add(detail.Group);
+                    break;
                 }
-                newGroup.Add(this, connections);
             }
-            else
-            {
-                newGroup.UpdateConnections(this, connections);
-            }
-            
+
+            Group = DetailsGroup.Merge(connectionsGroups, freeDetails);
+
+//            Debug.Log("Implicit connections count: " + ImplicitConnections.Count + " " + newLinks.ImplicitConnections.Count);
+//            foreach (var connection in connections)
+//            {
+//                var currentGroup = connection.Group;
+//
+//                if (currentGroup == newGroup) continue;
+//
+//                if (currentGroup != null)
+//                {
+//                    newGroup.Consume(currentGroup, null);
+//                }
+//                else
+//                {
+//                    newGroup.Add(connection, null);
+//                }
+//            }
+//
+//            if (newGroup != Group)
+//            {
+//                if (Group != null)
+//                {
+//                    Group.Remove(this);
+//                }
+//                newGroup.Add(this, connections);
+//            }
+//            else
+//            {
+//                newGroup.UpdateConnections(this, connections);
+//            }
+
         }
 
         //TODO сделать присоединение детали к группе и группы к детали одинаковым (без создания новой группы)
-        public void ConnectWith(Transform detail)
+//        public void ConnectWith(Transform detail)
+//        {
+////            Debug.Log("Connect! other: " + detail.gameObject.name + ", this:" + gameObject.name);
+//
+////             group = detail.RootParent() ?? transform.RootParent();
+//
+//            if (detail.RootParent().transform != detail)
+//            {
+//                var root = detail.root;
+//                transform.root.SetParent(root);
+//                return;
+//            }
+//
+//            if (transform.RootParent().transform != transform) {
+//                var root = transform.root;
+//                detail.root.SetParent(root);
+//                return;
+//            }
+//
+//            var newGroup = new GameObject("DetailsGroup");
+//            newGroup.AddComponent<DetailsGroup>();
+//            newGroup.transform.position = (detail.position + transform.position) / 2f;
+//
+//            detail.SetParent(newGroup.transform);
+//            transform.SetParent(newGroup.transform);
+//        }
+
+//        public void OnTriggerEnter(Collider collider) {
+//            Debug.Log("Contact!");
+//        }
+//        public void OnCollisionEnter(Collision collision) {
+//            Debug.Log("Contact!");
+//        }
+
+        public void OnPointerDown(PointerEventData eventData)
         {
-//            Debug.Log("Connect! other: " + detail.gameObject.name + ", this:" + gameObject.name);
-
-//             group = detail.RootParent() ?? transform.RootParent();
-
-            if (detail.RootParent().transform != detail)
-            {
-                var root = detail.root;
-                transform.root.SetParent(root);
-                return;
-            }
-
-            if (transform.RootParent().transform != transform) {
-                var root = transform.root;
-                detail.root.SetParent(root);
-                return;
-            }
-
-            var newGroup = new GameObject("DetailsGroup");
-            newGroup.AddComponent<DetailsGroup>();
-            newGroup.transform.position = (detail.position + transform.position) / 2f;
-
-            detail.SetParent(newGroup.transform);
-            transform.SetParent(newGroup.transform);
+            _isClick = true;
+            StartCoroutine(LongPress(++_callId));
         }
 
+        private int _callId;
 
+        private IEnumerator LongPress(int callId)
+        {
+            yield return new WaitForSeconds(1f);
+            if (_isClick && _callId == callId)
+            {
+                var app = FindObjectOfType<ApplicationController>();
+                app.SelectedDetail = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
+                app.SelectedDetail = Group ?? (DetailBase) this; Debug.Log("Group selected!");
+                
+                _isLongClick = true;
+                _isClick = false;
+            }
+        }
     }
 }
 ///
