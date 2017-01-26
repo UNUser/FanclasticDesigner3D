@@ -51,6 +51,26 @@ namespace Assets.Scripts
             }
         }
 
+        public DetailData Data
+        {
+            get
+            {
+                var materialName = GetComponent<Renderer>().material.name;
+                var data = new DetailData
+                {
+                    Links = Links.Data,
+                    GroupId = Group == null ? 0 : Group.GetInstanceID(),
+                    Id = GetInstanceID(),
+                    Position = transform.position,
+                    Rotation = transform.rotation.eulerAngles,
+                    Type = name.Remove(name.Length - "(Clone)".Length),
+                    Material = materialName.Remove(materialName.Length - " (Instance)".Length)
+                };
+
+                return data;
+            }
+        }
+
         public DetailLinks Links { get { return _links; } }
         public HashSet<Detail> Connections { get { return _links.Connections; } }
         public HashSet<Detail> Touches { get { return _links.Touches; } }
@@ -154,9 +174,10 @@ namespace Assets.Scripts
 
             foreach (var detail in _links.Touches)
             {
-                if (detail._links.HasWeakConnectionsWith(this))
+                if (detail._links.HasWeakConnectionsWith(this, true))
                 {
                     lostConnections.Add(detail);
+//                    detail.UpdateLinks();
                 }
             }
 
@@ -253,12 +274,11 @@ namespace Assets.Scripts
             if (hitPoint.y > 0 && !connections.HasConnections) return;
 
             transform.RootParent().Detach();
-            transform.RootParent().UpdateLinks(connections); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
 
             var offset = newPos - raycaster.transform.position;
             transform.RootParent().transform.Translate(offset, Space.World);
+
+            transform.RootParent().UpdateLinks(connections); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
 
@@ -357,7 +377,7 @@ namespace Assets.Scripts
             //TODO переделать?
             var app = FindObjectOfType<ApplicationController>();
             app.SelectedDetail = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
-            app.SelectedDetail = this; Debug.Log("Detail selected!");
+            app.SelectedDetail = this;
 
 //            mat.SetFloat("_intencity");
         }
@@ -419,16 +439,17 @@ namespace Assets.Scripts
         /// Имеет ли эта деталь соединения с другими деталями когда находится в позиции pos.
         /// Если pos == null, то берется текущая позиция детали.
         /// </summary>
-        public override DetailLinks GetLinks(Vector3? pos = null) 
+        public override DetailLinks GetLinks(Vector3? pos = null, bool respectSelected = false) 
         {
             var detailPos = pos ?? transform.position;
             var col = GetComponent<BoxCollider>();
             var overlapArea = col.bounds;
             var links = new DetailLinks();
 
+            var selectedMask = respectSelected ? 0 : 1 << LayerMask.NameToLayer("SelectedItem");
+
             overlapArea.center = detailPos;
-            LayerMask layerMask =
-                ~(1 << LayerMask.NameToLayer("SelectedItem") | 1 << LayerMask.NameToLayer("Workspace"));
+            LayerMask layerMask = ~(selectedMask | 1 << LayerMask.NameToLayer("Workspace"));
 
             var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
                 //TODO если будет жрать память, то можно заменить на NonAlloc версию
@@ -621,9 +642,12 @@ namespace Assets.Scripts
             _links.Connections.ExceptWith(connectionsToRemove);
         }
 
-        public override void UpdateLinks(DetailLinks newLinks = null)
+        /// <summary>
+        /// Метод должен вызываться только у перемещаемых элементов. 
+        /// </summary>
+        public override void UpdateLinks(DetailLinks newLinks = null, bool respectSelected = false)
         {
-            newLinks = newLinks ?? GetLinks();
+            newLinks = newLinks ?? GetLinks(null, respectSelected);
 
             UpdateConnections(newLinks.Connections);
             UpdateWeakNeighbours(newLinks.Touches);
@@ -642,43 +666,23 @@ namespace Assets.Scripts
             }
 
             foreach (var connection in newLinks.ImplicitConnections) {
-                foreach (var detail in connection) {
-                    connectionsGroups.Add(detail.Group);
-                    break;
-                }
+                connectionsGroups.Add(connection.First().Group);
             }
 
-            Group = DetailsGroup.Merge(connectionsGroups, freeDetails);
+            if (connectionsGroups.Count < 2 && freeDetails.Count == 0 && Group != null)
+            {
+                Group = connectionsGroups.Count == 0 ? null : connectionsGroups.Single();
+                return;
+            }
 
-//            Debug.Log("Implicit connections count: " + ImplicitConnections.Count + " " + newLinks.ImplicitConnections.Count);
-//            foreach (var connection in connections)
-//            {
-//                var currentGroup = connection.Group;
-//
-//                if (currentGroup == newGroup) continue;
-//
-//                if (currentGroup != null)
-//                {
-//                    newGroup.Consume(currentGroup, null);
-//                }
-//                else
-//                {
-//                    newGroup.Add(connection, null);
-//                }
-//            }
-//
-//            if (newGroup != Group)
-//            {
-//                if (Group != null)
-//                {
-//                    Group.Remove(this);
-//                }
-//                newGroup.Add(this, connections);
-//            }
-//            else
-//            {
-//                newGroup.UpdateConnections(this, connections);
-//            }
+            // Не надо себя отхерачивать! Сначала проверь, что твоей группы нет в объединяемых группах! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            if (Group == null || !connectionsGroups.Contains(Group)) {
+                Group = null;
+                freeDetails.Add(this);
+            }
+
+//            Debug.Log("UpdateLinks Merge: " + gameObject.name + " groups: " + connectionsGroups.Count + ", free: " + freeDetails.Count + ", touches: " + Touches.Count);
+            DetailsGroup.Merge(connectionsGroups, freeDetails);
 
         }
 
@@ -732,7 +736,7 @@ namespace Assets.Scripts
             {
                 var app = FindObjectOfType<ApplicationController>();
                 app.SelectedDetail = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
-                app.SelectedDetail = Group ?? (DetailBase) this; Debug.Log("Group selected!");
+                app.SelectedDetail = Group ?? (DetailBase) this;
                 
                 _isLongClick = true;
                 _isClick = false;

@@ -50,10 +50,10 @@ namespace Assets.Scripts {
             detail.transform.SetParent(transform);
         }
 
-        public static DetailsGroup CreateNewGroup(Vector3 position)
+        public static DetailsGroup CreateNewGroup(Vector3? position = null)
         {
             var newObj = new GameObject("DetailsGroup");
-            newObj.transform.position = position;
+            newObj.transform.position = position ?? Vector3.zero;
 
             return newObj.AddComponent<DetailsGroup>();
         }
@@ -74,8 +74,8 @@ namespace Assets.Scripts {
             var unconfirmedImplicitConnections = new Dictionary<HashSet<Detail>, Detail>();
             var totalCount = lostConnections.Count;
 
-            Debug.Log("/////////////////");
-            DebugPrint(subgroups, lastAdded);
+//            Debug.Log("/////////////////");
+//            DebugPrint(subgroups, lastAdded);
 
             while (totalCount < DetailsCount && subgroups.Count > 1)
             {
@@ -106,7 +106,7 @@ namespace Assets.Scripts {
 
                 totalCount += lastAdded.Sum(newDetails => newDetails.Count);
 
-                DebugPrint(subgroups, lastAdded);
+//                DebugPrint(subgroups, lastAdded);
             }
 
             SplitAndUpdate(subgroups, unconfirmedImplicitConnections);
@@ -150,7 +150,7 @@ namespace Assets.Scripts {
                 str.Append(" ] } ");
             }
 
-//            Debug.Log(str);
+            Debug.Log(str);
         }
 
         private void SplitAndUpdate(List<HashSet<Detail>> subgroups, Dictionary<HashSet<Detail>, Detail> unconfirmed)
@@ -254,7 +254,7 @@ namespace Assets.Scripts {
                         if (!subgroups[detailIndex].Contains(detail)) continue;
                         if (detailIndex == subgroupIndex) break;
 
-                        // Объединяем группы
+                        // Объединяем подгруппы
                         MergeSubgroups(subgroups, subgroupIndex, detailIndex, lastAdded);
 
                         // Для объединенной подгруппы нужно проверить все соединения снова
@@ -317,17 +317,16 @@ namespace Assets.Scripts {
             DetailsGroup targetGroup = null;
             var toUpdateLinks = new HashSet<Detail>();
 
-            foreach (var detailsGroup in groups)
-            {
-                if (targetGroup == null || targetGroup.DetailsCount < detailsGroup.DetailsCount)
-                {
+            foreach (var detailsGroup in groups) {
+                if (targetGroup == null || targetGroup.DetailsCount < detailsGroup.DetailsCount) {
                     targetGroup = detailsGroup;
                 }
             }
 
             if (targetGroup == null) {
-                if (freeDetails.Count > 0) {
+                if (freeDetails.Count > 1) {
                     targetGroup = CreateNewGroup(Vector3.zero);
+                    groups.Add(targetGroup);
                 } else {
                     return null;
                 }
@@ -343,28 +342,38 @@ namespace Assets.Scripts {
                 foreach (var child in children) {
                     var detail = child.GetComponent<Detail>();
 
-                    foreach (var touch in detail.Touches) {
-                        if (!touch.Links.HasWeakConnectionsWith(touch)) {
-                            toUpdateLinks.Add(touch);
-                        }
-                    }
+                    AddExternalTouchesToUpdateLinks(detail, groups, freeDetails, toUpdateLinks);
                     child.SetParent(targetGroup.transform);
                 }
                 Destroy(detailsGroup.gameObject);
             }
 
             foreach (var detail in freeDetails) {
-                toUpdateLinks.UnionWith(detail.Touches);
+                AddExternalTouchesToUpdateLinks(detail, groups, freeDetails, toUpdateLinks);
                 detail.transform.SetParent(targetGroup.transform);
             }
 
             foreach (var detail in toUpdateLinks) {
-                detail.UpdateLinks();
+                // В процессе обновления ссылок может произойти слияние с другими группами и наша группа будет
+                // удалена, поэтому после обновления меняем результат на группу, полученную в результате обновления
+                detail.UpdateLinks(null, true);
+                targetGroup = detail.Group;
             }
 
             return targetGroup;
         }
 
+        private static void AddExternalTouchesToUpdateLinks (Detail detail, HashSet<DetailsGroup> groups, HashSet<Detail> freeDetails, HashSet<Detail> toUpdateLinks)
+        {
+            foreach (var touch in detail.Touches) {
+
+                var touchGroup = touch.Group;
+
+                if ((touchGroup == null && !freeDetails.Contains(touch)) || (touchGroup != null && !groups.Contains(touchGroup))) {
+                    toUpdateLinks.Add(touch);  Debug.Log("Added!");
+                }
+            }
+        }
 
 //        public void Consume(DetailsGroup group, Dictionary<Detail, List<Detail>> connections)
 //        {
@@ -446,7 +455,7 @@ namespace Assets.Scripts {
 //            }
 //        }
 
-        public override void UpdateLinks(DetailLinks newLinks = null)
+        public override void UpdateLinks(DetailLinks newLinks = null, bool respectSelected = false)
         {
             Debug.LogError("NotImplemented!");
         }
@@ -502,7 +511,7 @@ namespace Assets.Scripts {
             Debug.LogError("NotImplemented!");
         }
 
-        public override DetailLinks GetLinks(Vector3? pos = null) 
+        public override DetailLinks GetLinks(Vector3? pos = null, bool respectSelected = false) 
         {
             Debug.LogError("NotImplemented!");
             return null;
