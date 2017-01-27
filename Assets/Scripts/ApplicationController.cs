@@ -11,6 +11,7 @@ using UnityEngine.UI;
 namespace Assets.Scripts {
     public class ApplicationController : MonoBehaviour
     {
+        public FileSelectionDialogLayer FileSelectionDialogLayer;
         public Text DebugTextGroups;
         public Text DebugTextDetail;
 
@@ -61,10 +62,14 @@ namespace Assets.Scripts {
             Destroy(SelectedDetail.gameObject);
         }
 
-        public void Save()
+        public void OnSaveButtonClicked()
+        {
+            FileSelectionDialogLayer.ShowFileSelectionDialog(Save, true);
+        }
+
+        private void Save(string fileName)
         {
             var bf = new BinaryFormatter();
-            var fileName = Application.persistentDataPath + "/CurrentScene.scn";
             var file = File.Create(fileName);
 
 
@@ -100,10 +105,13 @@ namespace Assets.Scripts {
             Debug.Log("Saved: " + fileName);
         }
 
-        public void Load()
+        public void OnLoadButtonClicked()
         {
-            var fileName = Application.persistentDataPath + "/CurrentScene.scn";
+            FileSelectionDialogLayer.ShowFileSelectionDialog(Load, false);
+        }
 
+        private void Load(string fileName)
+        {
             if (!File.Exists(fileName))
             {
                 Debug.Log("File doesn't exist!");

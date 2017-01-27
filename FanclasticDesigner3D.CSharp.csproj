@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\DetailButton.cs" />
     <Compile Include="Assets\Scripts\DetailsGroup.cs" />
     <Compile Include="Assets\Scripts\Extentions.cs" />
+    <Compile Include="Assets\Scripts\FileSelectionDialogLayer.cs" />
     <Compile Include="Assets\Scripts\FpsMeter.cs" />
     <Compile Include="Assets\Scripts\IMovable.cs" />
     <Compile Include="Assets\Scripts\SelectedGroup.cs" />
