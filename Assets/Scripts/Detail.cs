@@ -162,7 +162,7 @@ namespace Assets.Scripts
 
             transform.RootParent().SetRaycastOrigins(holdingConnectorOffset);
 
-            Detach();
+            transform.RootParent().Detach();
         }
 
         public override void Detach()

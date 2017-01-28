@@ -537,7 +537,7 @@ namespace Assets.Scripts {
         public override DetailLinks GetLinks(Vector3? pos = null, bool respectSelected = false) 
         {
             Debug.LogError("NotImplemented!");
-            return null;
+            return new DetailLinks();
         }
 
 

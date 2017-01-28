@@ -67,7 +67,7 @@ namespace Assets.Scripts {
             FileSelectionDialogLayer.ShowFileSelectionDialog(Save, true);
         }
 
-        private void Save(string fileName)
+        private void Save(string fileName)  //TODO добавить заголовок, чтобы определять свои файлы
         {
             var bf = new BinaryFormatter();
             var file = File.Create(fileName);
