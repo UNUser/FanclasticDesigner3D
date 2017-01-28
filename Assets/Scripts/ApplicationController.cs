@@ -72,6 +72,7 @@ namespace Assets.Scripts {
             var bf = new BinaryFormatter();
             var file = File.Create(fileName);
 
+            SelectedDetail.IsSelected = false;
 
             var roots = new List<GameObject>();
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);

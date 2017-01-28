@@ -58,26 +58,43 @@ namespace Assets.Scripts {
             return newObj.AddComponent<DetailsGroup>();
         }
 
-        public void UpdateContinuity(HashSet<Detail> lostConnections)
+        private List<HashSet<Detail>> InitLastAdded(Detail detachedDetail, List<HashSet<Detail>> subgroups, Dictionary<HashSet<Detail>, Detail> unconfirmed)
         {
-            if (!lostConnections.Any()) return;
+            var lostLinks = detachedDetail.Links;
 
-            var subgroups = new List<HashSet<Detail>>();
-            var lastAdded = new List<HashSet<Detail>>();
+            var directlyAdded = new List<HashSet<Detail>>();
+            var implicitlyAdded = new HashSet<Detail>();
 
-            foreach (var lostConnection in lostConnections)
+            foreach (var lostConnection in lostLinks.Connections)
             {
-                subgroups.Add(new HashSet<Detail> { lostConnection });
-                lastAdded.Add(new HashSet<Detail> { lostConnection });
+                directlyAdded.Add(new HashSet<Detail> { lostConnection });
+                subgroups.Add(new HashSet<Detail>());
             }
 
+            foreach (var touch in lostLinks.Touches) {
+                if (touch.Links.HasWeakConnectionsWith(detachedDetail, true)) {
+                    directlyAdded.Add(new HashSet<Detail> { touch });
+                    subgroups.Add(new HashSet<Detail>());
+                }
+            }
+
+            detachedDetail.UpdateLinks(new DetailLinks());    // TODO тут этого быть не должно! переделать!
+
+//            DebugPrint(subgroups, directlyAdded);
+            return MergeAllSubgroups(subgroups, directlyAdded, implicitlyAdded, unconfirmed);
+        }
+
+        public void UpdateContinuity(Detail detachedDetail)
+        {
+            var subgroups = new List<HashSet<Detail>>();
             var unconfirmedImplicitConnections = new Dictionary<HashSet<Detail>, Detail>();
-            var totalCount = lostConnections.Count;
+
+            var lastAdded = InitLastAdded(detachedDetail, subgroups, unconfirmedImplicitConnections);
+            var detailsAdded = lastAdded.Sum(newDetails => newDetails.Count);
 
 //            Debug.Log("/////////////////");
-//            DebugPrint(subgroups, lastAdded);
 
-            while (totalCount < DetailsCount && subgroups.Count > 1)
+            while (detailsAdded > 0 && subgroups.Count > 1)
             {
                 var directlyAdded = new List<HashSet<Detail>>();
                 var implicitlyAdded = new HashSet<Detail>();
@@ -102,11 +119,8 @@ namespace Assets.Scripts {
                     }
                 }
 
-                lastAdded = MergeAllSubgroups(subgroups, directlyAdded, implicitlyAdded, unconfirmedImplicitConnections);
-
-                totalCount += lastAdded.Sum(newDetails => newDetails.Count);
-
-//                DebugPrint(subgroups, lastAdded);
+                lastAdded = MergeAllSubgroups(subgroups, directlyAdded, implicitlyAdded, unconfirmedImplicitConnections); // TODO можно оптимизировать, подгруппы, в которые ничего не добавляется, можно отделять сразу, хотя, возможно, они могут присоединится неявными связями
+                detailsAdded = lastAdded.Sum(newDetails => newDetails.Count);
             }
 
             SplitAndUpdate(subgroups, unconfirmedImplicitConnections);
@@ -165,9 +179,9 @@ namespace Assets.Scripts {
                 }
             }
 
-            foreach (var detail in unconfirmed.Values)
+            foreach (var unconfirmedPair in unconfirmed)
             {
-                detail.UpdateLinks();
+                unconfirmedPair.Value.Links.ImplicitConnections.Remove(unconfirmedPair.Key);
             }
         }
 
@@ -205,14 +219,20 @@ namespace Assets.Scripts {
                 }
             }
 
+//            var sub = new List<HashSet<Detail>>(subgroups);
+//            sub.AddRange(newSubgroupsSpawners.Select(detail => new HashSet<Detail> {detail}));
+//            var last = new List<HashSet<Detail>>(lastAdded);
+//            last.AddRange(newSubgroupsSpawners.Select(detail => new HashSet<Detail> { detail }));
+//            DebugPrint(sub, last);
+
             // Объединяем подгруппы, которые пересеклись по прямым связям.
             // Поскольку на каждой итерации от каждой новой добавленной детали происходит добавление сразу всех деталей по всем возможным связям, 
             // то появление пересечений подгрупп (т.е. деталий, общих для несокольких подгрупп) возможно только среди новых добавленных деталей
             // и искать пересечения нужно только среди них, не затрагивая детали, добавленные в подгруппы до этого
             for (var i = 0; i < lastAdded.Count; i++) {
-                for (var j = i + 1; j < lastAdded.Count; j++) {
+                for (var j = i + 1; j < subgroups.Count; j++) {
 
-                    if (!lastAdded[j].Overlaps(lastAdded[i])) continue;
+                    if (!subgroups[j].Overlaps(lastAdded[i])) continue;
 
                     MergeSubgroups(subgroups, i, j, lastAdded);
                     j--;
@@ -310,6 +330,9 @@ namespace Assets.Scripts {
 
             subgroups.RemoveAt(secondIndex);
             lastAdded.RemoveAt(secondIndex);
+
+//            Debug.Log("Merged: " + firstIndex + " " + secondIndex);
+//            DebugPrint(subgroups, lastAdded);
         }
 
         public static DetailsGroup Merge(HashSet<DetailsGroup> groups, HashSet<Detail> freeDetails)
@@ -369,7 +392,7 @@ namespace Assets.Scripts {
 
                 var touchGroup = touch.Group;
 
-                if ((touchGroup == null && !freeDetails.Contains(touch)) || (touchGroup != null && !groups.Contains(touchGroup))) {
+                if ((touchGroup == null && !freeDetails.Contains(touch)) || (touchGroup != null && !groups.Contains(touchGroup))) { //TODO не будут образовываться дополнительные неявные соединения для деталей из группы
                     toUpdateLinks.Add(touch);  Debug.Log("Added!");
                 }
             }

@@ -10,7 +10,10 @@ namespace Assets.Scripts {
 
     public class DetailLinks
     {
-        public bool HasConnections { get { return Connections.Count > 0 || ImplicitConnections.Count > 0; } }
+        public bool HasConnections
+        {
+            get { return Connections.Count > 0 || ImplicitConnections.Count > 0; }
+        }
 
         public readonly HashSet<Detail> Connections;
         public readonly HashSet<Detail> Touches;
@@ -23,32 +26,69 @@ namespace Assets.Scripts {
                 var data = new DetailLinksData
                 {
                     Connections = Connections.Select(connection => connection.GetInstanceID()).ToList(),
-                    Touches = Touches.Select(touch =>touch.GetInstanceID()).ToList(),
+                    Touches = Touches.Select(touch => touch.GetInstanceID()).ToList(),
                     ImplicitConnections = new List<List<int>>()
                 };
 
-                foreach (var implicitConnection in ImplicitConnections) {
-                    data.ImplicitConnections.Add(implicitConnection.Select(connection => connection.GetInstanceID()).ToList());
+                foreach (var implicitConnection in ImplicitConnections)
+                {
+                    data.ImplicitConnections.Add(
+                        implicitConnection.Select(connection => connection.GetInstanceID()).ToList());
                 }
 
                 return data;
             }
         }
 
-        public DetailLinks()
+//        private readonly Detail _detail;
+
+        public DetailLinks(/*Detail detail = null*/)
         {
+//            _detail = detail;
+
             Connections = new HashSet<Detail>();
             Touches = new HashSet<Detail>();
             ImplicitConnections = new HashSet<HashSet<Detail>>();
         }
 
+//        public void AddConnection(Detail connection) {
+//            if (Connections.Add(connection)) {
+//                connection.Links.AddConnection(_detail);
+//            }
+//        }
+//
+//        public void RemoveConnection(Detail connection) {
+//            if (Connections.Remove(connection)) {
+//                connection.Links.RemoveConnection(_detail);
+//            }
+//        }
+//
+//        public void AddTouch(Detail touch) {
+//            if (Touches.Add(touch)) {
+//                touch.Links.AddTouch(_detail);
+//                _detail.UpdateLinks(null, true);
+//            }
+//        }
+//
+//        public void RemoveTouch(Detail touch) {
+//            if (Touches.Remove(touch)) {
+//                touch.Links.RemoveTouch(_detail);
+//                ImplicitConnections.RemoveWhere(implicitConnection => implicitConnection.Contains(touch));
+//            }
+//        }
+
+
         public bool HasWeakConnectionsWith(Detail detail, bool remove = false)
         {
             foreach (var implicitConnection in ImplicitConnections)
             {
-                if (implicitConnection.Contains(detail))
-                    ImplicitConnections.Remove(implicitConnection);
+                if (implicitConnection.Contains(detail)) {
+                    if (remove) {
+                        ImplicitConnections.RemoveWhere(connection => connection.Contains(detail));
+                    }
+
                     return true;
+                }
             }
             return false;
         }

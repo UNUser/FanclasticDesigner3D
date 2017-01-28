@@ -161,6 +161,8 @@ namespace Assets.Scripts
             var holdingConnectorOffset = cameraOffset - transform.TransformDirection(_connectorsLocalPos[_holdingConnector]);
 
             transform.RootParent().SetRaycastOrigins(holdingConnectorOffset);
+
+            Detach();
         }
 
         public override void Detach()
@@ -169,20 +171,8 @@ namespace Assets.Scripts
 
             if (group == null) return;
 
-            var emptyLinks = new DetailLinks();
-            var lostConnections = new HashSet<Detail>(_links.Connections);
 
-            foreach (var detail in _links.Touches)
-            {
-                if (detail._links.HasWeakConnectionsWith(this, true))
-                {
-                    lostConnections.Add(detail);
-//                    detail.UpdateLinks();
-                }
-            }
-
-            UpdateLinks(emptyLinks);
-            group.UpdateContinuity(lostConnections); // TODO передавать Links
+            group.UpdateContinuity(this); // TODO передавать Links
         }
 
         public override void SetRaycastOrigins(Vector3 offset)
