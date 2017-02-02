@@ -8,7 +8,7 @@ namespace Assets.Scripts {
     {
         public InputField InputField;
         public GameObject SaveButton;
-        public Transform ScrollContent;
+        public ScrollRect ScrollRect;
 
         private bool _isSaveFileDialog;
         private Action<string> _fileSelectedAction;
@@ -25,6 +25,7 @@ namespace Assets.Scripts {
             }
 
             UpdateFilesList();
+            ScrollRect.verticalNormalizedPosition = 0;
 
             gameObject.SetActive(true);
         }
@@ -33,9 +34,9 @@ namespace Assets.Scripts {
         {
             var path = Application.persistentDataPath;
             var files = Directory.GetFiles(Application.persistentDataPath);
-            var listItem = ScrollContent.GetChild(0).gameObject;
+            var listItem = ScrollRect.content.GetChild(0).gameObject;
 
-            var createdItems = ScrollContent.childCount - 1;
+            var createdItems = ScrollRect.content.childCount - 1;
             var neededItems = files.Length;
             var loopEnd = Math.Max(createdItems, neededItems);
 
@@ -43,10 +44,10 @@ namespace Assets.Scripts {
                 GameObject newItem;
 
                 if (i < createdItems) {
-                    newItem = ScrollContent.GetChild(i + 1).gameObject;
+                    newItem = ScrollRect.content.GetChild(i + 1).gameObject;
                 } else {
                     newItem = Instantiate(listItem);
-                    newItem.transform.SetParent(ScrollContent, false);
+                    newItem.transform.SetParent(ScrollRect.content, false);
                 }
 
 

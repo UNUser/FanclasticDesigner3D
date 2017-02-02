@@ -453,7 +453,7 @@ namespace Assets.Scripts
 
                 var overlap = Extentions.Overlap(overlapArea, neighbor.bounds);
 
-                var size = overlap.size; //intersectionMax - intersectionMin;
+                var size = overlap.size;
 
                 // у всех координат размеры больше 1 и минимум у двух координат размеры больше 2
                 var test = Mathf.Min(size.x, 2) + Math.Min(size.y, 2) + Math.Min(size.z, 2) > 5;
@@ -596,9 +596,14 @@ namespace Assets.Scripts
         private bool CheckDetailForWeakFourDetailsConnection(ref Bounds commonOverlap, Bounds detailOverlap,
             List<Detail> oversizedDetails, Detail detail)
         {
-            if (detailOverlap.MaxSize() > 2 && oversizedDetails.Count > 1) return false;
+            if (detailOverlap.MaxSize() > 2) {
 
-            oversizedDetails.Add(detail);
+                oversizedDetails.Add(detail);
+
+                if (oversizedDetails.Count > 2) {
+                    return false;
+                }
+            }
 
             commonOverlap = Extentions.Overlap(commonOverlap, detailOverlap);
 
@@ -632,12 +637,9 @@ namespace Assets.Scripts
             _links.Connections.ExceptWith(connectionsToRemove);
         }
 
-        /// <summary>
-        /// Метод должен вызываться только у перемещаемых элементов. 
-        /// </summary>
         public override void UpdateLinks(DetailLinks newLinks = null, bool respectSelected = false)
         {
-            newLinks = newLinks ?? GetLinks(null, respectSelected);
+            newLinks = newLinks ?? GetLinks(null, respectSelected);  //Debug.Log(name + " " + newLinks.Data);
 
             UpdateConnections(newLinks.Connections);
             UpdateWeakNeighbours(newLinks.Touches);
@@ -659,15 +661,19 @@ namespace Assets.Scripts
                 connectionsGroups.Add(connection.First().Group);
             }
 
+            //TODO посмотреть не слишком ли много раз тут будут вызываться UpdateLinks. 
+            //TODO Там после присоединения свободных деталей идет как бы обратная волна апдейтов на детали группы.
             if (connectionsGroups.Count < 2 && freeDetails.Count == 0 && Group != null)
             {
                 Group = connectionsGroups.Count == 0 ? null : connectionsGroups.Single();
                 return;
             }
 
-            // Не надо себя отхерачивать! Сначала проверь, что твоей группы нет в объединяемых группах! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            if (Group == null || !connectionsGroups.Contains(Group)) {
+            if (!connectionsGroups.Contains(Group)) {
                 Group = null;
+            }
+
+            if (Group == null) {
                 freeDetails.Add(this);
             }
 
@@ -677,39 +683,7 @@ namespace Assets.Scripts
         }
 
         //TODO сделать присоединение детали к группе и группы к детали одинаковым (без создания новой группы)
-//        public void ConnectWith(Transform detail)
-//        {
-////            Debug.Log("Connect! other: " + detail.gameObject.name + ", this:" + gameObject.name);
-//
-////             group = detail.RootParent() ?? transform.RootParent();
-//
-//            if (detail.RootParent().transform != detail)
-//            {
-//                var root = detail.root;
-//                transform.root.SetParent(root);
-//                return;
-//            }
-//
-//            if (transform.RootParent().transform != transform) {
-//                var root = transform.root;
-//                detail.root.SetParent(root);
-//                return;
-//            }
-//
-//            var newGroup = new GameObject("DetailsGroup");
-//            newGroup.AddComponent<DetailsGroup>();
-//            newGroup.transform.position = (detail.position + transform.position) / 2f;
-//
-//            detail.SetParent(newGroup.transform);
-//            transform.SetParent(newGroup.transform);
-//        }
 
-//        public void OnTriggerEnter(Collider collider) {
-//            Debug.Log("Contact!");
-//        }
-//        public void OnCollisionEnter(Collision collision) {
-//            Debug.Log("Contact!");
-//        }
 
         public void OnPointerDown(PointerEventData eventData)
         {
@@ -734,23 +708,7 @@ namespace Assets.Scripts
         }
     }
 }
-///
-/// Обычная деталь:
-/// во время снятия выделения проверяем соединения со всеми деталями: 
-/// если группа деталей у всех одна и она равна текущей группе выделенной детали, то все ок, просто обновляем списки связей в группе
-/// если группы отличаются, то идем по всем группам и сливаем их в одну
-/// 
-/// 
-///  Алгоритм проверки связности: берем все детали, которые соединяются с удаляемой деталью. Они образуют начальные множества несвязанных частей. Проверяем в этих множествах наличие пересечений.
-///  Если они есть, то объединяем множества. Если нет, то дополняем множества деталями, которые соединены с теми деталями, которые уже присутствуют в множестве и снова ищем пересечения.
-///  Если множества в итоге объединятся в одно, то деталь связная. Если нет, то множества образуют новые группы несвязных деталей.
-/// 
-///  Дополнение множеств просходит сначала деталями с жесткими связями, затем проверяется наличие мягких связей у добавленных деталей. Если они есть, то проверяется, что все части мягкой связи
-///  помечены одним маркером и если это так, то деталь тоже помечается этим маркером и добавляется в множество.
-/// 
-///  Храним, короче слабые связи в самих деталях и при перемещениях / удалениях обрабатываем прежде всего их. Детали сами добавляют и удаляют себя в группы. Т.е. внутри группы не делается 
-///  различия между слабыми и сильными связями, ими полностью управляют сами детали.
-/// 
+
 /// 
 ///  Еще одна хрень с тем, что слабая связь может быть на стороне детали, которую мы "держим". Т.е. нужно корректно определять, что у сложной детали есть детали, образующие слабую 
 ///  связь и она может прикрепиться к другой детали.

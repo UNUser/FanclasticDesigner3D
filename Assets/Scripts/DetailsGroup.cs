@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Security.AccessControl;
 using System.Text;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 
 namespace Assets.Scripts {
@@ -30,23 +28,8 @@ namespace Assets.Scripts {
             get { return transform.childCount; }
         }
 
-//        private readonly Dictionary<Detail, List<Detail>> _connections = new Dictionary<Detail, List<Detail>>();
-
-        public void Add (Detail detail/*, List<Detail> neighbors*/)
+        public void Add (Detail detail)
         {
-//            List<Detail> value;
-
-//            if (_connections.TryGetValue(detail, out value))
-//            {
-//                Debug.LogError("Detail already belong the group!");
-//            }
-//            neighbors = neighbors ?? new List<Detail>();
-//
-//            _connections.Add(detail, neighbors);
-//            foreach (var neighbour in neighbors)
-//            {
-//                _connections[neighbour].Add(detail);
-//            }
             detail.transform.SetParent(transform);
         }
 
@@ -65,12 +48,14 @@ namespace Assets.Scripts {
             var directlyAdded = new List<HashSet<Detail>>();
             var implicitlyAdded = new HashSet<Detail>();
 
+            // Подгруппы, порожденные прямыми связями
             foreach (var lostConnection in lostLinks.Connections)
             {
                 directlyAdded.Add(new HashSet<Detail> { lostConnection });
                 subgroups.Add(new HashSet<Detail>());
             }
 
+            // Подгруппы, порожденные деталями, которые имели неявную связь с удаляемой деталью
             foreach (var touch in lostLinks.Touches) {
                 if (touch.Links.HasWeakConnectionsWith(detachedDetail, true)) {
                     directlyAdded.Add(new HashSet<Detail> { touch });
@@ -78,10 +63,53 @@ namespace Assets.Scripts {
                 }
             }
 
+            // Подгруппы, порожденные возможными изолированными группами деталей, которые были
+            // связаны с основной группой только через неявную связь с удаляемой деталью
+            InitLastAddedWithImplicitConnections(lostLinks, subgroups, directlyAdded);
+
             detachedDetail.UpdateLinks(new DetailLinks());    // TODO тут этого быть не должно! переделать!
 
 //            DebugPrint(subgroups, directlyAdded);
+
             return MergeAllSubgroups(subgroups, directlyAdded, implicitlyAdded, unconfirmed);
+        }
+
+        private void InitLastAddedWithImplicitConnections(DetailLinks lostLinks, List<HashSet<Detail>> subgroups,
+            List<HashSet<Detail>> directlyAdded)
+        {
+            if (lostLinks.ImplicitConnections.Count < 2) return;
+
+            // Нужно разбить неявные соединения на непересекающиеся подгруппы
+            var connections = lostLinks.ImplicitConnections.ToList();
+            var result = new HashSet<HashSet<HashSet<Detail>>>();
+
+            for (var i = 0; i < connections.Count; i++) {
+
+                var targetSubgroup = result.FirstOrDefault(subgroup => subgroup.Contains(connections[i]));
+
+                if (targetSubgroup == null) {
+                    targetSubgroup = new HashSet<HashSet<Detail>> { connections[i] };
+                    result.Add(targetSubgroup);
+                }
+
+                for (var j = i + 1; j < connections.Count; j++) {
+                    if (connections[i].Overlaps(connections[j])) {
+                        targetSubgroup.Add(connections[j]);
+                    }
+                }
+            }
+
+            // Добавить по одному соединению из каждой такой независимой подгруппы, если их больше одной
+            if (result.Count < 2) return;
+
+            foreach (var subgroup in result) {
+                var connection = subgroup.First();
+
+                foreach (var detail in connection) {
+                    directlyAdded.Add(new HashSet<Detail> { detail });
+                    subgroups.Add(new HashSet<Detail>());
+                }
+            }
         }
 
         public void UpdateContinuity(Detail detachedDetail)
@@ -169,18 +197,15 @@ namespace Assets.Scripts {
 
         private void SplitAndUpdate(List<HashSet<Detail>> subgroups, Dictionary<HashSet<Detail>, Detail> unconfirmed)
         {
-            for (var i = 1; i < subgroups.Count; i++)
-            {
-                var newGroup = subgroups[i].Count > 1 ? CreateNewGroup(Vector3.zero) : null;            
+            for (var i = 1; i < subgroups.Count; i++) {
+                var newGroup = subgroups[i].Count > 1 ? CreateNewGroup(Vector3.zero) : null;
 
-                foreach (var detail in subgroups[i])
-                {
+                foreach (var detail in subgroups[i]) {
                     detail.Group = newGroup;
                 }
             }
 
-            foreach (var unconfirmedPair in unconfirmed)
-            {
+            foreach (var unconfirmedPair in unconfirmed) {
                 unconfirmedPair.Value.Links.ImplicitConnections.Remove(unconfirmedPair.Key);
             }
         }
@@ -198,7 +223,7 @@ namespace Assets.Scripts {
                 lastAdded[i].ExceptWith(subgroups[i]);
                 subgroups[i].UnionWith(lastAdded[i]);
 
-                // Находим и запоминаем у деталей неявные соединения и детали, которые эти соединения образуют и, возможно, порождают новые подгруппы
+                // Находим и запоминаем у деталей неявные соединения и детали, которые эти соединения образуют. Они, возможно, порождают новые подгруппы
                 AddUnconfirmedAndSpawners(lastAdded[i], newSubgroupsSpawners, unconfirmed);
             }
 
@@ -312,7 +337,7 @@ namespace Assets.Scripts {
         }
 
         /// <summary>
-        /// Объединяет две подгруппы с индексами firstIndex и secondIndex в множество с большим числом эелементов и 
+        /// Объединяет две подгруппы с индексами firstIndex и secondIndex в множество, у которого число эелементов больше, и 
         /// располагает его в списке под индексом firstIndex. Из списка удаляется подгруппа с индексом secondIndex.
         /// </summary>
         private void MergeSubgroups(List<HashSet<Detail>> subgroups, int firstIndex, int secondIndex, List<HashSet<Detail>> lastAdded)
@@ -335,7 +360,7 @@ namespace Assets.Scripts {
 //            DebugPrint(subgroups, lastAdded);
         }
 
-        public static DetailsGroup Merge(HashSet<DetailsGroup> groups, HashSet<Detail> freeDetails)
+        public static void Merge(HashSet<DetailsGroup> groups, HashSet<Detail> freeDetails)
         {
             DetailsGroup targetGroup = null;
             var toUpdateLinks = new HashSet<Detail>();
@@ -351,7 +376,7 @@ namespace Assets.Scripts {
                     targetGroup = CreateNewGroup(Vector3.zero);
                     groups.Add(targetGroup);
                 } else {
-                    return null;
+                    return;
                 }
             }
 
@@ -377,13 +402,9 @@ namespace Assets.Scripts {
             }
 
             foreach (var detail in toUpdateLinks) {
-                // В процессе обновления ссылок может произойти слияние с другими группами и наша группа будет
-                // удалена, поэтому после обновления меняем результат на группу, полученную в результате обновления
                 detail.UpdateLinks(null, true);
-                targetGroup = detail.Group;
             }
 
-            return targetGroup;
         }
 
         private static void AddExternalTouchesToUpdateLinks (Detail detail, HashSet<DetailsGroup> groups, HashSet<Detail> freeDetails, HashSet<Detail> toUpdateLinks)
@@ -392,8 +413,11 @@ namespace Assets.Scripts {
 
                 var touchGroup = touch.Group;
 
-                if ((touchGroup == null && !freeDetails.Contains(touch)) || (touchGroup != null && !groups.Contains(touchGroup))) { //TODO не будут образовываться дополнительные неявные соединения для деталей из группы
-                    toUpdateLinks.Add(touch);  Debug.Log("Added!");
+                if (touchGroup != detail.Group) { 
+                    toUpdateLinks.Add(detail);
+                    toUpdateLinks.Add(touch);  //Debug.Log("Added both!");
+                } else if (touchGroup == null && !freeDetails.Contains(touch)) {
+                    toUpdateLinks.Add(touch); //Debug.Log("Added touch!");
                 }
             }
         }

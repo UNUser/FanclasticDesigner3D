@@ -19,8 +19,10 @@ namespace Assets.Scripts {
         {
             if (!_isDrag) return;
 
-//            _newDetail.OnPointerUp(null);
             _isDrag = false;
+            if (_newDetail.transform.position.y < 0) {
+                Destroy(_newDetail.gameObject);
+            }
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -30,7 +32,7 @@ namespace Assets.Scripts {
                 _newDetail = Instantiate(_detailPrefab).GetComponent<Detail>();
                 //TODO тут покрасивше как-то переделать
                 _newDetail.GetComponent<MeshRenderer>().material = FindObjectOfType<AddDetailPanel>().ActiveColor;
-                _newDetail.transform.position = Vector3.down * 5; //TODO (если мы отпустили кнопку на фоне "неба", то созданная деталь останется под плоскостью)
+                _newDetail.transform.position = Vector3.down * 5;
                 _newDetail.OnPointerDown(null);
                 _newDetail.OnPointerUp(null);
                 _newDetail.OnBeginDrag(null);
