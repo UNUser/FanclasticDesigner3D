@@ -542,48 +542,49 @@ namespace Assets.Scripts
 
 //                        Debug.Log("overlap12 (MaxMinCenter): " + overlap12.max + " " + overlap12.min + " " + overlap12.center);
 
-                        // у всех координат размеры больше 0
-                        if (!overlap12.Valid()) continue;
+                        if (!CheckPrerequisite(overlap12)) continue;
 
-                        if (CheckOverlapForWeakTwoDetailsConnection(overlap12))
+                        if (CheckForTwofoldImplicitConnection(overlap12))
                         {
                             links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2 });
                             continue;
                         }
 
-                        if (groupWeakNeighbours.Count - n1 < 4) continue;
+//                        if (groupWeakNeighbours.Count - n1 < 4) continue;
 
-                        // проверка на слабую связь из 4 деталей
-                        var oversizedDetails = new List<Detail>();
-                        var commonOverlap = overlap12;
+                        // Неявные соединения более, чем из двух деталей, могут удерживать только детали вида 1 x n
+                        // за один из двух концов. Это значит, что у таких соединение общая область пересечения ни 
+                        // по одной координате не может быть больше двух. В противном случае в таком соединении есть 
+                        // пара деталей, образующих неявное соединение из двух деталей.
 
-                        if (overlaps[weakNeighbour1].MaxSize() > 2) 
-                            oversizedDetails.Add(weakNeighbour1);
-
-                        if (overlaps[weakNeighbour2].MaxSize() > 2)
-                            oversizedDetails.Add(weakNeighbour2);
 
                         for (var n3 = n2 + 1; n3 < groupWeakNeighbours.Count; n3++)
                         {
                             var weakNeighbour3 = groupWeakNeighbours[n3];
 
-                            if (!CheckDetailForWeakFourDetailsConnection(ref commonOverlap, overlaps[weakNeighbour3],
-                                oversizedDetails, weakNeighbour3)) continue;
+	                        var overlap123 = Extentions.Overlap(overlap12, overlaps[weakNeighbour3]);
+
+							if (!CheckPrerequisite(overlap123) || FormStrongerImplicitConnectionWithLast(overlaps[weakNeighbour1], overlaps[weakNeighbour2], overlaps[weakNeighbour3])) {
+		                        continue;
+	                        }
+
+	                        if (CheckForThreefoldImplicitConnection(overlaps[weakNeighbour1], overlaps[weakNeighbour2],
+		                        overlaps[weakNeighbour3]))
+	                        {
+								links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3 });
+		                        continue;
+	                        }
 
                             for (var n4 = n3 + 1; n4 < groupWeakNeighbours.Count; n4++)
                             {
                                 var weakNeighbour4 = groupWeakNeighbours[n4];
 
-                                if (!CheckDetailForWeakFourDetailsConnection(ref commonOverlap, overlaps[weakNeighbour4],
-                                    oversizedDetails, weakNeighbour4)) continue;
+								var overlap1234 = Extentions.Overlap(overlap123, overlaps[weakNeighbour4]);
 
-                                if (oversizedDetails.Count > 1)
-                                {
-                                    var oversizedDetailsOverlap = Extentions.Overlap(overlaps[oversizedDetails[0]],
-                                                                                     overlaps[oversizedDetails[1]]);
-
-                                    if (CheckOverlapForWeakTwoDetailsConnection(oversizedDetailsOverlap)) continue;
-                                }
+								if (!CheckPrerequisite(overlap1234) || FormStrongerImplicitConnectionWithLast(overlaps[weakNeighbour1], overlaps[weakNeighbour2], 
+																											  overlaps[weakNeighbour3], overlaps[weakNeighbour4])) {
+									continue;
+								}
 
                                 links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3, weakNeighbour4 });
                             }
@@ -593,24 +594,78 @@ namespace Assets.Scripts
             }
         }
 
-        private bool CheckDetailForWeakFourDetailsConnection(ref Bounds commonOverlap, Bounds detailOverlap,
-            List<Detail> oversizedDetails, Detail detail)
+        /// <summary>
+        ///  Минимально возможная область пересечения, необходимая для создания неявного соединения
+        ///  должна быть положительна по всем координатам и хотя бы по одной иметь размер больше 1
+        /// </summary>
+        private bool CheckPrerequisite(Bounds overlap)
         {
-            if (detailOverlap.MaxSize() > 2) {
-
-                oversizedDetails.Add(detail);
-
-                if (oversizedDetails.Count > 2) {
-                    return false;
-                }
-            }
-
-            commonOverlap = Extentions.Overlap(commonOverlap, detailOverlap);
-
-            return commonOverlap.Valid() && commonOverlap.MaxSize() > 1;
+            return overlap.Valid() && overlap.MaxSize() > 1;
         }
 
-        private bool CheckOverlapForWeakTwoDetailsConnection(Bounds overlap)
+		/// <summary>
+		///  Возвращает все неявные соединения, которые образуют 
+		/// </summary>
+	    private bool FormStrongerImplicitConnectionWithLast (Bounds touch1, Bounds touch2, Bounds touch3, Bounds? touch4 = null)
+		{
+		    var checkList = new List<Bounds> {touch1, touch2};
+			var last = touch4 ?? touch3;
+
+		    if (touch4 != null) {
+			    checkList.Add(touch3);
+		    }
+
+			for (var i = 0; i < checkList.Count; i++) {
+				var commonOverlap = Extentions.Overlap(checkList[i], last);
+
+				if (CheckForTwofoldImplicitConnection(commonOverlap)) {
+					return true;
+				}
+
+				if (touch4 == null) {
+					continue;
+				}
+
+				for (var j = i + 1; j < checkList.Count; j++)
+				{
+					commonOverlap = Extentions.Overlap(commonOverlap, checkList[j]);
+
+					if (!commonOverlap.Valid()) {
+						continue;
+					}
+
+					if (CheckForThreefoldImplicitConnection(checkList[i], checkList[j], last)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+
+		private bool CheckForThreefoldImplicitConnection(Bounds detailOverlap1, Bounds detailOverlap2, Bounds detailOverlap3) {
+
+	        var overlapNew1 = Extentions.Overlap(detailOverlap3, detailOverlap1);
+	        var overlapNew2 = Extentions.Overlap(detailOverlap3, detailOverlap2);
+	        var overlap12 = Extentions.Overlap(detailOverlap1, detailOverlap2);
+
+			return ThreefoldPrerequisite(overlapNew1) && ThreefoldPrerequisite(overlapNew2) && ThreefoldPrerequisite(overlap12);
+        }
+
+	    private bool ThreefoldPrerequisite(Bounds overlap)
+	    {
+			return Mathf.Min(overlap.size.x, 1f) + Mathf.Min(overlap.size.y, 1f) + Mathf.Min(overlap.size.z, 1f) >= 2f;
+	    }
+
+        private bool CheckForFourfoldImplicitConnection (Bounds commonOverlap/*, Bounds detailOverlapNew*/)
+        {
+//            commonOverlap = Extentions.Overlap(commonOverlap, detailOverlapNew);
+
+            return CheckPrerequisite(commonOverlap);
+        }
+
+        private bool CheckForTwofoldImplicitConnection(Bounds overlap)
         {
             // у одной координаты размер больше 1 и у еще одной больше 2
             return Mathf.Min(overlap.size.x, 2) + Math.Min(overlap.size.y, 2) + Math.Min(overlap.size.z, 2) > 3;
