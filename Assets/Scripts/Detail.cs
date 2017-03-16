@@ -22,6 +22,23 @@ namespace Assets.Scripts
     [RequireComponent(typeof (BoxCollider))]
     public class Detail : DetailBase, IBeginDragHandler, IDragHandler, IPointerUpHandler, IPointerDownHandler
     {
+		 
+		public override bool IsSelected {
+			get { return AppController.Instance.SelectedDetails.IsSelected(this); }
+			set {
+				var selected = AppController.Instance.SelectedDetails;
+
+				if (value)
+				{
+					selected.Add(this);
+				} else {
+					selected.Remove(this);
+				}
+				
+				gameObject.layer = LayerMask.NameToLayer(value ? "SelectedItem" : "Default");
+			}
+		}
+
         public override Bounds Bounds
         {
             get { return GetComponent<Renderer>().bounds; }
@@ -71,7 +88,7 @@ namespace Assets.Scripts
             }
         }
 
-        public DetailLinks Links { get { return _links; } }
+        public LinksBase Links { get { return _links; } }
         public HashSet<Detail> Connections { get { return _links.Connections; } }
         public HashSet<Detail> Touches { get { return _links.Touches; } }
         public HashSet<HashSet<Detail>> ImplicitConnections { get { return _links.ImplicitConnections; } }
@@ -92,10 +109,12 @@ namespace Assets.Scripts
 //        private readonly HashSet<Detail> _touches = new HashSet<Detail>();
 //        private readonly HashSet<HashSet<Detail>> _implicitConnections = new HashSet<HashSet<Detail>>();
 
-        private readonly DetailLinks _links = new DetailLinks();
+        private DetailLinks _links;
 
         private void Awake()
         {
+	        _links = new DetailLinks(LinksMode.ExceptSelected, this);
+
             // Определяем по размерам коллайдера тип детали и локальные координаты всех ее коннекторов
             var collider = GetComponent<Collider>();
 
@@ -237,7 +256,7 @@ namespace Assets.Scripts
             raycaster.AlignPosition(ref newPos);
 
 
-            if (newPos == transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
+            if (newPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
 
 //            UpdateConnections(connections);
 
@@ -259,16 +278,29 @@ namespace Assets.Scripts
 //                Debug.Log("    " + weakNeighgour.name);
 //                
 //            }
-            var connections = transform.RootParent().GetLinks(newPos);
 
-            if (hitPoint.y > 0 && !connections.HasConnections) return;
+			var offset = newPos - raycaster.transform.position;
+            List<LinksBase> linksList;
+			var hasConnections = transform.RootParent().GetLinks(out linksList, offset);
 
-            transform.RootParent().Detach();
 
-            var offset = newPos - raycaster.transform.position;
+	        if (hitPoint.y > 0 && !hasConnections)
+	        {
+		        var hitDetail = minRayHitInfo.Value.transform.RootParentOld();
+		        List<LinksBase> hitDetailLinksList;
+				var hitDetailHasConnections = hitDetail.GetLinks(out hitDetailLinksList, -offset, LinksMode.SelectedOnly);
+
+				if (!hitDetailHasConnections)
+					return;
+	        }
+
+	        transform.RootParent().Detach();
+
+//            var offset = newPos - raycaster.transform.position;
             transform.RootParent().transform.Translate(offset, Space.World);
 
-            transform.RootParent().UpdateLinks(connections); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			if (transform.RootParent() == this)
+				transform.RootParent().UpdateLinks(linksList); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
 
@@ -365,9 +397,9 @@ namespace Assets.Scripts
 //            IsSelected = true;
 
             //TODO переделать?
-            var app = FindObjectOfType<ApplicationController>();
-            app.SelectedDetail = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
-            app.SelectedDetail = this;
+	        var selected = AppController.Instance.SelectedDetails;
+            selected.Clear(); // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
+			selected.Add(this);
 
 //            mat.SetFloat("_intencity");
         }
@@ -429,19 +461,25 @@ namespace Assets.Scripts
         /// Имеет ли эта деталь соединения с другими деталями когда находится в позиции pos.
         /// Если pos == null, то берется текущая позиция детали.
         /// </summary>
-        public override DetailLinks GetLinks(Vector3? pos = null, bool respectSelected = false) 
+        public override bool GetLinks(out LinksBase links1, Vector3? offset = null, LinksMode linksMode = LinksMode.ExceptSelected) 
         {
-            var detailPos = pos ?? transform.position;
+            var detailPos = transform.position + (offset ?? Vector3.zero);
             var col = GetComponent<BoxCollider>();
             var overlapArea = col.bounds;
-            var links = new DetailLinks();
-
-            var selectedMask = respectSelected ? 0 : 1 << LayerMask.NameToLayer("SelectedItem");
+            var links = new LinksBase(TODO, this);
 
             overlapArea.center = detailPos;
-            LayerMask layerMask = ~(selectedMask | 1 << LayerMask.NameToLayer("Workspace"));
+            LayerMask layerMask;
 
-            var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
+	        if (linksMode == LinksMode.SelectedOnly) {
+				layerMask = 1 << LayerMask.NameToLayer("SelectedItem");
+	        } else {
+				var selectedMask = linksMode == LinksMode.All ? 0 : 1 << LayerMask.NameToLayer("SelectedItem");
+
+		        layerMask = ~(selectedMask | 1 << LayerMask.NameToLayer("Workspace"));
+	        }
+
+	        var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
                 //TODO если будет жрать память, то можно заменить на NonAlloc версию
             var overlaps = new Dictionary<Detail, Bounds>();
 
@@ -474,16 +512,25 @@ namespace Assets.Scripts
 
             GetImplicitConnections(links, overlaps);
 
-            return links;
+			links1 = new List <LinksBase> { links };
+
+	        return links.HasConnections;
         }
 
-        private void UpdateWeakNeighbours(HashSet<Detail> newWeakNeighbours)
+        public void UpdateWeakNeighbours(HashSet<Detail> newWeakNeighbours, LinksMode linksMode)
         {
             var addWeakNeighbours = new HashSet<Detail>(newWeakNeighbours);
             addWeakNeighbours.ExceptWith(_links.Touches);
 
             var removeWeakNeighbours = new HashSet<Detail>(_links.Touches);
             removeWeakNeighbours.ExceptWith(newWeakNeighbours);
+
+			if (linksMode != LinksMode.All) {
+				Predicate<Detail> exceptSelected = detail => detail.IsSelected;
+				Predicate<Detail> selectedOnly = detail => !detail.IsSelected;
+
+				removeWeakNeighbours.RemoveWhere(linksMode == LinksMode.ExceptSelected ? exceptSelected : selectedOnly);
+			}
 
             foreach (var newWeakNeighbour in addWeakNeighbours)
             {
@@ -499,17 +546,25 @@ namespace Assets.Scripts
             _links.Touches.ExceptWith(removeWeakNeighbours);
         }
 
-        private void UpdateImplicitConnections(HashSet<HashSet<Detail>> implicitConnections)
+        public void UpdateImplicitConnections(HashSet<HashSet<Detail>> implicitConnections, LinksMode linksMode)
         {
+			//TODO тут надо учитывать linksMode
+//			if (linksMode != LinksMode.All) {
+//				Predicate<Detail> exceptSelected = detail => detail.IsSelected;
+//				Predicate<Detail> selectedOnly = detail => !detail.IsSelected;
+//
+//				connectionsToRemove.RemoveWhere(linksMode == LinksMode.ExceptSelected ? exceptSelected : selectedOnly);
+//			}
+
             _links.ImplicitConnections.Clear();
             _links.ImplicitConnections.UnionWith(implicitConnections);
         }
 
-        private void GetImplicitConnections(DetailLinks links, Dictionary<Detail, Bounds> overlaps)
+        private void GetImplicitConnections(LinksBase linksBase, Dictionary<Detail, Bounds> overlaps)
         {
             var groups = new Dictionary<DetailsGroup, HashSet<Detail>>();
 
-            foreach (var weakNeighbour in links.Touches)
+            foreach (var weakNeighbour in linksBase.Touches)
             {
                 var neighbourGroup = weakNeighbour.Group;
 
@@ -546,7 +601,7 @@ namespace Assets.Scripts
 
                         if (CheckForTwofoldImplicitConnection(overlap12))
                         {
-                            links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2 });
+                            linksBase.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2 });
                             continue;
                         }
 
@@ -571,7 +626,7 @@ namespace Assets.Scripts
 	                        if (CheckForThreefoldImplicitConnection(overlaps[weakNeighbour1], overlaps[weakNeighbour2],
 		                        overlaps[weakNeighbour3]))
 	                        {
-								links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3 });
+								linksBase.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3 });
 		                        continue;
 	                        }
 
@@ -586,7 +641,7 @@ namespace Assets.Scripts
 									continue;
 								}
 
-                                links.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3, weakNeighbour4 });
+                                linksBase.ImplicitConnections.Add(new HashSet<Detail> { weakNeighbour1, weakNeighbour2, weakNeighbour3, weakNeighbour4 });
                             }
                         }
                     }
@@ -604,7 +659,7 @@ namespace Assets.Scripts
         }
 
 		/// <summary>
-		///  Возвращает все неявные соединения, которые образуют 
+		///  Образует ли последняя деталь, переданная в параметрах, более сильные связи с предыдущими деталями
 		/// </summary>
 	    private bool FormStrongerImplicitConnectionWithLast (Bounds touch1, Bounds touch2, Bounds touch3, Bounds? touch4 = null)
 		{
@@ -671,13 +726,22 @@ namespace Assets.Scripts
             return Mathf.Min(overlap.size.x, 2) + Math.Min(overlap.size.y, 2) + Math.Min(overlap.size.z, 2) > 3;
         }
 
-        private void UpdateConnections(HashSet<Detail> newConnections)
+		public void UpdateConnections(HashSet<Detail> newConnections, LinksMode linksMode)
         {
             var connectionsToAdd = new HashSet<Detail>(newConnections);
             connectionsToAdd.ExceptWith(_links.Connections);
 
             var connectionsToRemove = new HashSet<Detail>(_links.Connections);
             connectionsToRemove.ExceptWith(newConnections);
+
+			if (linksMode != LinksMode.All)
+			{
+				Predicate<Detail> exceptSelected = detail => detail.IsSelected;
+				Predicate<Detail> selectedOnly = detail => !detail.IsSelected;
+
+				connectionsToRemove.RemoveWhere(linksMode == LinksMode.ExceptSelected ? exceptSelected : selectedOnly);
+			}
+			
 
             foreach (var newConnection in connectionsToAdd) {
                 newConnection._links.Connections.Add(this);
@@ -692,50 +756,11 @@ namespace Assets.Scripts
             _links.Connections.ExceptWith(connectionsToRemove);
         }
 
-        public override void UpdateLinks(DetailLinks newLinks = null, bool respectSelected = false)
-        {
-            newLinks = newLinks ?? GetLinks(null, respectSelected);  //Debug.Log(name + " " + newLinks.Data);
-
-            UpdateConnections(newLinks.Connections);
-            UpdateWeakNeighbours(newLinks.Touches);
-            UpdateImplicitConnections(newLinks.ImplicitConnections);
+//        public override void UpdateLinks(List<DetailLinks> newLinks = null, LinksMode linksMode = LinksMode.ExceptSelected)
+//        {
 
 
-            var connectionsGroups = new HashSet<DetailsGroup>();
-            var freeDetails = new HashSet<Detail>();
-
-            foreach (var detail in newLinks.Connections) {
-                if (detail.Group == null) {
-                    freeDetails.Add(detail);
-                } else { 
-                    connectionsGroups.Add(detail.Group);
-                }
-            }
-
-            foreach (var connection in newLinks.ImplicitConnections) {
-                connectionsGroups.Add(connection.First().Group);
-            }
-
-            //TODO посмотреть не слишком ли много раз тут будут вызываться UpdateLinks. 
-            //TODO Там после присоединения свободных деталей идет как бы обратная волна апдейтов на детали группы.
-            if (connectionsGroups.Count < 2 && freeDetails.Count == 0 && Group != null)
-            {
-                Group = connectionsGroups.Count == 0 ? null : connectionsGroups.Single();
-                return;
-            }
-
-            if (!connectionsGroups.Contains(Group)) {
-                Group = null;
-            }
-
-            if (Group == null) {
-                freeDetails.Add(this);
-            }
-
-//            Debug.Log("UpdateLinks Merge: " + gameObject.name + " groups: " + connectionsGroups.Count + ", free: " + freeDetails.Count + ", touches: " + Touches.Count);
-            DetailsGroup.Merge(connectionsGroups, freeDetails);
-
-        }
+//        }
 
         //TODO сделать присоединение детали к группе и группы к детали одинаковым (без создания новой группы)
 
@@ -753,9 +778,9 @@ namespace Assets.Scripts
             yield return new WaitForSeconds(1f);
             if (_isClick && _callId == callId)
             {
-                var app = FindObjectOfType<ApplicationController>();
-                app.SelectedDetail = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
-                app.SelectedDetail = Group ?? (DetailBase) this;
+                var app = FindObjectOfType<AppController>();
+                app.SelectedDetails = null; // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
+                app.SelectedDetails = Group ?? (DetailBase) this;
                 
                 _isLongClick = true;
                 _isClick = false;

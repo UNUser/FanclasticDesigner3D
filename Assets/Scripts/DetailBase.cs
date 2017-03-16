@@ -1,172 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 
 namespace Assets.Scripts {
 
-    public class DetailLinks
-    {
-        public bool HasConnections
-        {
-            get { return Connections.Count > 0 || ImplicitConnections.Count > 0; }
-        }
-
-        public readonly HashSet<Detail> Connections;
-        public readonly HashSet<Detail> Touches;
-        public readonly HashSet<HashSet<Detail>> ImplicitConnections;
-
-        public DetailLinksData Data
-        {
-            get
-            {
-                var data = new DetailLinksData
-                {
-                    Connections = Connections.Select(connection => connection.GetInstanceID()).ToList(),
-                    Touches = Touches.Select(touch => touch.GetInstanceID()).ToList(),
-                    ImplicitConnections = new List<List<int>>()
-                };
-
-                foreach (var implicitConnection in ImplicitConnections)
-                {
-                    data.ImplicitConnections.Add(
-                        implicitConnection.Select(connection => connection.GetInstanceID()).ToList());
-                }
-
-                return data;
-            }
-        }
-
-//        private readonly Detail _detail;
-
-        public DetailLinks(/*Detail detail = null*/)
-        {
-//            _detail = detail;
-
-            Connections = new HashSet<Detail>();
-            Touches = new HashSet<Detail>();
-            ImplicitConnections = new HashSet<HashSet<Detail>>();
-        }
-
-//        public void AddConnection(Detail connection) {
-//            if (Connections.Add(connection)) {
-//                connection.Links.AddConnection(_detail);
-//            }
-//        }
-//
-//        public void RemoveConnection(Detail connection) {
-//            if (Connections.Remove(connection)) {
-//                connection.Links.RemoveConnection(_detail);
-//            }
-//        }
-//
-//        public void AddTouch(Detail touch) {
-//            if (Touches.Add(touch)) {
-//                touch.Links.AddTouch(_detail);
-//                _detail.UpdateLinks(null, true);
-//            }
-//        }
-//
-//        public void RemoveTouch(Detail touch) {
-//            if (Touches.Remove(touch)) {
-//                touch.Links.RemoveTouch(_detail);
-//                ImplicitConnections.RemoveWhere(implicitConnection => implicitConnection.Contains(touch));
-//            }
-//        }
-
-
-        public bool HasWeakConnectionsWith(Detail detail, bool remove = false)
-        {
-            foreach (var implicitConnection in ImplicitConnections)
-            {
-                if (implicitConnection.Contains(detail)) {
-                    if (remove) {
-                        ImplicitConnections.RemoveWhere(connection => connection.Contains(detail));
-                    }
-
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    [Serializable]
-    public class DetailLinksData
-    {
-        public List<int> Connections;
-        public List<int> Touches;
-        public List<List<int>> ImplicitConnections;
-
-        public override string ToString()
-        {
-            var str = new StringBuilder();
-            var needComma = false;
-
-            str.Append("Direct: ");
-            foreach (var connection in Connections)
-            {
-                ApplicationController.AddComma(str, ref needComma);
-                str.Append(connection);
-            }
-
-            str.Append(" Implicit: ");
-
-            foreach (var @implicit in ImplicitConnections) {
-                str.Append("   [ ");
-                needComma = false;
-                foreach (var detail in @implicit)
-                {
-                    ApplicationController.AddComma(str, ref needComma);
-                    str.Append(detail);
-                }
-                str.Append(" ]");
-            }
-
-            str.Append(" Touches: ");
-            needComma = false;
-
-            foreach (var touch in Touches) {
-                ApplicationController.AddComma(str, ref needComma);
-                str.Append(touch);
-            }
-
-            return str.ToString();
-        }
-    }
-
     public abstract class DetailBase : MonoBehaviour
     {
-        public virtual bool IsSelected {
-            get { return _isSelected; }
-            set {
-                if (!value && transform.parent == null) {
-                    UpdateLinks();
-                }
-                _isSelected = value;
-                gameObject.layer = LayerMask.NameToLayer(_isSelected ? "SelectedItem" : "Default");
-            }
-        }
-        private bool _isSelected;
+		public abstract bool IsSelected { get; set; }
 
         public abstract Bounds Bounds { get; }
 
-//        public DetailsGroup RootParent {
-//            get { return transform.root.GetComponent<DetailsGroup>(); }
-//            set {
-//                if (transform.parent != null) {
-//                    transform.parent.GetComponent<DetailsGroup>().ChildDetached();
-//                }
-//                transform.SetParent(value != null ? value.transform : null);
-//            }
-//        }
 
-        public abstract void Detach();
-        public abstract DetailLinks GetLinks(Vector3? pos = null, bool respectSelected = false);
-        public abstract void UpdateLinks(DetailLinks newLinks = null, bool respectSelected = false);
+        public abstract bool GetLinks(out LinksBase links, Vector3? offset = null, LinksMode linksMode = LinksMode.ExceptSelected);
+
+	    public virtual void UpdateLinks(LinksBase newLinks = null, LinksMode linksMode = LinksMode.ExceptSelected)
+	    {
+			if (newLinks == null) {
+				transform.RootParentOld().GetLinks(out newLinks, null, linksMode);
+			}
+
+			foreach (var detailLinks in newLinks) {
+				detailLinks.Holder.UpdateConnections(detailLinks.Connections, linksMode);
+				detailLinks.Holder.UpdateWeakNeighbours(detailLinks.Touches, linksMode);
+				detailLinks.Holder.UpdateImplicitConnections(detailLinks.ImplicitConnections, linksMode);
+			}
+
+
+			var connectionsGroups = new HashSet<DetailsGroup>();
+			var freeDetails = new HashSet<Detail>();
+
+			foreach (var detailLinks in newLinks) {
+				foreach (var detail in detailLinks.Connections) {
+					if (detail.Group == null) {
+						freeDetails.Add(detail);
+					} else {
+						connectionsGroups.Add(detail.Group);
+					}
+				}
+
+				foreach (var connection in detailLinks.ImplicitConnections) {
+					connectionsGroups.Add(connection.First().Group);
+				}
+			}
+
+		    var asDetail = this as Detail;
+
+		    if (asDetail != null)
+		    {
+
+			    //TODO посмотреть не слишком ли много раз тут будут вызываться UpdateLinks. 
+			    //TODO Там после присоединения свободных деталей идет как бы обратная волна апдейтов на детали группы.
+				if (connectionsGroups.Count < 2 && freeDetails.Count == 0 && asDetail.Group != null)
+			    {
+					asDetail.Group = connectionsGroups.Count == 0 ? null : connectionsGroups.Single();
+				    return;
+			    }
+
+
+				if (!connectionsGroups.Contains(asDetail.Group))
+			    {
+					asDetail.Group = null;
+			    }
+
+				if (asDetail.Group == null)
+			    {
+				    freeDetails.Add(asDetail);
+			    }
+		    }
+		    else
+		    {
+			    if (connectionsGroups.Count == 0 && freeDetails.Count == 0) {
+				    return;
+			    }
+
+			    connectionsGroups.Add(this as DetailsGroup);
+		    }
+
+
+		    //            Debug.Log("UpdateLinks Merge: " + gameObject.name + " groups: " + connectionsGroups.Count + ", free: " + freeDetails.Count + ", touches: " + Touches.Count);
+			DetailsGroup.Merge(connectionsGroups, freeDetails);
+	    }
 
         public abstract void SetRaycastOrigins(Vector3 offset);
         public abstract RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster, out int rayOriginIndex);

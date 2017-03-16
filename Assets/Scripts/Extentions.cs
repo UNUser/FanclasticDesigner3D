@@ -35,10 +35,15 @@ namespace Assets.Scripts {
 
         public static DetailBase RootParent(this Transform transform)
         {
-            return Object.FindObjectOfType<ApplicationController>().SelectedDetail.GetComponent<DetailBase>();
+            return Object.FindObjectOfType<AppController>().SelectedDetails.GetComponent<DetailBase>();
                 //transform.root.GetComponent<DetailBase>();
         }
 
+		public static DetailBase RootParentOld(this Transform transform) { //TODO такая хрень из-за detach в OnBeginDrag. Там если деталь часть группы, то будет возвращаться группа, а нужна только 
+																		   // TODO выделенная деталь
+//			return Object.FindObjectOfType<ApplicationController>().SelectedDetail.GetComponent<DetailBase>();
+			return transform.root.GetComponent<DetailBase>();
+		}
 //        public static void SetRootParent(this Transform transform, Transform value) {
 //                if (transform.parent != null) {
 //                    transform.parent.GetComponent<DetailsGroup>().ChildDetached();

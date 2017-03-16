@@ -7,21 +7,18 @@ using UnityEngine;
 namespace Assets.Scripts {
     public class DetailsGroup : DetailBase {
 
-        public override bool IsSelected
-        {
-            get
-            {
-                return base.IsSelected;
-            }
-            set
-            {
-                base.IsSelected = value;
-                foreach (Transform child in transform)
-                {
-                    child.GetComponent<DetailBase>().IsSelected = value;
-                }
-            }
-        }
+		public override bool IsSelected {
+			get {
+				return _details.All(detail => detail.IsSelected);
+			}
+			set {
+				foreach (var detail in _details) {
+					detail.IsSelected = value;
+				}
+			}
+		}
+
+		private readonly HashSet<Detail> _details = new HashSet<Detail>(); 
 
         public int DetailsCount
         {
@@ -30,6 +27,7 @@ namespace Assets.Scripts {
 
         public void Add (Detail detail)
         {
+	        _details.Add(detail);
             detail.transform.SetParent(transform);
         }
 
@@ -67,20 +65,20 @@ namespace Assets.Scripts {
             // связаны с основной группой только через неявную связь с удаляемой деталью
             InitLastAddedWithImplicitConnections(lostLinks, subgroups, directlyAdded);
 
-            detachedDetail.UpdateLinks(new DetailLinks());    // TODO тут этого быть не должно! переделать!
+            detachedDetail.UpdateLinks(new List<LinksBase>{ new LinksBase(TODO, detachedDetail) });    // TODO тут этого быть не должно! переделать!
 
 //            DebugPrint(subgroups, directlyAdded);
 
             return MergeAllSubgroups(subgroups, directlyAdded, implicitlyAdded, unconfirmed);
         }
 
-        private void InitLastAddedWithImplicitConnections(DetailLinks lostLinks, List<HashSet<Detail>> subgroups,
+        private void InitLastAddedWithImplicitConnections(LinksBase lostLinksBase, List<HashSet<Detail>> subgroups,
             List<HashSet<Detail>> directlyAdded)
         {
-            if (lostLinks.ImplicitConnections.Count < 2) return;
+            if (lostLinksBase.ImplicitConnections.Count < 2) return;
 
             // Нужно разбить неявные соединения на непересекающиеся подгруппы
-            var connections = lostLinks.ImplicitConnections.ToList();
+            var connections = lostLinksBase.ImplicitConnections.ToList();
             var result = new HashSet<HashSet<HashSet<Detail>>>();
 
             for (var i = 0; i < connections.Count; i++) {
@@ -402,7 +400,7 @@ namespace Assets.Scripts {
             }
 
             foreach (var detail in toUpdateLinks) {
-                detail.UpdateLinks(null, true);
+                detail.UpdateLinks(null, LinksMode.All);
             }
 
         }
@@ -453,6 +451,7 @@ namespace Assets.Scripts {
 //                _connections[neighbour].Remove(detail);
 //            }
 //            _connections.Remove(detail);
+	        _details.Remove(detail);
             detail.transform.SetParent(null);
 
             if (DetailsCount == 1) {
@@ -502,10 +501,10 @@ namespace Assets.Scripts {
 //            }
 //        }
 
-        public override void UpdateLinks(DetailLinks newLinks = null, bool respectSelected = false)
-        {
-            Debug.LogError("NotImplemented!");
-        }
+//        public override void UpdateLinks(List<DetailLinks> newLinks = null, LinksMode linksMode = LinksMode.ExceptSelected)
+//        {
+//            Debug.LogError("NotImplemented!");
+//        }
 
         public override void SetRaycastOrigins(Vector3 offset) {
 
@@ -553,15 +552,67 @@ namespace Assets.Scripts {
             transform.Translate(offset, Space.World);
         }
 
-        public override void Detach()
+        public void Detach(HashSet<Detail> detailsToDetach)
         {
-            Debug.LogError("NotImplemented!");
+			// если выделена вся группа целиком, то ничего отсоединять не надо
+	        if (_details.Count == detailsToDetach.Count) {
+		        return;
+	        }
+
+	        if (_details.Count > detailsToDetach.Count)
+	        {
+				Debug.LogError("Multiple groups selection unsupported!");
+				return;
+	        }
+
+	        DetailBase targetDetail;
+	        LinksBase emptyLinks;
+
+		    if (detailsToDetach.Count > 1)
+		    {
+				var newGroup = CreateNewGroup();
+
+				foreach (var detail in detailsToDetach) {
+					if (detail.Group != this) {
+						Debug.LogError("Multiple groups selection unsupported!");
+						continue;
+					}
+					detail.Group = newGroup;
+				}
+				targetDetail = newGroup;
+			    emptyLinks = new DetailsGroupLinks(LinksMode.ExceptSelected, newGroup);
+		    } else {
+			    var first = detailsToDetach.First();
+
+				targetDetail = first;
+			    first.Group = null;
+				emptyLinks = new DetailLinks(LinksMode.ExceptSelected, first);
+		    }
+
+			targetDetail.UpdateLinks(emptyLinks);
+			UpdateContinuity();
         }
 
-        public override DetailLinks GetLinks(Vector3? pos = null, bool respectSelected = false) 
+        public override bool GetLinks(out LinksBase links, Vector3? offset = null, LinksMode linksMode = LinksMode.ExceptSelected) 
         {
-            Debug.LogError("NotImplemented!");
-            return new DetailLinks();
+	        var hasConnections = false;
+
+			links = new List<LinksBase>();
+
+	        foreach (Transform child in transform)
+	        {
+		        var detail = child.GetComponent<Detail>();
+		        List<LinksBase> detailLinks;
+
+		        if (detail.GetLinks(out detailLinks, offset, linksMode)) {
+			        hasConnections = true;
+		        }
+
+				//TODO отсеивать пустые линки
+				links.Add(detailLinks[0]);
+	        }
+
+	        return hasConnections;
         }
 
 

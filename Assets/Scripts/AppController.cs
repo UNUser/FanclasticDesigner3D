@@ -9,57 +9,43 @@ using UnityEngine;
 using UnityEngine.UI;
 
 namespace Assets.Scripts {
-    public class ApplicationController : MonoBehaviour
+    public class AppController : MonoBehaviour
     {
         public FileSelectionDialogLayer FileSelectionDialogLayer;
         public Text DebugTextGroups;
         public Text DebugTextDetail;
 
 
+	    public static AppController Instance {
+		    get { return _instance ?? (_instance = new AppController()); }
+	    }
+	    private static AppController _instance;
+
+
         public Material[] DetailColors;
 
-        public DetailBase SelectedDetail
-        {
-            get { return _selectedDetail; }
-            set
-            {
-                if (_selectedDetail != null)
-                {
-                    _selectedDetail.IsSelected = false;
-                }
-                _selectedDetail = value;
-                if (value != null)
-                {
-                    _selectedDetail.IsSelected = true;
-                }
-            }
-        }
-
-        private DetailBase _selectedDetail = null;
+		public SelectedDetails SelectedDetails = new SelectedDetails();
 
         public void RotateSelectedByX() {
-            if (SelectedDetail == null) return;
             
-            SelectedDetail.Rotate(Vector3.right);
+            SelectedDetails.Rotate(Vector3.right);
         }
 
         public void RotateSelectedByY() {
-            if (SelectedDetail == null) return;
 
-            SelectedDetail.Rotate(Vector3.up);
+            SelectedDetails.Rotate(Vector3.up);
         }
 
         public void RotateSelectedByZ() {
-            if (SelectedDetail == null) return;
 
-            SelectedDetail.Rotate(Vector3.forward);
+            SelectedDetails.Rotate(Vector3.forward);
         }
 
         public void RemoveSelected() {
-            if (SelectedDetail == null) return;
+            if (SelectedDetails == null) return;
 
-            SelectedDetail.Detach();
-            Destroy(SelectedDetail.gameObject);
+			SelectedDetails.Remove();
+
         }
 
         public void OnSaveButtonClicked()
@@ -72,7 +58,7 @@ namespace Assets.Scripts {
             var bf = new BinaryFormatter();
             var file = File.Create(fileName);
 
-            SelectedDetail.IsSelected = false;
+            SelectedDetails.IsSelected = false;
 
             var roots = new List<GameObject>();
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
@@ -150,7 +136,7 @@ namespace Assets.Scripts {
         private void CreateObjects(List<List<DetailData>> groups)
         {
             var id2Detail = new Dictionary<int, Detail>();
-            var links2Data= new Dictionary<DetailLinks, DetailLinksData>();
+            var links2Data= new Dictionary<LinksBase, DetailLinksData>();
 
             foreach (var @group in groups)
             {
@@ -259,7 +245,7 @@ namespace Assets.Scripts {
 
         private void DebugUpdateDetailInfo()
         {
-            var selected = SelectedDetail as Detail;
+            var selected = SelectedDetails as Detail;
 
             if (selected == null) {
                 DebugTextDetail.text = string.Empty;
