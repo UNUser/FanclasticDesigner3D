@@ -113,14 +113,10 @@ namespace Assets.Scripts {
 	    private void SetLight()
 	    {
 			var sightDirection = Camera.transform.forward;
-		    var rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(sightDirection, Vector3.up));
-			var lightDirection = rotation * Quaternion.Euler(LightRotation) * Vector3.forward;
-			var lightDirection1 = rotation * Quaternion.Euler(LightRotation1) * Vector3.forward;
+		    var lookRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(sightDirection, Vector3.up));
 
-			DirectionalLight.LookAt(lightDirection + DirectionalLight.position);
-//			Debug.DrawRay(DirectionalLight.position, lightDirection * 15, Color.red, 5);
-//			Debug.DrawRay(DirectionalLight.position, DirectionalLight.forward * 15, Color.blue, 5);
-			DirectionalLight1.LookAt(lightDirection1 + DirectionalLight1.position);
+			DirectionalLight.rotation = lookRotation *  Quaternion.Euler(LightRotation);
+			DirectionalLight1.rotation = lookRotation * Quaternion.Euler(LightRotation1);
 	    }
 
         private void Focusing()

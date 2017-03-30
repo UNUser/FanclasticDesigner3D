@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 7e1bfb38d125c4d458a704615e000cfb
-timeCreated: 1479308759
+guid: 9bdc3dbafb1953a4889ba6613e815673
+timeCreated: 1490885101
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -52,11 +52,12 @@ ModelImporter:
     useFileScale: 1
   tangentSpace:
     normalSmoothAngle: 60
-    normalImportMode: 1
+    normalImportMode: 0
     tangentImportMode: 3
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
+    serializedVersion: 2
     human: []
     skeleton: []
     armTwist: 0.5
@@ -67,7 +68,10 @@ ModelImporter:
     legStretch: 0.05
     feetSpacing: 0
     rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 2
   humanoidOversampling: 1
