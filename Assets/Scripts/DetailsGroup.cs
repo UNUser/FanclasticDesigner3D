@@ -11,24 +11,27 @@ namespace Assets.Scripts {
 			get {
 				return _details.All(detail => detail.IsSelected);
 			}
-			set {
-				foreach (var detail in _details) {
-					detail.IsSelected = value;
-				}
-			}
 		}
+
+		public Detail[] Details { get { return _details.ToArray(); } }
 
 		private readonly HashSet<Detail> _details = new HashSet<Detail>(); 
 
         public int DetailsCount
         {
-            get { return transform.childCount; }
+            get { return _details.Count; }
         }
 
         public void Add (Detail detail)
         {
-	        _details.Add(detail);
-            detail.transform.SetParent(transform);
+			if (detail.Group == this) return;
+
+			if (detail.Group != null) {
+				detail.Group.Remove(detail);
+			}
+
+			_details.Add(detail);
+			detail.transform.SetParent(transform);
         }
 
         public static DetailsGroup CreateNewGroup(Vector3? position = null)
@@ -39,12 +42,9 @@ namespace Assets.Scripts {
             return newObj.AddComponent<DetailsGroup>();
         }
 
-        private List<HashSet<Detail>> InitLastAdded(Detail detachedDetail, List<HashSet<Detail>> subgroups, Dictionary<HashSet<Detail>, Detail> unconfirmed)
+        private List<HashSet<Detail>> InitLastAdded(LinksBase lostLinks, List<HashSet<Detail>> subgroups)
         {
-            var lostLinks = detachedDetail.Links;
-
-            var directlyAdded = new List<HashSet<Detail>>();
-            var implicitlyAdded = new HashSet<Detail>();
+			var directlyAdded = new List<HashSet<Detail>>();
 
             // Подгруппы, порожденные прямыми связями
             foreach (var lostConnection in lostLinks.Connections)
@@ -53,69 +53,16 @@ namespace Assets.Scripts {
                 subgroups.Add(new HashSet<Detail>());
             }
 
-            // Подгруппы, порожденные деталями, которые имели неявную связь с удаляемой деталью
-            foreach (var touch in lostLinks.Touches) {
-                if (touch.Links.HasWeakConnectionsWith(detachedDetail, true)) {
-                    directlyAdded.Add(new HashSet<Detail> { touch });
-                    subgroups.Add(new HashSet<Detail>());
-                }
-            }
-
-            // Подгруппы, порожденные возможными изолированными группами деталей, которые были
-            // связаны с основной группой только через неявную связь с удаляемой деталью
-            InitLastAddedWithImplicitConnections(lostLinks, subgroups, directlyAdded);
-
-            detachedDetail.UpdateLinks(new List<LinksBase>{ new LinksBase(TODO, detachedDetail) });    // TODO тут этого быть не должно! переделать!
-
 //            DebugPrint(subgroups, directlyAdded);
 
-            return MergeAllSubgroups(subgroups, directlyAdded, implicitlyAdded, unconfirmed);
+            return MergeAllSubgroups(subgroups, directlyAdded);
         }
 
-        private void InitLastAddedWithImplicitConnections(LinksBase lostLinksBase, List<HashSet<Detail>> subgroups,
-            List<HashSet<Detail>> directlyAdded)
-        {
-            if (lostLinksBase.ImplicitConnections.Count < 2) return;
-
-            // Нужно разбить неявные соединения на непересекающиеся подгруппы
-            var connections = lostLinksBase.ImplicitConnections.ToList();
-            var result = new HashSet<HashSet<HashSet<Detail>>>();
-
-            for (var i = 0; i < connections.Count; i++) {
-
-                var targetSubgroup = result.FirstOrDefault(subgroup => subgroup.Contains(connections[i]));
-
-                if (targetSubgroup == null) {
-                    targetSubgroup = new HashSet<HashSet<Detail>> { connections[i] };
-                    result.Add(targetSubgroup);
-                }
-
-                for (var j = i + 1; j < connections.Count; j++) {
-                    if (connections[i].Overlaps(connections[j])) {
-                        targetSubgroup.Add(connections[j]);
-                    }
-                }
-            }
-
-            // Добавить по одному соединению из каждой такой независимой подгруппы, если их больше одной
-            if (result.Count < 2) return;
-
-            foreach (var subgroup in result) {
-                var connection = subgroup.First();
-
-                foreach (var detail in connection) {
-                    directlyAdded.Add(new HashSet<Detail> { detail });
-                    subgroups.Add(new HashSet<Detail>());
-                }
-            }
-        }
-
-        public void UpdateContinuity(Detail detachedDetail)
+        public void UpdateContinuity(LinksBase lostLinks)
         {
             var subgroups = new List<HashSet<Detail>>();
-            var unconfirmedImplicitConnections = new Dictionary<HashSet<Detail>, Detail>();
 
-            var lastAdded = InitLastAdded(detachedDetail, subgroups, unconfirmedImplicitConnections);
+            var lastAdded = InitLastAdded(lostLinks, subgroups);
             var detailsAdded = lastAdded.Sum(newDetails => newDetails.Count);
 
 //            Debug.Log("/////////////////");
@@ -123,7 +70,6 @@ namespace Assets.Scripts {
             while (detailsAdded > 0 && subgroups.Count > 1)
             {
                 var directlyAdded = new List<HashSet<Detail>>();
-                var implicitlyAdded = new HashSet<Detail>();
 
                 // добавляем в подгруппы следующий уровень соединений
                 for (var i = 0; i < lastAdded.Count; i++) {
@@ -135,21 +81,14 @@ namespace Assets.Scripts {
 
                         // добавляем детали по прямым связям
                         directlyAdded[i].UnionWith(detail.Connections);
-                            
-                        // добавляем детали по неявным связям
-                        foreach (var touch in detail.Touches) {
-                            if (touch.Links.HasWeakConnectionsWith(detail)) {
-                                implicitlyAdded.Add(touch);
-                            }
-                        }
                     }
                 }
 
-                lastAdded = MergeAllSubgroups(subgroups, directlyAdded, implicitlyAdded, unconfirmedImplicitConnections); // TODO можно оптимизировать, подгруппы, в которые ничего не добавляется, можно отделять сразу, хотя, возможно, они могут присоединится неявными связями
+                lastAdded = MergeAllSubgroups(subgroups, directlyAdded); // TODO можно оптимизировать, подгруппы, в которые ничего не добавляется, можно отделять сразу, хотя, возможно, они могут присоединится неявными связями
                 detailsAdded = lastAdded.Sum(newDetails => newDetails.Count);
             }
 
-            SplitAndUpdate(subgroups, unconfirmedImplicitConnections);
+            SplitAndUpdate(subgroups);
         }
 
         private void DebugPrint(List<HashSet<Detail>> subgroups, List<HashSet<Detail>> lastAdded)
@@ -193,25 +132,24 @@ namespace Assets.Scripts {
             Debug.Log(str);
         }
 
-        private void SplitAndUpdate(List<HashSet<Detail>> subgroups, Dictionary<HashSet<Detail>, Detail> unconfirmed)
+        private void SplitAndUpdate(List<HashSet<Detail>> subgroups)
         {
             for (var i = 1; i < subgroups.Count; i++) {
                 var newGroup = subgroups[i].Count > 1 ? CreateNewGroup(Vector3.zero) : null;
 
                 foreach (var detail in subgroups[i]) {
-                    detail.Group = newGroup;
+	                if (newGroup != null) {
+		                newGroup.Add(detail);
+	                } else {
+		                Remove(detail);
+	                }
                 }
-            }
-
-            foreach (var unconfirmedPair in unconfirmed) {
-                unconfirmedPair.Value.Links.ImplicitConnections.Remove(unconfirmedPair.Key);
             }
         }
 
-        private List<HashSet<Detail>> MergeAllSubgroups(List<HashSet<Detail>> subgroups, List<HashSet<Detail>> directlyAdded, HashSet<Detail> implicitlyAdded, Dictionary<HashSet<Detail>, Detail> unconfirmed)
+        private List<HashSet<Detail>> MergeAllSubgroups(List<HashSet<Detail>> subgroups, List<HashSet<Detail>> directlyAdded)
         {
             var lastAdded = new List<HashSet<Detail>>();
-            var newSubgroupsSpawners = new HashSet<Detail>(implicitlyAdded);
 
             // Отбираем в lastAdded новые детали, которых еще нет ни в одной подгруппе.
             for (var i = 0; i < subgroups.Count; i++)
@@ -220,32 +158,10 @@ namespace Assets.Scripts {
                 lastAdded.Add(new HashSet<Detail>(directlyAdded[i]));
                 lastAdded[i].ExceptWith(subgroups[i]);
                 subgroups[i].UnionWith(lastAdded[i]);
-
-                // Находим и запоминаем у деталей неявные соединения и детали, которые эти соединения образуют. Они, возможно, порождают новые подгруппы
-                AddUnconfirmedAndSpawners(lastAdded[i], newSubgroupsSpawners, unconfirmed);
-            }
-
-            AddUnconfirmedAndSpawners(implicitlyAdded, newSubgroupsSpawners, unconfirmed);
-
-            // Среди деталей, порождающих новые подгруппы, оставляем только те, которые не содержатся ни в одной из старых подгрупп
-            var spawners = newSubgroupsSpawners.ToList();
-
-            foreach (var subgroup in subgroups) {
-                for (var spawnerIndex = 0; spawnerIndex < spawners.Count; spawnerIndex++) {
-                    var detail = spawners[spawnerIndex];
-
-                    if (subgroup.Contains(detail)) {
-                        newSubgroupsSpawners.Remove(detail);
-                        spawners.RemoveAt(spawnerIndex);
-                        spawnerIndex--;
-                    }
-                }
             }
 
 //            var sub = new List<HashSet<Detail>>(subgroups);
-//            sub.AddRange(newSubgroupsSpawners.Select(detail => new HashSet<Detail> {detail}));
 //            var last = new List<HashSet<Detail>>(lastAdded);
-//            last.AddRange(newSubgroupsSpawners.Select(detail => new HashSet<Detail> { detail }));
 //            DebugPrint(sub, last);
 
             // Объединяем подгруппы, которые пересеклись по прямым связям.
@@ -261,78 +177,10 @@ namespace Assets.Scripts {
                     j--;
                 }
             }
-            
-            var connections = unconfirmed.ToList();
-
-            for (var subgroupIndex = 0; subgroupIndex < subgroups.Count; subgroupIndex++)
-            {
-                for (var connectionIndex = 0; connectionIndex < connections.Count; connectionIndex++)
-                {
-                    var keyValuePair = connections[connectionIndex];
-                    var connection = keyValuePair.Key;
-                    var detail = keyValuePair.Value;
-
-                    // Подтверждаем неявное соединение
-                    if (!subgroups[subgroupIndex].IsSupersetOf(connection)) continue;
-
-                    // Убираем соединение из неподтвержденных
-                    unconfirmed.Remove(connection);
-                    connections.RemoveAt(connectionIndex);
-                    connectionIndex--;
-
-                    // Ищем подгруппу, в которую входит деталь с подтвержденным соединением
-
-                    // Сначала ищем среди деталей, порождающих новые подгруппы
-                    if (newSubgroupsSpawners.Contains(detail))
-                    {
-                        newSubgroupsSpawners.Remove(detail);
-                        subgroups[subgroupIndex].Add(detail);
-                        lastAdded[subgroupIndex].Add(detail);
-                        continue;
-                    }
-
-                    // Если не нашли, то ищем по всем подгруппам
-                    for (var detailIndex = 0; detailIndex < subgroups.Count; detailIndex++)
-                    {
-                        if (!subgroups[detailIndex].Contains(detail)) continue;
-                        if (detailIndex == subgroupIndex) break;
-
-                        // Объединяем подгруппы
-                        MergeSubgroups(subgroups, subgroupIndex, detailIndex, lastAdded);
-
-                        // Для объединенной подгруппы нужно проверить все соединения снова
-                        connectionIndex = 0;
-
-                        subgroupIndex--;
-                    }
-                }
-            }
-
-            // Добавляем новые подгруппы
-            foreach (var detail in newSubgroupsSpawners) {
-                lastAdded.Add(new HashSet<Detail>{detail});
-                subgroups.Add(new HashSet<Detail>{detail});
-            }
 
             return lastAdded;
         }
 
-        private void AddUnconfirmedAndSpawners(HashSet<Detail> details, HashSet<Detail> spawners,
-            Dictionary<HashSet<Detail>, Detail> unconfirmed)
-        {
-            // Все неявные связи новых деталей добавляем в группу неподтвержденных связей
-            foreach (var detail in details) {
-                foreach (var implicitConnection in detail.ImplicitConnections) {
-                    if (unconfirmed.ContainsKey(implicitConnection))
-                        break;
-                    unconfirmed.Add(implicitConnection, detail);
-                    // Все детали, образующие новые неявные соединения, добавляем в группу деталей, порождающих новые подгруппы
-                    foreach (var connectionDetail in implicitConnection) {
-                        spawners.Add(connectionDetail);
-                    }
-                }
-            }
-        }
 
         /// <summary>
         /// Объединяет две подгруппы с индексами firstIndex и secondIndex в множество, у которого число эелементов больше, и 
@@ -358,10 +206,29 @@ namespace Assets.Scripts {
 //            DebugPrint(subgroups, lastAdded);
         }
 
-        public static void Merge(HashSet<DetailsGroup> groups, HashSet<Detail> freeDetails)
+        public static void Merge(LinksBase newLinks)
         {
+			var groups = new HashSet<DetailsGroup>();
+			var details = new HashSet<Detail>();
+
+			foreach (var detail in newLinks.Connections) {
+				if (detail.Group == null) {
+					details.Add(detail);
+				} else {
+					groups.Add(detail.Group);
+				}
+			}
+			
+			if (newLinks is DetailLinks) {
+				details.Add(((DetailLinks) newLinks).Holder);
+			} else {
+				var groupLinks = (DetailsGroupLinks) newLinks;
+				var group = groupLinks.DetailsLinks.First().Holder.Group;
+
+				groups.Add(group);
+			}
+
             DetailsGroup targetGroup = null;
-            var toUpdateLinks = new HashSet<Detail>();
 
             foreach (var detailsGroup in groups) {
                 if (targetGroup == null || targetGroup.DetailsCount < detailsGroup.DetailsCount) {
@@ -370,7 +237,7 @@ namespace Assets.Scripts {
             }
 
             if (targetGroup == null) {
-                if (freeDetails.Count > 1) {
+                if (details.Count > 1) {
                     targetGroup = CreateNewGroup(Vector3.zero);
                     groups.Add(targetGroup);
                 } else {
@@ -382,75 +249,19 @@ namespace Assets.Scripts {
             {
                 if (detailsGroup == targetGroup) continue;
 
-                // прямой цикл по потомкам изменяющегося трансформа не доходит до последней детали
-                var children = detailsGroup.transform.Cast<Transform>().ToList();
-
-                foreach (var child in children) {
-                    var detail = child.GetComponent<Detail>();
-
-                    AddExternalTouchesToUpdateLinks(detail, groups, freeDetails, toUpdateLinks);
-                    child.SetParent(targetGroup.transform);
-                }
+				foreach (var detail in detailsGroup.Details) {
+					targetGroup.Add(detail);
+				}
                 Destroy(detailsGroup.gameObject);
             }
 
-            foreach (var detail in freeDetails) {
-                AddExternalTouchesToUpdateLinks(detail, groups, freeDetails, toUpdateLinks);
-                detail.transform.SetParent(targetGroup.transform);
-            }
-
-            foreach (var detail in toUpdateLinks) {
-                detail.UpdateLinks(null, LinksMode.All);
-            }
-
-        }
-
-        private static void AddExternalTouchesToUpdateLinks (Detail detail, HashSet<DetailsGroup> groups, HashSet<Detail> freeDetails, HashSet<Detail> toUpdateLinks)
-        {
-            foreach (var touch in detail.Touches) {
-
-                var touchGroup = touch.Group;
-
-                if (touchGroup != detail.Group) { 
-                    toUpdateLinks.Add(detail);
-                    toUpdateLinks.Add(touch);  //Debug.Log("Added both!");
-                } else if (touchGroup == null && !freeDetails.Contains(touch)) {
-                    toUpdateLinks.Add(touch); //Debug.Log("Added touch!");
-                }
+            foreach (var detail in details) {
+				targetGroup.Add(detail);
             }
         }
-
-//        public void Consume(DetailsGroup group, Dictionary<Detail, List<Detail>> connections)
-//        {
-//            connections = connections ?? new Dictionary<Detail, List<Detail>>();
-//
-//            foreach (var connection in group._connections)
-//            {
-//                List<Detail> newNeighbours;
-//
-//                if (connections.TryGetValue(connection.Key, out newNeighbours))
-//                {
-//                    connection.Value.AddRange(newNeighbours);
-//                    foreach (var newNeighbour in newNeighbours)
-//                    {
-//                        _connections[newNeighbour].Add(connection.Key);
-//                    }
-//                }
-//                _connections.Add(connection.Key, connection.Value);
-//                connection.Key.transform.SetParent(transform);
-//            }
-//            Destroy(group.gameObject);
-//        }
 
         public void Remove(Detail detail)
         {
-//            var neighbours = _connections[detail];
-//
-//            foreach (var neighbour in neighbours)
-//            {
-//                _connections[neighbour].Remove(detail);
-//            }
-//            _connections.Remove(detail);
 	        _details.Remove(detail);
             detail.transform.SetParent(null);
 
@@ -463,25 +274,28 @@ namespace Assets.Scripts {
 
         }
 
-//        public void UpdateConnections(Detail detail, List<Detail> newNeighbours)
-//        {
-//            foreach (var oldNeighbour in _connections[detail])
-//            {
-//                if (!newNeighbours.Contains(oldNeighbour))
-//                {
-//                    _connections[oldNeighbour].Remove(detail);
-//                }
-//            }
-//
-//            _connections[detail] = newNeighbours;
-//        }
+        protected override void UpdateConnections(LinksBase newLinks)
+        {
+	        var groupLinks = newLinks as DetailsGroupLinks;
+
+	        if (groupLinks == null) {
+		        Debug.LogError("Invalid links type: expected DetailsGroupLinks!");
+				return;
+	        }
+
+            foreach (var detailLinks in groupLinks.DetailsLinks) {
+	            var detail = detailLinks.Holder;
+
+				detail.UpdateLinks(detailLinks.LinksMode, detailLinks);
+            }
+        }
 
         public override Bounds Bounds
         {
             get
             {
                 var combinedBounds = new Bounds();
-                combinedBounds.center = transform.position;
+                combinedBounds.center = _details.First().transform.position;
                 foreach (Transform child in transform)
                 {
                     combinedBounds.Encapsulate(child.GetComponent<DetailBase>().Bounds);
@@ -490,58 +304,12 @@ namespace Assets.Scripts {
             }
         }
 
-//
-//        public void ChildDetached()
-//        {
-//            if (transform.childCount == 1) {
-//                var lastChild = transform.GetChild(0).GetComponent<IMovable>();
-//
-//                lastChild.Parent = transform.parent.GetComponent<DetailsGroup>();
-//                Destroy(gameObject);
-//            }
-//        }
-
-//        public override void UpdateLinks(List<DetailLinks> newLinks = null, LinksMode linksMode = LinksMode.ExceptSelected)
-//        {
-//            Debug.LogError("NotImplemented!");
-//        }
-
-        public override void SetRaycastOrigins(Vector3 offset) {
-
-            foreach (Transform child in transform) {
-                child.GetComponent<DetailBase>().SetRaycastOrigins(offset);
-            }
-        }
-
-        public override RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster, out int rayOriginIndex)
-        {
-            RaycastHit? minRayHitInfo = null;
-
-            rayOriginIndex = -1;
-            raycaster = null;
-
-            foreach (Transform child in transform)
-            {
-                Detail childRaycaster;
-                int childRayOriginIndex;
-
-                var childHitInfo = child.GetComponent<DetailBase>()
-                    .CastDetailAndGetClosestHit(direction, out childRaycaster, out childRayOriginIndex);
-
-                if (childHitInfo == null) continue;
-                if (minRayHitInfo != null && minRayHitInfo.Value.distance <= childHitInfo.Value.distance) continue;
-
-                minRayHitInfo = childHitInfo;
-                raycaster = childRaycaster;
-                rayOriginIndex = childRayOriginIndex;
-            }
-
-            return minRayHitInfo;
-        }
 
         public override void Rotate(Vector3 axis)
         {
-            transform.Rotate(axis, 90, Space.World);
+	        var boundingBox = Bounds;
+
+            transform.RotateAround(boundingBox.center, axis, 90);
 
             var bottomDetail = GetBottomDetail();
             var newPos = bottomDetail.transform.position;
@@ -552,17 +320,17 @@ namespace Assets.Scripts {
             transform.Translate(offset, Space.World);
         }
 
-        public void Detach(HashSet<Detail> detailsToDetach)
+        public DetailBase Detach(HashSet<Detail> detailsToDetach)
         {
 			// если выделена вся группа целиком, то ничего отсоединять не надо
 	        if (_details.Count == detailsToDetach.Count) {
-		        return;
+		        return this;
 	        }
 
-	        if (_details.Count > detailsToDetach.Count)
+	        if (_details.Count < detailsToDetach.Count)
 	        {
 				Debug.LogError("Multiple groups selection unsupported!");
-				return;
+				return null;
 	        }
 
 	        DetailBase targetDetail;
@@ -571,54 +339,45 @@ namespace Assets.Scripts {
 		    if (detailsToDetach.Count > 1)
 		    {
 				var newGroup = CreateNewGroup();
+				var emptyGroupLinks = new DetailsGroupLinks(LinksMode.ExceptSelected);
+
+				targetDetail = newGroup;
 
 				foreach (var detail in detailsToDetach) {
 					if (detail.Group != this) {
 						Debug.LogError("Multiple groups selection unsupported!");
 						continue;
 					}
-					detail.Group = newGroup;
+					newGroup.Add(detail);
+					emptyGroupLinks += new DetailLinks(detail, emptyGroupLinks.LinksMode);
 				}
-				targetDetail = newGroup;
-			    emptyLinks = new DetailsGroupLinks(LinksMode.ExceptSelected, newGroup);
+
+			    emptyLinks = emptyGroupLinks;
 		    } else {
 			    var first = detailsToDetach.First();
 
 				targetDetail = first;
-			    first.Group = null;
-				emptyLinks = new DetailLinks(LinksMode.ExceptSelected, first);
+			    Remove(first);
+				emptyLinks = new DetailLinks(first);
 		    }
 
-			targetDetail.UpdateLinks(emptyLinks);
-			UpdateContinuity();
+	        var lostLinks = targetDetail.GetLinks();
+
+			targetDetail.UpdateLinks(LinksMode.ExceptSelected, emptyLinks);
+			UpdateContinuity(lostLinks);
+
+	        return targetDetail;
         }
 
-        public override bool GetLinks(out LinksBase links, Vector3? offset = null, LinksMode linksMode = LinksMode.ExceptSelected) 
+        public override LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected, Vector3? offset = null)
         {
-	        var hasConnections = false;
-
-			links = new List<LinksBase>();
-
-	        foreach (Transform child in transform)
-	        {
-		        var detail = child.GetComponent<Detail>();
-		        List<LinksBase> detailLinks;
-
-		        if (detail.GetLinks(out detailLinks, offset, linksMode)) {
-			        hasConnections = true;
-		        }
-
-				//TODO отсеивать пустые линки
-				links.Add(detailLinks[0]);
-	        }
-
-	        return hasConnections;
+	        return AppController.Instance.SelectedDetails.GetLinks(linksMode, offset);
         }
 
 
         private Detail GetBottomDetail()
         {
-            var bounds = Bounds;
+			var bounds = Bounds;
 
             bounds.center += Vector3.down * (bounds.extents.y);
             bounds.extents += Vector3.down * (bounds.extents.y - 0.25f);
@@ -633,7 +392,8 @@ namespace Assets.Scripts {
 
             foreach (var detail in details)
             {
-                if (detail.transform.RootParent() != this) continue;
+
+                if (detail.transform.root != transform) continue;
 
                 return detail.GetComponent<Detail>();
             }

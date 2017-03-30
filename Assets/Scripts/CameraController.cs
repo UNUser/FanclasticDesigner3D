@@ -9,6 +9,10 @@ namespace Assets.Scripts {
     public class CameraController : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         public Camera Camera;
+	    public Transform DirectionalLight;
+	    public Transform DirectionalLight1;
+	    public Vector3 LightRotation;
+	    public Vector3 LightRotation1;
 
         public float RotationFloorSpeed = 0.3f;
         public float TiltingFloorSpeed = 0.3f;
@@ -101,9 +105,24 @@ namespace Assets.Scripts {
             Camera.transform.RotateAround(_focus, axis, -angel);
             Camera.transform.RotateAround(_focus, Vector3.up, offset.x * RotationFloorSpeed);
 
+			SetLight();
+
             _prevMousePos = newMousePos;
         }
-        
+
+	    private void SetLight()
+	    {
+			var sightDirection = Camera.transform.forward;
+		    var rotation = Quaternion.FromToRotation(Vector3.forward, Vector3.ProjectOnPlane(sightDirection, Vector3.up));
+			var lightDirection = rotation * Quaternion.Euler(LightRotation) * Vector3.forward;
+			var lightDirection1 = rotation * Quaternion.Euler(LightRotation1) * Vector3.forward;
+
+			DirectionalLight.LookAt(lightDirection + DirectionalLight.position);
+//			Debug.DrawRay(DirectionalLight.position, lightDirection * 15, Color.red, 5);
+//			Debug.DrawRay(DirectionalLight.position, DirectionalLight.forward * 15, Color.blue, 5);
+			DirectionalLight1.LookAt(lightDirection1 + DirectionalLight1.position);
+	    }
+
         private void Focusing()
         {
             if (!_isFocusing) return;
@@ -114,6 +133,7 @@ namespace Assets.Scripts {
                 Time.deltaTime * FocusingSpeed, Mathf.Infinity);
 
             Camera.transform.LookAt(cameraPos + newDirection);
+			SetLight();
 
             var distanceExcess = Mathf.Max((Focus - cameraPos).magnitude - MaxDistance, 0f);
             var targetPosition = cameraPos + Camera.transform.forward * distanceExcess;

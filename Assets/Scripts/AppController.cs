@@ -14,17 +14,17 @@ namespace Assets.Scripts {
         public FileSelectionDialogLayer FileSelectionDialogLayer;
         public Text DebugTextGroups;
         public Text DebugTextDetail;
-
+	    public ColorSetter ColorSetter;
 
 	    public static AppController Instance {
-		    get { return _instance ?? (_instance = new AppController()); }
+			get { return _instance ?? (_instance = FindObjectOfType <AppController>()); }
 	    }
 	    private static AppController _instance;
 
 
         public Material[] DetailColors;
 
-		public SelectedDetails SelectedDetails = new SelectedDetails();
+		public SelectedDetails SelectedDetails;
 
         public void RotateSelectedByX() {
             
@@ -42,9 +42,8 @@ namespace Assets.Scripts {
         }
 
         public void RemoveSelected() {
-            if (SelectedDetails == null) return;
 
-			SelectedDetails.Remove();
+			SelectedDetails.Delete();
 
         }
 
@@ -58,7 +57,7 @@ namespace Assets.Scripts {
             var bf = new BinaryFormatter();
             var file = File.Create(fileName);
 
-            SelectedDetails.IsSelected = false;
+            SelectedDetails.Clear();
 
             var roots = new List<GameObject>();
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
@@ -123,6 +122,8 @@ namespace Assets.Scripts {
             var rootObjects = new List<GameObject>();
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(rootObjects);
 
+			SelectedDetails.Clear();
+
             foreach (var rootObject in rootObjects)
             {
                 var detailBase = rootObject.GetComponent<DetailBase>();
@@ -169,20 +170,25 @@ namespace Assets.Scripts {
                     detailLinks.Connections.Add(id2Detail[id]);
                 }
 
-                foreach (var id in linksData.Touches) {
-                    detailLinks.Touches.Add(id2Detail[id]);
-                }
-
-                foreach (var connection in linksData.ImplicitConnections) {
-                    var newConnection = new HashSet<Detail>();
-
-                    foreach (var id in connection) {
-                        newConnection.Add(id2Detail[id]);
-                    }
-                    detailLinks.ImplicitConnections.Add(newConnection);
-                }
+//                foreach (var id in linksData.Touches) {
+//                    detailLinks.Touches.Add(id2Detail[id]);
+//                }
+//
+//                foreach (var connection in linksData.ImplicitConnections) {
+//                    var newConnection = new HashSet<Detail>();
+//
+//                    foreach (var id in connection) {
+//                        newConnection.Add(id2Detail[id]);
+//                    }
+//                    detailLinks.ImplicitConnections.Add(newConnection);
+//                }
             }
         }
+
+	    public void Awake()
+	    {
+		    SelectedDetails = gameObject.AddComponent<SelectedDetails>();
+	    }
 
         public void Start()
         {
@@ -245,12 +251,12 @@ namespace Assets.Scripts {
 
         private void DebugUpdateDetailInfo()
         {
-            var selected = SelectedDetails as Detail;
-
-            if (selected == null) {
+			if (SelectedDetails.Count != 1) {
                 DebugTextDetail.text = string.Empty;
                 return;
             }
+
+	        var selected = SelectedDetails.First;
 
             var str = new StringBuilder();
             var needComma = false;
@@ -264,29 +270,29 @@ namespace Assets.Scripts {
                 str.Append(connection.gameObject.name.Remove(3));
             }
 
-            str.AppendLine();
-            str.Append("Touches: ");
-            needComma = false;
-
-            foreach (var touch in selected.Touches) {
-                AddComma(str, ref needComma);
-                str.Append(touch.gameObject.name.Remove(3));
-            }
-
-            str.AppendLine();
-            str.AppendLine("Implicit Connections: ");
-
-            foreach (var @implicit in selected.ImplicitConnections) {
-                str.Append("   [ ");
-                needComma = false;
-                foreach (var detail in @implicit)
-                {
-                    AddComma(str, ref needComma);
-                    str.Append(detail.gameObject.name.Remove(3));
-                }
-                str.Append(" ]");
-                str.AppendLine();
-            }
+//            str.AppendLine();
+//            str.Append("Touches: ");
+//            needComma = false;
+//
+//            foreach (var touch in selected.Touches) {
+//                AddComma(str, ref needComma);
+//                str.Append(touch.gameObject.name.Remove(3));
+//            }
+//
+//            str.AppendLine();
+//            str.AppendLine("Implicit Connections: ");
+//
+//            foreach (var @implicit in selected.ImplicitConnections) {
+//                str.Append("   [ ");
+//                needComma = false;
+//                foreach (var detail in @implicit)
+//                {
+//                    AddComma(str, ref needComma);
+//                    str.Append(detail.gameObject.name.Remove(3));
+//                }
+//                str.Append(" ]");
+//                str.AppendLine();
+//            }
 
             DebugTextDetail.text = str.ToString();
         }

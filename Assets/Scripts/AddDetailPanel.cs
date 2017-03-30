@@ -15,30 +15,32 @@ namespace Assets.Scripts {
 
         public Material ActiveColor { get; private set; }
 
-        private static Material[] _materials;
-        private static GameObject[] _details;
+
+
+        public static Material[] Materials;
+        public static GameObject[] _details;
 
         private static readonly Dictionary<string, Material> _name2Material = new Dictionary<string, Material>();
         private static readonly Dictionary<string, GameObject> _name2Detail = new Dictionary<string, GameObject>();
 
-        private void Start()
+        private void Awake()
         {
-            _materials = Resources.LoadAll<Material>("Materials");
+            Materials = Resources.LoadAll<Material>("Materials");
 
-            for (var i = 0; i < _materials.Length; i++)
+            for (var i = 0; i < Materials.Length; i++)
             {
                 var colorToggle = Instantiate(ColorSetterPrefab).GetComponent<Toggle>();
                 var index = i;
 
-                colorToggle.targetGraphic.color = _materials[i].color;
+                colorToggle.targetGraphic.color = Materials[i].color;
                 colorToggle.isOn = i == 0;
-                colorToggle.onValueChanged.AddListener(value => { if (value) ActiveColor = _materials[index]; });
+                colorToggle.onValueChanged.AddListener(value => { if (value) ActiveColor = Materials[index]; });
                 colorToggle.group = ColorsContent.GetComponent<ToggleGroup>();
                 colorToggle.transform.SetParent(ColorsContent, false);
 
-                _name2Material.Add(_materials[i].name, _materials[i]);
+                _name2Material.Add(Materials[i].name, Materials[i]);
             }
-            ActiveColor = _materials[0];
+            ActiveColor = Materials[0];
 
             _details = Resources.LoadAll<GameObject>("Prefabs/Details");
 

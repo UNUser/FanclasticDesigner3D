@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Assets.Scripts {
     public static class Extentions {
@@ -33,24 +32,13 @@ namespace Assets.Scripts {
             return bounds.size.x > 0 && bounds.size.y > 0 && bounds.size.z > 0;
         }
 
-        public static DetailBase RootParent(this Transform transform)
-        {
-            return Object.FindObjectOfType<AppController>().SelectedDetails.GetComponent<DetailBase>();
-                //transform.root.GetComponent<DetailBase>();
-        }
 
-		public static DetailBase RootParentOld(this Transform transform) { //TODO такая хрень из-за detach в OnBeginDrag. Там если деталь часть группы, то будет возвращаться группа, а нужна только 
-																		   // TODO выделенная деталь
-//			return Object.FindObjectOfType<ApplicationController>().SelectedDetail.GetComponent<DetailBase>();
-			return transform.root.GetComponent<DetailBase>();
-		}
-//        public static void SetRootParent(this Transform transform, Transform value) {
-//                if (transform.parent != null) {
-//                    transform.parent.GetComponent<DetailsGroup>().ChildDetached();
-//                }
-//                transform.SetParent(value != null ? value.transform : null);
-//        }
-
+		public static void SafeInvoke <T> (this Action <T> action, T arg)
+	    {
+			if (action != null) {
+				action (arg);
+			}
+	    }
 
         /// <summary>
         /// Выравнивание координат вектора по сетке крестовых коннекторов (все координаты вектора должны быть целые и либо все четные, либо все нечетные)
