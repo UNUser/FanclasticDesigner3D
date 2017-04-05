@@ -2,11 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+#if UNITY_EDITOR_WIN
+using System.Windows.Forms;
+#endif
 using UnityEngine;
 using UnityEngine.UI;
+using Application = UnityEngine.Application;
 
 namespace Assets.Scripts {
     public class AppController : MonoBehaviour
@@ -49,8 +53,46 @@ namespace Assets.Scripts {
 
         public void OnSaveButtonClicked()
         {
+
+#if UNITY_EDITOR_WIN
+
+			ShowSaveFileDialog();
+#else
             FileSelectionDialogLayer.ShowFileSelectionDialog(Save, true);
+#endif
         }
+
+
+#if UNITY_EDITOR_WIN
+
+		[DllImport("user32.dll")]
+		private static extern void SaveFileDialog();
+		private static extern void OpenFileDialog(); 
+
+		public void ShowSaveFileDialog() {
+
+			var saveFileDialog = new SaveFileDialog {
+				InitialDirectory = Application.persistentDataPath
+			};
+
+
+			if (saveFileDialog.ShowDialog() == DialogResult.OK) {
+				Save(saveFileDialog.FileName);
+			}
+		}
+
+		public void ShowOpenFileDialog() {
+
+			var openFileDialog = new OpenFileDialog {
+				InitialDirectory = Application.persistentDataPath
+			};
+
+
+			if (openFileDialog.ShowDialog() == DialogResult.OK) {
+				Load(openFileDialog.FileName);
+			}
+		}
+#endif
 
         private void Save(string fileName)  //TODO добавить заголовок, чтобы определять свои файлы
         {
@@ -62,30 +104,39 @@ namespace Assets.Scripts {
             var roots = new List<GameObject>();
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
 
-            var groups = new List<List<DetailData>>();
+			var sceneData = new SceneData { Components = new List<ComponentBase>() };
+//            var groups = new List<List<DetailData>>();
 
             foreach (var root in roots) {
                 var detailBase = root.GetComponent<DetailBase>();
 
                 if (detailBase == null) continue;
 
-                var currentGroup = new List<DetailData>();
-                groups.Add(currentGroup);
+//                var currentGroup = new List<DetailData>();
+//                groups.Add(currentGroup);
 
                 var detail = detailBase as Detail;
                 if (detail != null) {
-                    currentGroup.Add(detail.Data);
+					sceneData.Components.Add(new SimpleComponent{Data = detail.Data});
+//                    currentGroup.Add(detail.Data);
                     continue;
                 }
+
+				var complexComponent = new ComplexComponent();
 
                 foreach (Transform child in detailBase.transform)
                 {
                     var childDetail = child.GetComponent<Detail>();
-                    currentGroup.Add(childDetail.Data);
+					complexComponent.Components.Add(new SimpleComponent{Data = childDetail.Data});
+//                    currentGroup.Add(childDetail.Data);
                 }
+
+				sceneData.Components.Add(complexComponent);
             }
 
-            bf.Serialize(file, groups);
+	        
+
+            bf.Serialize(file, sceneData);
             file.Close();
             
             Debug.Log("Saved: " + fileName);
@@ -93,8 +144,15 @@ namespace Assets.Scripts {
 
         public void OnLoadButtonClicked()
         {
+
+#if UNITY_EDITOR_WIN
+
+			ShowOpenFileDialog();
+#else
             FileSelectionDialogLayer.ShowFileSelectionDialog(Load, false);
-        }
+#endif
+
+		}
 
         private void Load(string fileName)
         {
@@ -109,10 +167,10 @@ namespace Assets.Scripts {
             var bf = new BinaryFormatter();
             var file = File.Open(fileName, FileMode.Open);
 
-            var groups = (List<List<DetailData>>) bf.Deserialize(file);
+            var sceneData = (SceneData) bf.Deserialize(file);
 
             file.Close();
-            CreateObjects(groups);
+            CreateObjects(sceneData.Components);
 
             Debug.Log("Loaded: " + fileName);
         }
@@ -134,19 +192,20 @@ namespace Assets.Scripts {
             }
         }
 
-        private void CreateObjects(List<List<DetailData>> groups)
+        private void CreateObjects(List<ComponentBase> sceneData)
         {
             var id2Detail = new Dictionary<int, Detail>();
             var links2Data= new Dictionary<LinksBase, DetailLinksData>();
 
-            foreach (var @group in groups)
+            foreach (var componentBase in sceneData)
             {
-                var detailsGroup = group.Count > 1 
+				var detailsGroup = componentBase is ComplexComponent
                     ? DetailsGroup.CreateNewGroup() 
                     : null;
 
-                foreach (var detailData in group)
+                foreach (var component in componentBase is ComplexComponent ? (componentBase as ComplexComponent).Components : new List<ComponentBase>{componentBase})
                 {
+					var detailData = ((SimpleComponent) component).Data;
                     var newDetail = AddDetailPanel.GetDetail(detailData.Type);
 
                     newDetail.transform.position = detailData.Position;
@@ -305,6 +364,31 @@ namespace Assets.Scripts {
                 needComma = true;
         }
     }
+
+
+	
+
+	[Serializable]
+	public struct SceneData
+	{
+		public const string Version = "0.1.0";
+		public List<ComponentBase> Components;
+	}
+
+	[Serializable]
+	public class ComponentBase { }
+
+	[Serializable]
+	public class ComplexComponent : ComponentBase
+	{
+		public List<ComponentBase> Components = new List<ComponentBase>();
+	}
+
+	[Serializable]
+	public class SimpleComponent : ComponentBase
+	{
+		public DetailData Data;
+	}
 
     [Serializable]
     public struct DetailData

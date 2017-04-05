@@ -2,6 +2,8 @@
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
+using Application = UnityEngine.Application;
+
 
 namespace Assets.Scripts {
     public class FileSelectionDialogLayer : MonoBehaviour
@@ -10,7 +12,24 @@ namespace Assets.Scripts {
         public InputField InputField;
         public GameObject SaveButton;
 	    public GameObject UpButton;
+	    public GameObject DownloadsButton;
         public ScrollRect ScrollRect;
+
+
+	    private void Awake()
+	    {
+		    DownloadsButton.SetActive(Application.platform == RuntimePlatform.Android);
+	    }
+
+
+	    public void OnDownloadsButtonClick()
+	    {
+		    var plugin = new AndroidJavaClass("ru.fanclastic.androidplugin.AndroidPlugin");
+			var downloadsPath = plugin.CallStatic<string>("GetDownloadsPath");
+
+		    CurrentPath = downloadsPath;
+	    }
+
 
 	    public string CurrentPath
 	    {
@@ -54,7 +73,8 @@ namespace Assets.Scripts {
                 InputField.text = string.Empty;
             }
 
-            UpdateFilesList();
+	        CurrentPath = Application.persistentDataPath;
+//            UpdateFilesList();
 
             gameObject.SetActive(true);
         }
