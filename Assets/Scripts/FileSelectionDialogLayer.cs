@@ -30,7 +30,6 @@ namespace Assets.Scripts {
 		    CurrentPath = downloadsPath;
 	    }
 
-
 	    public string CurrentPath
 	    {
 		    get {
@@ -62,21 +61,26 @@ namespace Assets.Scripts {
         private bool _isSaveFileDialog;
         private Action<string> _fileSelectedAction;
 
-        public void ShowFileSelectionDialog(Action<string> fileSelectedAction, bool isSaveFileDialog) {
-            _isSaveFileDialog = isSaveFileDialog;
-            _fileSelectedAction = fileSelectedAction;
+	    public void ShowFileSelectionDialog(Action<string> fileSelectedAction, bool isSaveFileDialog)
+	    {
+		    _isSaveFileDialog = isSaveFileDialog;
+		    _fileSelectedAction = fileSelectedAction;
 
-            InputField.gameObject.SetActive(_isSaveFileDialog);
-            SaveButton.SetActive(_isSaveFileDialog);
+		    InputField.gameObject.SetActive(_isSaveFileDialog);
+		    SaveButton.SetActive(_isSaveFileDialog);
 
-            if (_isSaveFileDialog) {
-                InputField.text = string.Empty;
-            }
+		    if (_isSaveFileDialog)
+		    {
+			    InputField.text = string.Empty;
+		    }
 
-	        CurrentPath = Application.persistentDataPath;
-//            UpdateFilesList();
+		    if (CurrentPath != Application.persistentDataPath) {
+			    CurrentPath = Application.persistentDataPath;
+		    } else {
+			    UpdateFilesList();
+		    }
 
-            gameObject.SetActive(true);
+		    gameObject.SetActive(true);
         }
 
         private void UpdateFilesList(bool resetScrollPosition = true)

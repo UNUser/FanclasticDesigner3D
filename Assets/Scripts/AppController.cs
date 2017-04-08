@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-#if UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN
 using System.Windows.Forms;
 #endif
 using UnityEngine;
@@ -19,12 +19,12 @@ namespace Assets.Scripts {
         public Text DebugTextGroups;
         public Text DebugTextDetail;
 	    public ColorSetter ColorSetter;
+	    public GameObject ExitButton;
 
 	    public static AppController Instance {
 			get { return _instance ?? (_instance = FindObjectOfType <AppController>()); }
 	    }
 	    private static AppController _instance;
-
 
         public Material[] DetailColors;
 
@@ -51,10 +51,14 @@ namespace Assets.Scripts {
 
         }
 
-        public void OnSaveButtonClicked()
-        {
+	    public void OnExitButtonClicked()
+	    {
+		    Application.Quit();
+	    }
 
-#if UNITY_EDITOR_WIN
+        public void OnSaveButtonClicked() {
+
+#if UNITY_STANDALONE_WIN
 
 			ShowSaveFileDialog();
 #else
@@ -63,10 +67,11 @@ namespace Assets.Scripts {
         }
 
 
-#if UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN
 
 		[DllImport("user32.dll")]
 		private static extern void SaveFileDialog();
+		[DllImport("user32.dll")]
 		private static extern void OpenFileDialog(); 
 
 		public void ShowSaveFileDialog() {
@@ -142,10 +147,9 @@ namespace Assets.Scripts {
             Debug.Log("Saved: " + fileName);
         }
 
-        public void OnLoadButtonClicked()
-        {
+        public void OnLoadButtonClicked() {
 
-#if UNITY_EDITOR_WIN
+#if UNITY_STANDALONE_WIN
 
 			ShowOpenFileDialog();
 #else
@@ -247,6 +251,7 @@ namespace Assets.Scripts {
 	    public void Awake()
 	    {
 		    SelectedDetails = gameObject.AddComponent<SelectedDetails>();
+			ExitButton.SetActive(!Application.isMobilePlatform);
 	    }
 
         public void Start()

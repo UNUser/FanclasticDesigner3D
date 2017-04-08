@@ -423,7 +423,6 @@ namespace Assets.Scripts
 	        var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
                 //TODO если будет жрать память, то можно заменить на NonAlloc версию
 
-
             foreach (var neighbor in neighbors)
             {
 				if (neighbor == col) continue;
@@ -439,11 +438,11 @@ namespace Assets.Scripts
 
 				// у всех координат размеры больше 1.25 и минимум у одной координаты размер больше 2.25
                 var weakTest =  Mathf.Min(size.x, 1.75f) + Mathf.Min(size.y, 1.75f) + Mathf.Min(size.z, 1.75f) > 4;
-				var cohesionTest = (detail.transform.eulerAngles.x + transform.eulerAngles.x) % 180 
-								 + (detail.transform.eulerAngles.z + transform.eulerAngles.z) % 180 > 0;
-                
+	            var dot = Vector3.Dot(detail.transform.forward.normalized, transform.forward.normalized);
+	            var cohesionTest = Mathf.Abs(dot) < 0.0000001f; // если плоскости деталей параллельны, то они не сцепляются
+
 				if (test || (weakTest && cohesionTest)) {
-					links.Connections.Add(detail); Debug.Log(neighbor.name + " " + test + " " + weakTest + " " + cohesionTest);
+					links.Connections.Add(detail); 
                 }
             }
 

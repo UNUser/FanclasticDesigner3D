@@ -1,14 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="ru.fanclastic.androidplugin">
+    package="ru.fanclastic.Fanclastic3DDesigner">
     
 	<application
 	
+		android:icon="@drawable/app_icon"
+		android:label="Fanclastic 3D Designer"
         android:allowBackup="true"
-        android:label="AndroidPlugin"
         android:supportsRtl="true">
 	
 		<activity android:name="com.unity3d.player.UnityPlayerActivity"
-			android:label="FanclasticDesigner3D">
+			android:label="Fanclastic 3D Designer">
 			
 			<intent-filter>
 			<action android:name="android.intent.action.MAIN" />
