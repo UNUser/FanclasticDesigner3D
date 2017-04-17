@@ -247,6 +247,7 @@ namespace Assets.Scripts
 
 	        var detached = AppController.Instance.SelectedDetails.Detach();
 
+			AppController.Instance.SelectedDetails.IsValid = links.IsValid;
             detached.transform.Translate(offset, Space.World);
 			detached.UpdateLinks(links.LinksMode, links); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
@@ -341,6 +342,10 @@ namespace Assets.Scripts
             _isClick = false;
             _isLongClick = false;
 
+	        if (!selected.IsValid) {
+		        return;
+	        }
+
             selected.Clear(); // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
 	        selected.Add(this);
         }
@@ -379,7 +384,7 @@ namespace Assets.Scripts
 
             GL.PushMatrix();
             GL.Begin(GL.LINES);
-            GL.Color(Color.green);
+            GL.Color(AppController.Instance.SelectedDetails.IsValid ? Color.green : Color.red);
             for (var i = 0; i < 4; i++)
             {
                 // - + +, + + -, - - -, + - +
@@ -433,13 +438,21 @@ namespace Assets.Scripts
 
                 var size = overlap.size;
 
+				// все координаты больше 2.25
+				var invalidTest = Mathf.Min(size.x, 2.25f) + Mathf.Min(size.y, 2.25f) + Mathf.Min(size.z, 2.25f) > 6.5;
+
+	            if (invalidTest) {
+		            links.IsValid = false;
+					break;
+	            }
+
                 // у всех координат размеры больше 1.25 и минимум у двух координат размеры больше 2.25
                 var test = Mathf.Min(size.x, 2.25f) + Mathf.Min(size.y, 2.25f) + Mathf.Min(size.z, 2.25f) > 5;
 
 				// у всех координат размеры больше 1.25 и минимум у одной координаты размер больше 2.25
                 var weakTest =  Mathf.Min(size.x, 1.75f) + Mathf.Min(size.y, 1.75f) + Mathf.Min(size.z, 1.75f) > 4;
 	            var dot = Vector3.Dot(detail.transform.forward.normalized, transform.forward.normalized);
-	            var cohesionTest = Mathf.Abs(dot) < 0.0000001f; // если плоскости деталей параллельны, то они не сцепляются
+	            var cohesionTest = Mathf.Abs(dot) < 0.00001f; // если плоскости деталей параллельны, то они не сцепляются
 
 				if (test || (weakTest && cohesionTest)) {
 					links.Connections.Add(detail); 
@@ -499,10 +512,12 @@ namespace Assets.Scripts
             if (_isClick && _callId == callId)
             {
                 var selected = AppController.Instance.SelectedDetails;
-				selected.Clear(); // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
-				selected.Add(Group ?? (DetailBase) this);
-                
-                _isLongClick = true;
+
+	            if (selected.IsValid) {
+		            selected.Clear(); // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
+		            selected.Add(Group ?? (DetailBase) this);
+	            }
+	            _isLongClick = true;
                 _isClick = false;
             }
         }

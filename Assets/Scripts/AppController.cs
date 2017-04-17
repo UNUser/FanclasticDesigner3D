@@ -58,6 +58,10 @@ namespace Assets.Scripts {
 
         public void OnSaveButtonClicked() {
 
+	        if (!SelectedDetails.IsValid) {
+		        return;
+	        }
+
 #if UNITY_STANDALONE_WIN
 
 			ShowSaveFileDialog();

@@ -9,7 +9,7 @@ namespace Assets.Scripts
     {
 		private readonly HashSet<Detail> _details = new HashSet<Detail>();
 	    private Material _axisMaterial;
-
+		
 		public Detail First { get { return _details.FirstOrDefault(); } }
 		public int Count { get { return _details.Count; } }
 
@@ -17,12 +17,15 @@ namespace Assets.Scripts
 	    {
 		    AppController.Instance.ColorSetter.ActiveColorChangedEvent += SetColor;
 			AppController.Instance.ColorSetter.gameObject.SetActive(false);
+		    IsValid = true;
 	    }
 
 	    public bool IsSelected(Detail detail)
 	    {
 		    return _details.Contains(detail);
 	    }
+
+	    public bool IsValid { get; set; }
 
 	    public void Add(DetailBase detailBase)
 	    {
@@ -71,6 +74,7 @@ namespace Assets.Scripts
 				detail.gameObject.layer = LayerMask.NameToLayer("Default");
 		    }
 			_details.Clear();
+		    IsValid = true;
 			AppController.Instance.ColorSetter.gameObject.SetActive(false);
 		    AppController.Instance.ColorSetter.CurrentColor.enabled = true;
 	    }
@@ -84,13 +88,19 @@ namespace Assets.Scripts
 		    var targetDetail = Detach();
 
 			targetDetail.Rotate(axis);
+
+		    var links = targetDetail.GetLinks();
+
+			IsValid = links.IsValid;
+
+			targetDetail.UpdateLinks(LinksMode.ExceptSelected, links);
 	    }
 
 	    public LinksBase GetLinks(LinksMode linksMode, Vector3? offset)
 	    {
 		    if (_details.Count < 2)
 		    {
-			    return _details.Any() 
+			    return _details.Any()
 					? _details.First().GetLinks(linksMode, offset) 
 					: null;
 		    }
@@ -101,6 +111,11 @@ namespace Assets.Scripts
 				var detailLinks = (DetailLinks) detail.GetLinks(linksMode, offset);
 
 //				Debug.Log(detailLinks.Data + " " + linksMode + " " + offset);
+
+				if (!detailLinks.IsValid) {
+					groupLinks.IsValid = false;
+					break;
+				}
 
 				if (detailLinks.HasConnections) {
 					groupLinks += detailLinks;

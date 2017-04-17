@@ -360,7 +360,7 @@ namespace Assets.Scripts {
 			    Remove(first);
 				emptyLinks = new DetailLinks(first);
 		    }
-
+			
 	        var lostLinks = targetDetail.GetLinks();
 
 			targetDetail.UpdateLinks(LinksMode.ExceptSelected, emptyLinks);

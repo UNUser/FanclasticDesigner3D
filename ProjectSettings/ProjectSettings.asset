@@ -458,8 +458,13 @@ PlayerSettings:
   XboxOneAllowedProductIds: []
   XboxOnePersistentLocalStorageSize: 0
   vrEditorSettings: {}
-  cloudServicesEnabled: {}
-  cloudProjectId: 
-  projectName: 
-  organizationId: 
+  cloudServicesEnabled:
+    Build: 1
+    Collab: 0
+    ErrorHub: 0
+    Hub: 0
+    UNet: 1
+  cloudProjectId: b78accf4-e388-4fa4-84b8-f56e31c9437c
+  projectName: Fanclastic 3D Designer
+  organizationId: fanclastic
   cloudEnabled: 0

@@ -21,12 +21,16 @@ namespace Assets.Scripts {
 
             _isDrag = false;
             if (_newDetail.transform.position.y < 0) {
-                Destroy(_newDetail.gameObject);
+				AppController.Instance.RemoveSelected();
             }
         }
 
         public void OnDrag(PointerEventData eventData)
         {
+	        if (!AppController.Instance.SelectedDetails.IsValid) {
+		        return;
+	        }
+
             if (!_isDrag)
             {
                 _newDetail = Instantiate(_detailPrefab).GetComponent<Detail>();

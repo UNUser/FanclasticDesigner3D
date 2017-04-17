@@ -22,6 +22,10 @@ namespace Assets.Scripts {
 				newLinks = GetLinks(linksMode);
 			}
 
+		    if (!newLinks.IsValid) {
+			    return;
+		    }
+
 			UpdateConnections(newLinks);
 
 			if (!newLinks.HasConnections) {

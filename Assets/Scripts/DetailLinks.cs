@@ -19,6 +19,7 @@ namespace Assets.Scripts
 		}
 
 		public readonly HashSet<Detail> Connections;
+		public bool IsValid = true;
 
 		public DetailLinksData Data {
 			get {
@@ -59,14 +60,22 @@ namespace Assets.Scripts
 
 		public static DetailsGroupLinks operator +(DetailsGroupLinks groupLinks, DetailLinks detailLinks)
 		{
-			if (detailLinks.Holder == null)
-			{
+			if (detailLinks.Holder == null) {
 				Debug.LogError("Links holder can't be null in group links!");
 				return groupLinks;
 			}
 
 			if (detailLinks.LinksMode != groupLinks.LinksMode) {
 				Debug.LogError("Adding detail links with different links mode!");
+				return groupLinks;
+			}
+
+			if (!groupLinks.IsValid) {
+				return groupLinks;
+			}
+
+			if (!detailLinks.IsValid) {
+				groupLinks.IsValid = false;
 				return groupLinks;
 			}
 
