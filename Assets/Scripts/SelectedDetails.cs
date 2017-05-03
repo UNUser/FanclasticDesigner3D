@@ -9,7 +9,8 @@ namespace Assets.Scripts
     {
 		private readonly HashSet<Detail> _details = new HashSet<Detail>();
 	    private Material _axisMaterial;
-		
+
+		public HashSet<Detail> Selected { get { return new HashSet<Detail>(_details); } } 
 		public Detail First { get { return _details.FirstOrDefault(); } }
 		public int Count { get { return _details.Count; } }
 
@@ -26,6 +27,13 @@ namespace Assets.Scripts
 	    }
 
 	    public bool IsValid { get; set; }
+
+	    public void Add(HashSet<Detail> selection)
+	    {
+		    foreach (var detail in selection) {
+			    Add(detail);
+		    }
+	    }
 
 	    public void Add(DetailBase detailBase)
 	    {
@@ -79,18 +87,22 @@ namespace Assets.Scripts
 		    AppController.Instance.ColorSetter.CurrentColor.enabled = true;
 	    }
 
-	    public void Rotate(Vector3 axis)
+	    public void AppRotate(Vector3 axis)
+	    {
+			AppController.Instance.ActionsLog.RegisterAction(new RotateAction(axis));
+			Rotate(axis);
+	    }
+
+	    public void Rotate(Vector3 axis, bool clockwise = true)
 	    {
 		    if (!_details.Any()) {
 			    return;
 		    }
 
 		    var targetDetail = Detach();
-
-			targetDetail.Rotate(axis);
+			targetDetail.Rotate(axis, clockwise);
 
 		    var links = targetDetail.GetLinks();
-
 			IsValid = links.IsValid;
 
 			targetDetail.UpdateLinks(LinksMode.ExceptSelected, links);
@@ -182,16 +194,42 @@ namespace Assets.Scripts
 
 			var targetDetail = Detach();
 
+			AppController.Instance.ActionsLog.RegisterAction(new DeleteAction(targetDetail));
+			Hide();
 			Clear();
-			Destroy(targetDetail.gameObject);
+//			Destroy(targetDetail.gameObject);
 		}
 
-	    private void SetColor(Material material)
+	    public void Move(Vector3 offset)
 	    {
+		    var targetDetail = Detach();
+
+			targetDetail.transform.Translate(offset, Space.World);
+	    }
+
+	    public void SetColor(Material material)
+	    {
+			AppController.Instance.ActionsLog.RegisterAction(new SetColorAction(Selected, material));
+
 		    foreach (var detail in _details) {
-			    detail.GetComponent<Renderer>().material = material;
+			    detail.Material = material;
 		    }
 		    AppController.Instance.ColorSetter.CurrentColor.enabled = _details.Count == 1;
+	    }
+
+	    public void Hide()
+	    {
+			var targetDetail = Detach();
+
+			targetDetail.gameObject.SetActive(false);
+	    }
+
+	    public void Show()
+	    {
+			var targetDetail = Detach();
+
+			targetDetail.gameObject.SetActive(true);
+			targetDetail.UpdateLinks();
 	    }
 
 		private void CreateLineMaterial() {

@@ -78,6 +78,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Actions.cs" />
+    <Compile Include="Assets\Scripts\ActionsEngine.cs" />
+    <Compile Include="Assets\Scripts\ActionsLog.cs" />
     <Compile Include="Assets\Scripts\AddDetailPanel.cs" />
     <Compile Include="Assets\Scripts\AppController.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />

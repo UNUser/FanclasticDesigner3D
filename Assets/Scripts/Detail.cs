@@ -20,7 +20,7 @@ namespace Assets.Scripts
     /// 
     /// </summary>
     [RequireComponent(typeof (BoxCollider))]
-    public class Detail : DetailBase, IBeginDragHandler, IDragHandler, IPointerUpHandler, IPointerDownHandler
+	public class Detail : DetailBase, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerUpHandler, IPointerDownHandler
     {
 		 
 		public override bool IsSelected {
@@ -40,7 +40,13 @@ namespace Assets.Scripts
             }
         }
 
-        public DetailData Data
+	    public Material Material
+	    {
+		    get { return GetComponent<Renderer>().material; }
+		    set { GetComponent<Renderer>().material = value; }
+	    }
+
+	    public DetailData Data
         {
             get
             {
@@ -72,6 +78,7 @@ namespace Assets.Scripts
         private Vector3 _prevPointerPos;
         private bool _isClick;
         private bool _isLongClick;
+	    private Vector3 _sourcePosition;
 
         private static Material _selectedMaterial;
 
@@ -151,6 +158,10 @@ namespace Assets.Scripts
 
             AppController.Instance.SelectedDetails.SetRaycastOrigins(holdingConnectorOffset);
 
+	        if (eventData != null) {
+		        _sourcePosition = transform.position;
+	        }
+	        
 //			AppController.Instance.SelectedDetails.Detach();
         }
 
@@ -162,11 +173,11 @@ namespace Assets.Scripts
             }
         }
 
-        public override void Rotate(Vector3 axis)
+        public override void Rotate(Vector3 axis, bool clockwise = true)
         {
 	        var boundingBox = Bounds;
 
-            transform.RotateAround(boundingBox.center, axis, 90);
+            transform.RotateAround(boundingBox.center, axis, clockwise ? 90 : -90);
 
             var newPos = transform.position;
 
@@ -217,26 +228,6 @@ namespace Assets.Scripts
 
             if (newPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
 
-//            UpdateConnections(connections);
-
-
-////            int i = 1;
-////            foreach (var weakConnection in _weakConnections) {
-////                Debug.Log("Connection " + i++ + ":");
-////
-////                foreach (var detail in weakConnection) {
-////                    Debug.Log("    " + detail.name);
-////                }
-////            }
-//
-//
-//            Debug.Log("Weak neighbours:");
-//
-//
-//            foreach (var weakNeighgour in _touches) {
-//                Debug.Log("    " + weakNeighgour.name);
-//                
-//            }
 
 			var offset = newPos - raycaster.transform.position;
 			var links = AppController.Instance.SelectedDetails.GetLinks(LinksMode.ExceptSelected, offset);
@@ -252,6 +243,14 @@ namespace Assets.Scripts
 			detached.UpdateLinks(links.LinksMode, links); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
+	    public void OnEndDrag(PointerEventData eventData)
+	    {
+		    var offset = transform.position - _sourcePosition;
+
+		    if (offset != Vector3.zero) {
+			    AppController.Instance.ActionsLog.RegisterAction(new MoveAction(offset));
+		    }
+	    }
 
         public RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster, out int rayOriginIndex)
         {
@@ -344,6 +343,10 @@ namespace Assets.Scripts
 
 	        if (!selected.IsValid) {
 		        return;
+	        }
+
+	        if (eventData != null) {
+		        AppController.Instance.ActionsLog.RegisterAction(new SelectAction(selected.Selected, new HashSet<Detail>{this}));
 	        }
 
             selected.Clear(); // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
@@ -514,8 +517,11 @@ namespace Assets.Scripts
                 var selected = AppController.Instance.SelectedDetails;
 
 	            if (selected.IsValid) {
+					var prevSelection = selected.Selected;
+
 		            selected.Clear(); // нужно, чтобы с предыдущей детали снялось выделение и она сформировала группы
 		            selected.Add(Group ?? (DetailBase) this);
+					AppController.Instance.ActionsLog.RegisterAction(new SelectAction(prevSelection, selected.Selected));
 	            }
 	            _isLongClick = true;
                 _isClick = false;

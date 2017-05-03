@@ -20,6 +20,7 @@ namespace Assets.Scripts {
         public Text DebugTextDetail;
 	    public ColorSetter ColorSetter;
 	    public GameObject ExitButton;
+	    public ActionsLog ActionsLog;
 
 	    public static AppController Instance {
 			get { return _instance ?? (_instance = FindObjectOfType <AppController>()); }
@@ -32,23 +33,22 @@ namespace Assets.Scripts {
 
         public void RotateSelectedByX() {
             
-            SelectedDetails.Rotate(Vector3.right);
+            SelectedDetails.AppRotate(Vector3.right);
         }
 
         public void RotateSelectedByY() {
 
-            SelectedDetails.Rotate(Vector3.up);
+            SelectedDetails.AppRotate(Vector3.up);
         }
 
         public void RotateSelectedByZ() {
 
-            SelectedDetails.Rotate(Vector3.forward);
+            SelectedDetails.AppRotate(Vector3.forward);
         }
 
         public void RemoveSelected() {
 
 			SelectedDetails.Delete();
-
         }
 
 	    public void OnExitButtonClicked()

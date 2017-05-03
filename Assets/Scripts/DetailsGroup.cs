@@ -305,11 +305,11 @@ namespace Assets.Scripts {
         }
 
 
-        public override void Rotate(Vector3 axis)
+        public override void Rotate(Vector3 axis, bool clockwise = true)
         {
 	        var boundingBox = Bounds;
 
-            transform.RotateAround(boundingBox.center, axis, 90);
+            transform.RotateAround(boundingBox.center, axis, clockwise ? 90 : -90);
 
             var bottomDetail = GetBottomDetail();
             var newPos = bottomDetail.transform.position;

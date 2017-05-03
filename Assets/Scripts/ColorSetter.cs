@@ -2,6 +2,8 @@
 using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Assets.Scripts {
@@ -49,8 +51,8 @@ namespace Assets.Scripts {
 
 				colorToggle.targetGraphic.color = materials[i].color;
 				colorToggle.isOn = i == 0;
-				colorToggle.onValueChanged.AddListener(value => { if (value) OnToggleOn(index);
-
+				colorToggle.onValueChanged.AddListener(value => {
+					if (value) { OnToggleOn(index); }
 				});
 				colorToggle.group = ColorSettersGroup;
 				colorToggle.transform.SetParent(AvailableColors, false);
@@ -64,11 +66,14 @@ namespace Assets.Scripts {
 		private void OnToggleOn(int toggleIndex)
 		{
 			var materials = AddDetailPanel.Materials;
+			var selected = EventSystem.current.currentSelectedGameObject;
+			var userClicked = selected != null && selected.GetComponent<Toggle>() != null;
 
 			ActiveColor = materials[toggleIndex];
+
 			CurrentColor.color = materials[toggleIndex].color;
 			ColorsPanelOpener.isOn = false;
-			if (ActiveColorChangedEvent != null) {
+			if (ActiveColorChangedEvent != null && userClicked) {
 				ActiveColorChangedEvent(materials[toggleIndex]);
 			}
 		}

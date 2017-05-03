@@ -41,6 +41,6 @@ namespace Assets.Scripts {
 			DetailsGroup.Merge(newLinks);
 	    }
 
-        public abstract void Rotate(Vector3 axis);
+        public abstract void Rotate(Vector3 axis, bool clockwise = true);
     }
 }
