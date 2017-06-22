@@ -5,9 +5,20 @@ using UnityEngine;
 
 namespace Assets.Scripts {
 
+	public enum ActionType
+	{
+		Selection,
+		Movement,
+		Rotation,
+		Creation,
+		Deleting,
+		Coloring
+	}
 
 	public abstract class ActionBase
 	{
+		public abstract ActionType Type { get; }
+
 		public abstract void Do();
 		public abstract void Undo();
 	}
@@ -15,6 +26,9 @@ namespace Assets.Scripts {
 
 
 	public class SelectAction : ActionBase {
+		public override ActionType Type {
+			get { return ActionType.Selection; }
+		}
 
 		private readonly HashSet<Detail> _prevSelection;
 		private readonly HashSet<Detail> _nextSelection;
@@ -40,6 +54,9 @@ namespace Assets.Scripts {
 	}
 
 	public class MoveAction : ActionBase {
+		public override ActionType Type {
+			get { return ActionType.Movement; }
+		}
 
 		private readonly Vector3 _offset;
 
@@ -64,8 +81,11 @@ namespace Assets.Scripts {
 		}
 	}
 
-	public class RotateAction : ActionBase
-	{
+	public class RotateAction : ActionBase {
+		public override ActionType Type {
+			get { return ActionType.Rotation; }
+		}
+
 		private readonly Vector3 _axis;
 
 		public RotateAction(Vector3 axis)
@@ -93,6 +113,9 @@ namespace Assets.Scripts {
 	}
 
 	public class CreateAction : ActionBase {
+		public override ActionType Type {
+			get { return ActionType.Creation; }
+		}
 
 		private readonly DetailBase _detail;
 		private readonly HashSet<Detail> _prevSelected;
@@ -120,6 +143,9 @@ namespace Assets.Scripts {
 	}
 
 	public class DeleteAction : ActionBase {
+		public override ActionType Type {
+			get { return ActionType.Deleting; }
+		}
 
 		private readonly DetailBase _detail;
 
@@ -143,8 +169,10 @@ namespace Assets.Scripts {
 		}
 	}
 
-	public class SetColorAction : ActionBase
-	{
+	public class SetColorAction : ActionBase {
+		public override ActionType Type {
+			get { return ActionType.Coloring; }
+		}
 
 		private readonly Dictionary<Detail, Material> _oldMaterials = new Dictionary<Detail, Material>();
 		private readonly Material _newMaterial;

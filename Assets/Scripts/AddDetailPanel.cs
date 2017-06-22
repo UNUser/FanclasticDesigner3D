@@ -18,7 +18,7 @@ namespace Assets.Scripts {
 
 
         public static Material[] Materials;
-        public static GameObject[] _details;
+        public static GameObject[] Details;
 
         private static readonly Dictionary<string, Material> _name2Material = new Dictionary<string, Material>();
         private static readonly Dictionary<string, GameObject> _name2Detail = new Dictionary<string, GameObject>();
@@ -42,9 +42,9 @@ namespace Assets.Scripts {
             }
             ActiveColor = Materials[0];
 
-            _details = Resources.LoadAll<GameObject>("Prefabs/Details");
+            Details = Resources.LoadAll<GameObject>("Prefabs/Details");
 
-            foreach (var detail in _details)
+            foreach (var detail in Details)
             {
                 var detailButton = Instantiate(DetailButtonPrefab).GetComponent<DetailButton>();
 

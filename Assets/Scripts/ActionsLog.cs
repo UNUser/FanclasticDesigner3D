@@ -9,6 +9,29 @@ namespace Assets.Scripts {
 		public GameObject UndoButton;
 		public GameObject RedoButton;
 
+//		public List<ActionBase> Guide {
+////			set
+////			{
+////				Debug.LogWarning("Actions history cleared!");
+////				_history.Clear();
+////				_actionIndex = 0;
+////				_history.AddRange(value);
+////			}
+//			get
+//			{
+//				var guide = new List<ActionBase>();
+//				List<Detail> lastSelected;
+//				ActionBase lastAction = null;
+//
+//				foreach (var action in _history)
+//				{
+//					if (lastAction == null)
+//					{
+//						guide.ad
+//					}
+//				}
+//			}
+//		}
 
 		private readonly List<ActionBase> _history = new List<ActionBase>();
 		private int _actionIndex;

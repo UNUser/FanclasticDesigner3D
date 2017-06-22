@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -21,6 +22,10 @@ namespace Assets.Scripts {
 	    public ColorSetter ColorSetter;
 	    public GameObject ExitButton;
 	    public ActionsLog ActionsLog;
+
+	    private List<ActionBase> _sourceGuide;
+	    private Dictionary<int, Detail> _id2Detail;
+	    private Dictionary<Detail, int> _detail2Id;
 
 	    public static AppController Instance {
 			get { return _instance ?? (_instance = FindObjectOfType <AppController>()); }
@@ -114,6 +119,7 @@ namespace Assets.Scripts {
             UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
 
 			var sceneData = new SceneData { Components = new List<ComponentBase>() };
+			var deletedDetails = new List<Detail>();
 //            var groups = new List<List<DetailData>>();
 
             foreach (var root in roots) {
@@ -126,17 +132,28 @@ namespace Assets.Scripts {
 
                 var detail = detailBase as Detail;
                 if (detail != null) {
-					sceneData.Components.Add(new SimpleComponent{Data = detail.Data});
+	                if (detail.gameObject.activeSelf) {
+						sceneData.Components.Add(new SimpleComponent { Data = detail.Data });
+	                } else {
+						deletedDetails.Add(detail);
+					}
+					
 //                    currentGroup.Add(detail.Data);
                     continue;
                 }
 
+	            var detailsGroup = (DetailsGroup) detailBase;
+
+	            if (!detailsGroup.gameObject.activeSelf) {
+		            deletedDetails.AddRange(detailsGroup.Details);
+					continue;
+	            }
+
 				var complexComponent = new ComplexComponent();
 
-                foreach (Transform child in detailBase.transform)
+                foreach (var child in detailsGroup.Details)
                 {
-                    var childDetail = child.GetComponent<Detail>();
-					complexComponent.Components.Add(new SimpleComponent{Data = childDetail.Data});
+					complexComponent.Components.Add(new SimpleComponent{Data = child.Data});
 //                    currentGroup.Add(childDetail.Data);
                 }
 
@@ -145,11 +162,27 @@ namespace Assets.Scripts {
 
 	        
 
+			
+
+
+
             bf.Serialize(file, sceneData);
             file.Close();
             
             Debug.Log("Saved: " + fileName);
         }
+
+	    private List<ActionBase> GetGuide(List<Detail> deletedDetails)
+	    {
+		    var guide = new List<ActionBase>();
+
+//		    foreach (var VARIABLE in COLLECTION)
+//		    {
+//			    
+//		    }
+
+		    return guide;
+	    } 
 
         public void OnLoadButtonClicked() {
 
@@ -178,7 +211,8 @@ namespace Assets.Scripts {
             var sceneData = (SceneData) bf.Deserialize(file);
 
             file.Close();
-            CreateObjects(sceneData.Components);
+			CreateObjects(sceneData.Components, out _id2Detail, out _detail2Id);
+//	        _sourceGuide = sceneData.Guide;
 
             Debug.Log("Loaded: " + fileName);
         }
@@ -200,10 +234,11 @@ namespace Assets.Scripts {
             }
         }
 
-        private void CreateObjects(List<ComponentBase> sceneData)
+		private void CreateObjects(List<ComponentBase> sceneData, out Dictionary<int, Detail> id2Detail, out Dictionary<Detail, int> detail2Id)
         {
-            var id2Detail = new Dictionary<int, Detail>();
             var links2Data= new Dictionary<LinksBase, DetailLinksData>();
+
+			id2Detail = new Dictionary<int, Detail>();
 
             foreach (var componentBase in sceneData)
             {
@@ -250,6 +285,8 @@ namespace Assets.Scripts {
 //                    detailLinks.ImplicitConnections.Add(newConnection);
 //                }
             }
+
+			detail2Id = id2Detail.ToDictionary(kp => kp.Value, kp => kp.Key);
         }
 
 	    public void Awake()
@@ -382,6 +419,7 @@ namespace Assets.Scripts {
 	{
 		public const string Version = "0.1.0";
 		public List<ComponentBase> Components;
+//		public List<ActionBase> Guide;
 	}
 
 	[Serializable]
