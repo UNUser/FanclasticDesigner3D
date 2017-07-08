@@ -8,8 +8,15 @@ using UnityEngine.UI;
 namespace Assets.Scripts {
 	public class SceneInfoLayer : MonoBehaviour
 	{
+		public GameObject CopyButton;
 		public GridLayoutGroup Grid;
 		public GameObject CellPrefab;
+
+		public Text HeightText;
+		public Text LengthText;
+		public Text WidthText;
+
+		private const float UnitPhysicalSize = 0.8f; //cm
 
 		public void OnCopyButtonClicked()
 		{
@@ -62,6 +69,7 @@ namespace Assets.Scripts {
 			var counts = new Dictionary<Color, Dictionary<string, int>>();
 
 			var details = GetAll();
+			var bounds = new Bounds(details.Any() ? details[0].Bounds.center : Vector3.zero, Vector3.zero);
 
 			Clear();
 
@@ -81,6 +89,7 @@ namespace Assets.Scripts {
 				var type = name.Remove(name.Length - "(Clone)".Length);
 
 				counts[detail.Material.color][type] += 1;
+				bounds.Encapsulate(detail.Bounds);
 			}
 
 			Grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
@@ -96,13 +105,21 @@ namespace Assets.Scripts {
 			foreach (var material in materials)
 			{
 				var materialName = material.name;
-				AddCell(materialName.Remove(materialName.Length - "Material".Length), TextAnchor.MiddleRight);
+				AddCell(materialName, TextAnchor.MiddleRight);
 
 				foreach (var type in types)
 				{
 					AddCell(counts[material.color][type].ToString());
 				}
 			}
+
+			var roundedSize = (SerializableVector3) bounds.size;
+
+			HeightText.text = string.Format("Height: {0} cm", roundedSize.y * UnitPhysicalSize);
+			LengthText.text = string.Format("Length: {0} cm", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
+			WidthText.text = string.Format("Width: {0} cm", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
+
+			CopyButton.SetActive(!Application.isMobilePlatform);
 		}
 
 		private void Clear()

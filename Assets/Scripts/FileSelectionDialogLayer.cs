@@ -33,7 +33,7 @@ namespace Assets.Scripts {
 	    public string CurrentPath
 	    {
 		    get {
-			    return (_currentPath ?? (CurrentPath = Application.persistentDataPath));
+			    return (_currentPath ?? (CurrentPath = PlayerPrefs.GetString("LastPath", Application.persistentDataPath)));
 		    }
 			private set {
 				if (value == null || value == _currentPath) {
@@ -61,7 +61,7 @@ namespace Assets.Scripts {
         private bool _isSaveFileDialog;
         private Action<string> _fileSelectedAction;
 
-	    public void ShowFileSelectionDialog(Action<string> fileSelectedAction, bool isSaveFileDialog)
+	    public void ShowFileSelectionDialog(string path, Action<string> fileSelectedAction, bool isSaveFileDialog)
 	    {
 		    _isSaveFileDialog = isSaveFileDialog;
 		    _fileSelectedAction = fileSelectedAction;
@@ -74,8 +74,8 @@ namespace Assets.Scripts {
 			    InputField.text = string.Empty;
 		    }
 
-		    if (CurrentPath != Application.persistentDataPath) {
-			    CurrentPath = Application.persistentDataPath;
+		    if (CurrentPath != path) {
+			    CurrentPath = path;
 		    } else {
 			    UpdateFilesList();
 		    }

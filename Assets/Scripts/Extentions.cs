@@ -32,6 +32,32 @@ namespace Assets.Scripts {
             return bounds.size.x > 0 && bounds.size.y > 0 && bounds.size.z > 0;
         }
 
+		public static void DrawGL(this Bounds bounds, Material axisMaterial) {
+
+			var ext = bounds.extents;
+			var center = bounds.center;
+
+			axisMaterial.SetPass(0);
+
+			GL.PushMatrix();
+			GL.Begin(GL.LINES);
+			GL.Color(Color.green);
+
+			for (var i = 0; i < 4; i++) {
+				// - + +, + + -, - - -, + - +
+				var begin = new Vector3(ext.x * (i.IsOdd() ? 1 : -1), ext.y * (i / 2 < 1 ? 1 : -1), ext.z * (i % 3 == 0 ? 1 : -1));
+				var beginGL = begin + center;
+				for (var j = 0; j < 3; j++) {
+					GL.Vertex3(beginGL.x, beginGL.y, beginGL.z);
+					var end = begin;
+					end[j] *= -1;
+					var endGL = end + center;
+					GL.Vertex3(endGL.x, endGL.y, endGL.z);
+				}
+			}
+			GL.End();
+			GL.PopMatrix();
+		}
 
 		public static void SafeInvoke <T> (this Action <T> action, T arg)
 	    {
@@ -129,14 +155,14 @@ namespace Assets.Scripts {
     [Serializable]
     public struct SerializableVector3 {
 
-        public float x;
-        public float y;
-        public float z;
+        public int x;
+        public int y;
+        public int z;
 
         public SerializableVector3(float rX, float rY, float rZ) {
-            x = rX;
-            y = rY;
-            z = rZ;
+            x = Mathf.RoundToInt(rX);
+            y = Mathf.RoundToInt(rY);
+            z = Mathf.RoundToInt(rZ);
         }
 
         public override string ToString() {

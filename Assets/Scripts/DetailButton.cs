@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 
@@ -10,7 +11,7 @@ namespace Assets.Scripts {
         private Detail _newDetail;
         private bool _isDrag;
 
-	    private CreateAction _createAction;
+	    private HashSet<Detail> _prevSelected;
 
         public void SetDetail(GameObject detail)
         {
@@ -27,7 +28,7 @@ namespace Assets.Scripts {
 				return;
             }
 
-			AppController.Instance.ActionsLog.RegisterAction(_createAction);
+			AppController.Instance.ActionsLog.RegisterAction(new CreateAction(_newDetail, _prevSelected));
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -41,7 +42,7 @@ namespace Assets.Scripts {
                 _newDetail = Instantiate(_detailPrefab).GetComponent<Detail>();
 
                 //TODO тут покрасивше как-то переделать
-				_createAction = new CreateAction(_newDetail, AppController.Instance.SelectedDetails.Selected);
+	            _prevSelected = AppController.Instance.SelectedDetails.Selected;
 
                 _newDetail.GetComponent<MeshRenderer>().material = FindObjectOfType<AddDetailPanel>().ActiveColor;
                 _newDetail.transform.position = Vector3.down * 5;

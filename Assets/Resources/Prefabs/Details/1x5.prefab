@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 65000013628425012}
   - component: {fileID: 114000014082413708}
   m_Layer: 0
-  m_Name: 5x1
+  m_Name: 1x5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -73,6 +73,7 @@ MeshRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
+  m_SortingLayer: 0
   m_SortingOrder: 0
 --- !u!33 &33000011554440164
 MeshFilter:

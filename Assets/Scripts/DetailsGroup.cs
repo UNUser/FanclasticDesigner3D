@@ -305,21 +305,6 @@ namespace Assets.Scripts {
         }
 
 
-        public override void Rotate(Vector3 axis, bool clockwise = true)
-        {
-	        var boundingBox = Bounds;
-
-            transform.RotateAround(boundingBox.center, axis, clockwise ? 90 : -90);
-
-            var bottomDetail = GetBottomDetail();
-            var newPos = bottomDetail.transform.position;
-
-            bottomDetail.AlignPosition(ref newPos);
-
-            var offset = newPos - bottomDetail.transform.position;
-            transform.Translate(offset, Space.World);
-        }
-
         public DetailBase Detach(HashSet<Detail> detailsToDetach)
         {
 			// если выделена вся группа целиком, то ничего отсоединять не надо
@@ -374,33 +359,6 @@ namespace Assets.Scripts {
 	        return AppController.Instance.SelectedDetails.GetLinks(linksMode, offset);
         }
 
-
-        private Detail GetBottomDetail()
-        {
-			var bounds = Bounds;
-
-            bounds.center += Vector3.down * (bounds.extents.y);
-            bounds.extents += Vector3.down * (bounds.extents.y - 0.25f);
-
-            var details = Physics.OverlapBox(bounds.center, bounds.extents);
-
-            if (details == null)
-            {
-                Debug.LogError("Wrong bounds in details group!");
-                return null;
-            }
-
-            foreach (var detail in details)
-            {
-
-                if (detail.transform.root != transform) continue;
-
-                return detail.GetComponent<Detail>();
-            }
-
-            Debug.LogError("Wrong bounds in details group!");
-            return null; 
-        }
 
 //        public void CombineChildren() {
 //            MeshFilter[] meshFilters = GetComponentsInChildren<MeshFilter>();

@@ -79,6 +79,9 @@
     <Reference Include="System.Windows.Forms">
       <HintPath>Assets\Plugins\Windows\System.Windows.Forms.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Assets\UnityPackages\JsonNet-Lite\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Actions.cs" />
@@ -97,11 +100,13 @@
     <Compile Include="Assets\Scripts\Extentions.cs" />
     <Compile Include="Assets\Scripts\FileSelectionDialogLayer.cs" />
     <Compile Include="Assets\Scripts\FpsMeter.cs" />
+    <Compile Include="Assets\Scripts\InstructionsLayer.cs" />
     <Compile Include="Assets\Scripts\Platform.cs" />
     <Compile Include="Assets\Scripts\PrefabsLinks.cs" />
     <Compile Include="Assets\Scripts\Scene.cs" />
     <Compile Include="Assets\Scripts\SceneInfoLayer.cs" />
     <Compile Include="Assets\Scripts\SelectedDetails.cs" />
+    <Compile Include="Assets\Scripts\Session.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Plugins\Android\AndroidManifest.xml" />

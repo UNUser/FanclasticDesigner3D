@@ -1,6 +1,7 @@
 ﻿
 
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts {
@@ -23,12 +24,15 @@ namespace Assets.Scripts {
 		public abstract void Undo();
 	}
 
-
+	//TODO make InitialAction base class for SelectAction and CreateAction
 
 	public class SelectAction : ActionBase {
 		public override ActionType Type {
 			get { return ActionType.Selection; }
 		}
+
+		public DetailData? SourceState { get; private set; }
+		public List<Detail> SelectedDetails { get { return _nextSelection.ToList(); } } 
 
 		private readonly HashSet<Detail> _prevSelection;
 		private readonly HashSet<Detail> _nextSelection;
@@ -36,6 +40,7 @@ namespace Assets.Scripts {
 		public SelectAction(HashSet<Detail> prevSelection, HashSet<Detail> nextSelection) {
 			_prevSelection = prevSelection;
 			_nextSelection = nextSelection;
+			SourceState = nextSelection.Count == 1 ? (DetailData?) nextSelection.First().Data : null;
 		}
 
 		public override void Do() {
@@ -58,17 +63,17 @@ namespace Assets.Scripts {
 			get { return ActionType.Movement; }
 		}
 
-		private readonly Vector3 _offset;
+		public Vector3 Offset { get; private set; }
 
 		public MoveAction(Vector3 offset) {
-			_offset = offset;
+			Offset = offset;
 		}
 
 		public override void Do() {
 			var selected = AppController.Instance.SelectedDetails;
 			var targetDetail = selected.Detach();
 
-			selected.Move(_offset);
+			selected.Move(Offset);
 			targetDetail.UpdateLinks();
 		}
 
@@ -76,7 +81,7 @@ namespace Assets.Scripts {
 			var selected = AppController.Instance.SelectedDetails;
 			var targetDetail = selected.Detach();
 
-			selected.Move(-_offset);
+			selected.Move(-Offset);
 			targetDetail.UpdateLinks();
 		}
 	}
@@ -86,11 +91,15 @@ namespace Assets.Scripts {
 			get { return ActionType.Rotation; }
 		}
 
-		private readonly Vector3 _axis;
+		public Vector3 Axis { get; private set; }
+		public Vector3 Pivot { get; private set; }
+		public Vector3 Alignment { get; private set; }
 
-		public RotateAction(Vector3 axis)
+		public RotateAction(Vector3 axis, Vector3 pivot, Vector3 alignment)
 		{
-			_axis = axis;
+			Axis = axis;
+			Pivot = pivot;
+			Alignment = alignment;
 		}
 
 		public override void Do()
@@ -98,7 +107,7 @@ namespace Assets.Scripts {
 			var selected = AppController.Instance.SelectedDetails;
 			var targetDetail = selected.Detach();
 
-			selected.Rotate(_axis);
+			selected.Rotate(Axis, true, Pivot, Alignment);
 			targetDetail.UpdateLinks();
 		}
 
@@ -107,7 +116,7 @@ namespace Assets.Scripts {
 			var selected = AppController.Instance.SelectedDetails;
 			var targetDetail = selected.Detach();
 
-			selected.Rotate(_axis, false);
+			selected.Rotate(Axis, false, Pivot, Alignment);
 			targetDetail.UpdateLinks();
 		}
 	}
@@ -117,12 +126,16 @@ namespace Assets.Scripts {
 			get { return ActionType.Creation; }
 		}
 
+		public Detail Detail { get { return (Detail) _detail; } }
+		public DetailData SourceState { get; private set; }
+
 		private readonly DetailBase _detail;
 		private readonly HashSet<Detail> _prevSelected;
 
 		public CreateAction(DetailBase detail, HashSet<Detail> prevSelected) {
 			_detail = detail;
 			_prevSelected = prevSelected;
+			SourceState = ((Detail) detail).Data;
 		}
 
 		public override void Do() {

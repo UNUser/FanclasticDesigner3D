@@ -53,13 +53,13 @@ namespace Assets.Scripts
                 var materialName = GetComponent<Renderer>().material.name;
                 var data = new DetailData
                 {
-                    Links = Links.Data,
-                    GroupId = Group == null ? 0 : Group.GetInstanceID(),
+                    Connections = Links.Data.Connections,
                     Id = GetInstanceID(),
+					Detail = this,
                     Position = transform.position,
                     Rotation = transform.rotation.eulerAngles,
                     Type = name.Remove(name.Length - "(Clone)".Length),
-                    Material = materialName.Remove(materialName.Length - " (Instance)".Length)
+                    Color = materialName.Remove(materialName.Length - " (Instance)".Length)
                 };
 
                 return data;
@@ -173,18 +173,6 @@ namespace Assets.Scripts
             }
         }
 
-        public override void Rotate(Vector3 axis, bool clockwise = true)
-        {
-	        var boundingBox = Bounds;
-
-            transform.RotateAround(boundingBox.center, axis, clockwise ? 90 : -90);
-
-            var newPos = transform.position;
-
-            AlignPosition(ref newPos);
-            var offset = newPos - transform.position;
-            transform.Translate(offset, Space.World);
-        }
 
         // TODO Кучу кода можно по идее заменить используя Physics.BoxCast!!!! (только не кидает ли он еще больше лучей?)
         public void OnDrag(PointerEventData eventData)
@@ -245,6 +233,8 @@ namespace Assets.Scripts
 
 	    public void OnEndDrag(PointerEventData eventData)
 	    {
+			if (!IsSelected) return;
+
 		    var offset = transform.position - _sourcePosition;
 
 		    if (offset != Vector3.zero) {
@@ -503,6 +493,10 @@ namespace Assets.Scripts
 
         public void OnPointerDown(PointerEventData eventData)
         {
+			if (AppController.Instance.Mode == AppMode.InstructionsMode) {
+				return;
+			}
+
             _isClick = true;
             StartCoroutine(LongPress(++_callId));
         }

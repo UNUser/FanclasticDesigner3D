@@ -89,24 +89,94 @@ namespace Assets.Scripts
 
 	    public void AppRotate(Vector3 axis)
 	    {
-			AppController.Instance.ActionsLog.RegisterAction(new RotateAction(axis));
-			Rotate(axis);
+		    Vector3 pivot;
+		    Vector3 alignment;
+
+			Rotate(axis, true, out pivot, out alignment);
+			AppController.Instance.ActionsLog.RegisterAction(new RotateAction(axis, pivot, alignment));
 	    }
 
-	    public void Rotate(Vector3 axis, bool clockwise = true)
+
+	    public void Rotate(Vector3 axis, bool clockwise, Vector3 pivot, Vector3 alignment)
+	    {
+			var targetDetail = Detach();
+			var angle = clockwise ? 90 : -90;
+
+		    if (clockwise) {
+			    targetDetail.transform.RotateAround(pivot, axis, angle);
+				targetDetail.transform.Translate(alignment, Space.World);
+		    } else {
+				targetDetail.transform.Translate(-alignment, Space.World);
+				targetDetail.transform.RotateAround(pivot, axis, angle);
+		    }
+	    }
+
+		public void Rotate(Vector3 axis, bool clockwise = true)
+		{
+			var dummy = new Vector3();
+
+			Rotate(axis, clockwise, out dummy, out dummy);
+		}
+
+	    public void Rotate(Vector3 axis, bool clockwise, out Vector3 pivot, out Vector3 alignment)
 	    {
 		    if (!_details.Any()) {
+				pivot = Vector3.zero;
+				alignment = Vector3.zero;
+
 			    return;
 		    }
 
-		    var targetDetail = Detach();
-			targetDetail.Rotate(axis, clockwise);
+			var targetDetail = Detach();
+			var boundingBox = targetDetail.Bounds;
+			var angle = clockwise ? 90 : -90;
+
+			pivot = boundingBox.center;
+			targetDetail.transform.RotateAround(pivot, axis, angle);
+
+			var bottomDetail = GetBottomDetail();
+			var newPos = bottomDetail.transform.position;
+
+			bottomDetail.AlignPosition(ref newPos);
+
+			alignment = newPos - bottomDetail.transform.position;
+			targetDetail.transform.Translate(alignment, Space.World);
 
 		    var links = targetDetail.GetLinks();
 			IsValid = links.IsValid;
 
 			targetDetail.UpdateLinks(LinksMode.ExceptSelected, links);
 	    }
+
+
+		private Detail GetBottomDetail() {
+
+			var targetGroup = Detach();
+			var boundingBox = targetGroup.Bounds;
+
+			boundingBox.center += Vector3.down * (boundingBox.extents.y);
+			boundingBox.extents += Vector3.down * (boundingBox.extents.y - 0.25f);
+
+			var details = Physics.OverlapBox(boundingBox.center, boundingBox.extents);
+
+			if (details == null) {
+				Debug.LogError("Wrong bounds in details group!");
+				return null;
+			}
+
+			foreach (var detail in details) {
+
+				if (detail.transform.root != targetGroup.transform) continue;
+
+				return detail.GetComponent<Detail>();
+			}
+
+			Debug.LogError("Wrong bounds in details group!");
+			return null;
+		}
+
+
+
 
 	    public LinksBase GetLinks(LinksMode linksMode, Vector3? offset)
 	    {

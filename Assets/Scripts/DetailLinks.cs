@@ -89,8 +89,6 @@ namespace Assets.Scripts
 	[Serializable]
 	public class DetailLinksData {
 		public List<int> Connections;
-		public List<int> Touches;
-		public List<List<int>> ImplicitConnections;
 
 		public override string ToString() {
 			var str = new StringBuilder();
@@ -101,26 +99,6 @@ namespace Assets.Scripts
 				AppController.AddComma(str, ref needComma);
 				str.Append(connection);
 			}
-
-//			str.Append(" Implicit: ");
-//
-//			foreach (var @implicit in ImplicitConnections) {
-//				str.Append("   [ ");
-//				needComma = false;
-//				foreach (var detail in @implicit) {
-//					AppController.AddComma(str, ref needComma);
-//					str.Append(detail);
-//				}
-//				str.Append(" ]");
-//			}
-//
-//			str.Append(" Touches: ");
-//			needComma = false;
-//
-//			foreach (var touch in Touches) {
-//				AppController.AddComma(str, ref needComma);
-//				str.Append(touch);
-//			}
 
 			return str.ToString();
 		}
