@@ -258,7 +258,7 @@ namespace Assets.Scripts {
 		}
 
 		private void CreateObjects(SceneData sceneData) {
-
+			var oldId2Detail = new Dictionary<int, Detail>();
 			var links2Connections = new Dictionary<LinksBase, List<int>>();
 
 			foreach (var detailData in sceneData.SingleDetails) {
@@ -271,10 +271,11 @@ namespace Assets.Scripts {
 				var detailsGroup = DetailsGroup.CreateNewGroup();
 
 				foreach (var detailData in connectedGroup.Details) {
+					var oldId = detailData.Id;
 					var newDetail = CreateDetail(detailData);
 
 					links2Connections.Add(newDetail.Links, detailData.Connections);
-					_id2Detail.Add(detailData.Id, newDetail);
+					oldId2Detail.Add(oldId, newDetail);
 
 					detailsGroup.Add(newDetail);
 				}
@@ -286,7 +287,7 @@ namespace Assets.Scripts {
 				var connections = links2Connections[detailLinks];
 
 				foreach (var id in connections) {
-					detailLinks.Connections.Add(_id2Detail[id]);
+					detailLinks.Connections.Add(oldId2Detail[id]);
 				}
 			}
 
@@ -295,7 +296,7 @@ namespace Assets.Scripts {
 				var newTargetDetails = new HashSet<int>();
 
 				foreach (var detailId in instruction.TargetDetails) {
-					newTargetDetails.Add(_id2Detail[detailId].GetInstanceID());
+					newTargetDetails.Add(oldId2Detail[detailId].GetInstanceID());
 				}
 
 				instruction.TargetDetails = newTargetDetails;

@@ -153,13 +153,13 @@ namespace Assets.Scripts {
     }
 
     [Serializable]
-    public struct SerializableVector3 {
+    public struct SerializableVector3Int {
 
         public int x;
         public int y;
         public int z;
 
-        public SerializableVector3(float rX, float rY, float rZ) {
+        public SerializableVector3Int(float rX, float rY, float rZ) {
             x = Mathf.RoundToInt(rX);
             y = Mathf.RoundToInt(rY);
             z = Mathf.RoundToInt(rZ);
@@ -169,12 +169,48 @@ namespace Assets.Scripts {
             return string.Format("[{0}, {1}, {2}]", x, y, z);
         }
 
-        public static implicit operator Vector3(SerializableVector3 rValue) {
+        public static implicit operator Vector3(SerializableVector3Int rValue) {
             return new Vector3(rValue.x, rValue.y, rValue.z);
         }
 
-        public static implicit operator SerializableVector3(Vector3 rValue) {
-            return new SerializableVector3(rValue.x, rValue.y, rValue.z);
+        public static implicit operator SerializableVector3Int(Vector3 rValue) {
+            return new SerializableVector3Int(rValue.x, rValue.y, rValue.z);
         }
     }
+
+	[Serializable]
+	public struct SerializableVector3 {
+
+		public float x;
+		public float y;
+		public float z;
+
+		public SerializableVector3(float rX, float rY, float rZ)
+		{
+			// округляем дробную часть либо до ближайшего целого, либо до 0.5
+			var rXDecimal = rX - (float) Math.Truncate(rX);
+			var rYDecimal = rY - (float) Math.Truncate(rY);
+			var rZDecimal = rZ - (float) Math.Truncate(rZ);
+
+			var rXDecimalRounded = Mathf.Abs(rXDecimal - 0.5f * Mathf.Sign(rX)) < 0.3 ? 0.5f * Mathf.Sign(rX) : Mathf.RoundToInt(rXDecimal);
+			var rYDecimalRounded = Mathf.Abs(rYDecimal - 0.5f * Mathf.Sign(rY)) < 0.3 ? 0.5f * Mathf.Sign(rY) : Mathf.RoundToInt(rYDecimal);
+			var rZDecimalRounded = Mathf.Abs(rZDecimal - 0.5f * Mathf.Sign(rZ)) < 0.3 ? 0.5f * Mathf.Sign(rZ) : Mathf.RoundToInt(rZDecimal);
+
+			x = (float) Math.Truncate(rX) + rXDecimalRounded;
+			y = (float) Math.Truncate(rY) + rYDecimalRounded;
+			z = (float) Math.Truncate(rZ) + rZDecimalRounded;
+		}
+
+		public override string ToString() {
+			return string.Format("[{0}, {1}, {2}]", x, y, z);
+		}
+
+		public static implicit operator Vector3(SerializableVector3 rValue) {
+			return new Vector3(rValue.x, rValue.y, rValue.z);
+		}
+
+		public static implicit operator SerializableVector3(Vector3 rValue) {
+			return new SerializableVector3(rValue.x, rValue.y, rValue.z);
+		}
+	}
 }

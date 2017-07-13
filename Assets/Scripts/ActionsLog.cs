@@ -52,7 +52,8 @@ namespace Assets.Scripts {
 			var rotationPivot = Vector3.zero;
 			var resultOffset = Vector3.zero;
 
-			while (actionIndex >= 0 && _history[actionIndex].Type != ActionType.Selection && _history[actionIndex].Type != ActionType.Creation)
+			while (actionIndex >= 0 && _history[actionIndex].Type != ActionType.Selection 
+									&& _history[actionIndex].Type != ActionType.Creation)
 			{
 				var currentAction = _history[actionIndex];
 
@@ -71,6 +72,9 @@ namespace Assets.Scripts {
 						var moveAction = (MoveAction) currentAction;
 
 						resultOffset += moveAction.Offset;
+						if (resultRotation != Quaternion.identity) {
+							rotationPivot -= moveAction.Offset;
+						}
 						break;
 
 					case ActionType.Rotation:
@@ -150,14 +154,13 @@ namespace Assets.Scripts {
 
 				if (selectAction != null)
 				{
-					var sourceStateNullable = selectAction.SourceState;
+					sourceState = selectAction.SourceState;
 
-					if (!sourceStateNullable.HasValue) {
+					if (sourceState == null) {
 						Debug.LogError("Source state for selected detail is null!");
 						return null;
 					}
 
-					sourceState = sourceStateNullable.Value;
 					invalidDetails.Add(targetDetails.First());
 				} else if (initialAction is CreateAction) {
 					sourceState = ((CreateAction) initialAction).SourceState;
@@ -165,9 +168,6 @@ namespace Assets.Scripts {
 					Debug.LogError("Invalid initial action: " + initialAction.Type);
 					return null;
 				}
-
-				Debug.Log("SourceState.Rotation: " + sourceState.Rotation + ", resultRotation: " + resultRotation.eulerAngles
-					+ ", Rotation: " + (Quaternion.Euler(sourceState.Rotation) * resultRotation).eulerAngles);
 
 				addInstruction.TargetDetails = new HashSet<int>{ sourceState.Id };
 				addInstruction.Position = sourceState.Position + resultOffset;
@@ -180,8 +180,8 @@ namespace Assets.Scripts {
 
 			// убираем бессмысленные повороты и перемещения
 			var resultRotationEuler = resultRotation.eulerAngles;
-			var normalizedRotation = (SerializableVector3) resultRotationEuler;
-			var normalizedOffset = (SerializableVector3) resultOffset;
+			var normalizedRotation = (SerializableVector3Int) resultRotationEuler;
+			var normalizedOffset = resultOffset.magnitude < 0.001f ? Vector3.zero : resultOffset;
 
 			if (normalizedOffset  == Vector3.zero && normalizedRotation == Vector3.zero) {
 				return null;

@@ -31,7 +31,7 @@ namespace Assets.Scripts {
 			get { return ActionType.Selection; }
 		}
 
-		public DetailData? SourceState { get; private set; }
+		public DetailData SourceState { get; private set; }
 		public List<Detail> SelectedDetails { get { return _nextSelection.ToList(); } } 
 
 		private readonly HashSet<Detail> _prevSelection;
@@ -40,7 +40,7 @@ namespace Assets.Scripts {
 		public SelectAction(HashSet<Detail> prevSelection, HashSet<Detail> nextSelection) {
 			_prevSelection = prevSelection;
 			_nextSelection = nextSelection;
-			SourceState = nextSelection.Count == 1 ? (DetailData?) nextSelection.First().Data : null;
+			SourceState = nextSelection.Count == 1 ? nextSelection.First().Data : null;
 		}
 
 		public override void Do() {

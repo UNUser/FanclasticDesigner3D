@@ -12,9 +12,9 @@ namespace Assets.Scripts {
 		public GridLayoutGroup Grid;
 		public GameObject CellPrefab;
 
-		public Text HeightText;
-		public Text LengthText;
-		public Text WidthText;
+		public Text HeightValue;
+		public Text LengthValue;
+		public Text WidthValue;
 
 		private const float UnitPhysicalSize = 0.8f; //cm
 
@@ -113,11 +113,11 @@ namespace Assets.Scripts {
 				}
 			}
 
-			var roundedSize = (SerializableVector3) bounds.size;
+			var roundedSize = (SerializableVector3Int) bounds.size;
 
-			HeightText.text = string.Format("Height: {0} cm", roundedSize.y * UnitPhysicalSize);
-			LengthText.text = string.Format("Length: {0} cm", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
-			WidthText.text = string.Format("Width: {0} cm", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
+			HeightValue.text = string.Format("{0} cm", roundedSize.y * UnitPhysicalSize);
+			LengthValue.text = string.Format("{0} cm", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
+			WidthValue.text = string.Format("{0} cm", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
 
 			CopyButton.SetActive(!Application.isMobilePlatform);
 		}

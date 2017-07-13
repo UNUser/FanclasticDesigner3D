@@ -337,7 +337,7 @@ namespace Assets.Scripts {
 		}
 
 		public SerializableVector3 Pivot;
-		public SerializableVector3 Rotation;
+		public SerializableVector3Int Rotation;
 		public SerializableVector3 Offset;
 
 		public override void Do() {
@@ -358,11 +358,11 @@ namespace Assets.Scripts {
 			foreach (var id in TargetDetails) {
 				var detail = AppController.Instance.Session.GetDetail(id);
 
-				detail.transform.Translate(-(Vector3) Offset, Space.World);
+				detail.transform.Translate( - (Vector3) Offset, Space.World);
 
-				detail.transform.RotateAround(Pivot, Vector3.up, -Rotation.y);
-				detail.transform.RotateAround(Pivot, Vector3.right, -Rotation.x);
-				detail.transform.RotateAround(Pivot, Vector3.forward, -Rotation.z);
+				detail.transform.RotateAround(Pivot, Vector3.up, - Rotation.y);
+				detail.transform.RotateAround(Pivot, Vector3.right, - Rotation.x);
+				detail.transform.RotateAround(Pivot, Vector3.forward, - Rotation.z);
 			}
 		}
 
@@ -383,8 +383,8 @@ namespace Assets.Scripts {
 			get { return "Add"; }
 		}
 
-		public SerializableVector3 Rotation;
-		public SerializableVector3 Position;
+		public SerializableVector3Int Rotation;
+		public SerializableVector3Int Position;
 
 		public override void Do() {
 			var id = TargetDetails.First();
@@ -429,7 +429,7 @@ namespace Assets.Scripts {
 	}
 
     [Serializable]
-    public struct DetailData
+    public class DetailData
     {
 		[NonSerialized]
 	    public Detail Detail;
@@ -438,8 +438,8 @@ namespace Assets.Scripts {
 		public string Type;
 		public string Color;
 
-        public SerializableVector3 Position;
-        public SerializableVector3 Rotation;
+        public SerializableVector3Int Position;
+        public SerializableVector3Int Rotation;
 
 		public List<int> Connections;
 
