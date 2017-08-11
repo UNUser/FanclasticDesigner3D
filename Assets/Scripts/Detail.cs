@@ -82,10 +82,6 @@ namespace Assets.Scripts
 
         private static Material _selectedMaterial;
 
-//        private readonly HashSet<Detail> _connections = new HashSet<Detail>();
-//        private readonly HashSet<Detail> _touches = new HashSet<Detail>();
-//        private readonly HashSet<HashSet<Detail>> _implicitConnections = new HashSet<HashSet<Detail>>();
-
         private DetailLinks _links;
 
         private void Awake()
@@ -106,6 +102,7 @@ namespace Assets.Scripts
             for (var i = 0; i < _connectorsLocalPos.Length; i++)
             {
                 _connectorsLocalPos[i] = new Vector3(i % _sizeX - _sizeX / 2,
+													0,
                                                     -i / _sizeX + _sizeZ / 2);
 
             }

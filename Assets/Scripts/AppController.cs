@@ -77,6 +77,11 @@ namespace Assets.Scripts {
 		    Application.Quit();
 	    }
 
+	    public void OnFixButtonClicked()
+	    {
+		    Session.Fix();
+	    }
+
 	    public void OnModeChanged(int modeInt)
 	    {
 		    Mode = (AppMode) modeInt;

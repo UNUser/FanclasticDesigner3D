@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 71c8f0c4772c0be4fa0b7322d586bed7
-timeCreated: 1490885101
+guid: aacdbebb133859e4b817abdb185e3138
+timeCreated: 1502202609
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
@@ -9,18 +9,22 @@ ModelImporter:
     400000: //RootNode
     2300000: //RootNode
     3300000: //RootNode
-    4300000: Layer:0
+    4300000: 3x3
+    7400000: 3x3|3x3)_|Take 001|Base Layer
+    7400002: 3x3|3x3)_|Take 001|Base Layer.001
     9500000: //RootNode
   materials:
     importMaterials: 0
     materialName: 0
-    materialSearch: 1
+    materialSearch: 0
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
     motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -49,12 +53,12 @@ ModelImporter:
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
-    useFileScale: 1
+    useFileScale: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
     serializedVersion: 2
@@ -73,7 +77,7 @@ ModelImporter:
     hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

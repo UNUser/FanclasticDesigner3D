@@ -71,7 +71,7 @@ namespace Assets.Scripts {
         public static Detail GetDetail(string name) {
             GameObject detail;
 
-            if (!_name2Detail.TryGetValue(name, out detail)) {
+			if (!_name2Detail.TryGetValue(name, out detail) && !_name2Detail.TryGetValue(name[2] + "x" + name[0], out detail)) {
                 Debug.LogError("No such detail: " + name);
                 return null;
             }

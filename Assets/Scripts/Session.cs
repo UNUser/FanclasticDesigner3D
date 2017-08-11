@@ -33,6 +33,30 @@ namespace Assets.Scripts {
 			Load(fileName);
 		}
 
+		//TODO убрать после фикса файлов
+		public void Fix()
+		{
+			if (string.IsNullOrEmpty(_fileName)) return;
+
+			Reset();
+			foreach (var detail in _id2Detail.Values) {
+				detail.transform.rotation *= Quaternion.AngleAxis(-90, Vector3.right);
+			}
+
+			foreach (var instruction in _sourceInstructions) {
+				var instructionAdd = instruction as InstructionAdd;
+
+				if (instructionAdd == null) continue;
+
+				var newRotation = Quaternion.Euler(instructionAdd.Rotation) * Quaternion.AngleAxis(-90, Vector3.right);
+
+				instructionAdd.Rotation = newRotation.eulerAngles;
+			}
+			Save(_fileName);
+
+			Debug.Log("Fixed: " + _fileName);
+		}
+
 		public void Reset()
 		{
 			//TODO тут сделать сброс деталей в последнее сохраненное состояние вместо повторной загрузки файла
@@ -48,42 +72,8 @@ namespace Assets.Scripts {
 			UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
 
 			SceneData = new SceneData();
-			
-
-
-//
-//			var instructions = new List<InstructionBase>
-//	        {
-//		        new InstructionAdd
-//		        {
-//			        TargetDetails = new List<int> {-11},
-//			        Rotation = new SerializableVector3(1f, 1f, 1f),
-//			        Position = new SerializableVector3(2f, 2f, 2f)
-//		        },
-//		        new InstructionAdd
-//		        {
-//			        TargetDetails = new List<int> {-111},
-//			        Rotation = new SerializableVector3(11f, 11f, 11f),
-//			        Position = new SerializableVector3(22f, 22f, 22f)
-//		        },
-//		        new InstructionMoveAndRotate
-//		        {
-//			        TargetDetails = new List<int> {1, 2, 3},
-//			        Offset = new SerializableVector3(-1f, -1f, -1f)
-//		        },
-//				new InstructionRotate
-//		        {
-//			        TargetDetails = new List<int> {-1, -2, -3},
-//			        Pivot = new SerializableVector3(0f, 0f, 0f)
-//
-//		        },
-//	        };
-
 
 			AcceptChanges();
-
-
-
 
 			foreach (var root in roots) {
 				var detailBase = root.GetComponent<DetailBase>();
@@ -112,7 +102,6 @@ namespace Assets.Scripts {
 					connectedGroup.Details.Add(child.Data);
 					_id2Detail.Add(child.GetInstanceID(), child);
 				}
-//				connectedGroup.Instructions = instructions;
 
 				SceneData.ConnectedGroups.Add(connectedGroup);
 			}
@@ -183,21 +172,7 @@ namespace Assets.Scripts {
 					continue;
 				}
 
-				var group2TargetDetails = instruction.TargetDetails.ToLookup(id => id2Detail[id].Group);//new Dictionary<DetailsGroup, HashSet<int>>();
-
-//				foreach (var id in instruction.TargetDetails)
-//				{
-//					var group = id2Detail[id].Group;
-//
-//					if (group == null) {
-//						continue;
-//					}
-//
-//					if (!group2TargetDetails.ContainsKey(group)) {
-//						group2TargetDetails.Add(group, new HashSet<int>());
-//					}
-//					group2TargetDetails[group].Add(id);
-//				}
+				var group2TargetDetails = instruction.TargetDetails.ToLookup(id => id2Detail[id].Group);
 
 				foreach (var targetDetail in group2TargetDetails)
 				{
@@ -250,11 +225,13 @@ namespace Assets.Scripts {
 				var detailBase = rootObject.GetComponent<DetailBase>();
 
 				if (detailBase != null) {
-					Object.Destroy(rootObject);
+					Object.DestroyImmediate(rootObject);
 				}
 			}
 
 			_id2Detail.Clear();
+			_sourceInstructions = null;
+			SceneData = null;
 		}
 
 		private void CreateObjects(SceneData sceneData) {
