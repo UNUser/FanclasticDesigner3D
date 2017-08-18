@@ -40,11 +40,15 @@ namespace Assets.Scripts
             }
         }
 
-	    public Material Material
+	    public DetailColor Color
 	    {
-		    get { return GetComponent<Renderer>().material; }
-		    set { GetComponent<Renderer>().material = value; }
+		    get { return _color; }
+		    set {
+			    _color = value;
+				GetComponent<Renderer>().material = _color.Material; 
+			}
 	    }
+		private DetailColor _color;
 
 	    public DetailData Data
         {
@@ -374,7 +378,7 @@ namespace Assets.Scripts
 
             GL.PushMatrix();
             GL.Begin(GL.LINES);
-            GL.Color(AppController.Instance.SelectedDetails.IsValid ? Color.green : Color.red);
+            GL.Color(AppController.Instance.SelectedDetails.IsValid ? UnityEngine.Color.green : UnityEngine.Color.red);
             for (var i = 0; i < 4; i++)
             {
                 // - + +, + + -, - - -, + - +
@@ -441,7 +445,7 @@ namespace Assets.Scripts
 
 				// у всех координат размеры больше 1.25 и минимум у одной координаты размер больше 2.25
                 var weakTest =  Mathf.Min(size.x, 1.75f) + Mathf.Min(size.y, 1.75f) + Mathf.Min(size.z, 1.75f) > 4;
-	            var dot = Vector3.Dot(detail.transform.forward.normalized, transform.forward.normalized);
+	            var dot = Vector3.Dot(detail.transform.up.normalized, transform.up.normalized);
 	            var cohesionTest = Mathf.Abs(dot) < 0.00001f; // если плоскости деталей параллельны, то они не сцепляются
 
 				if (test || (weakTest && cohesionTest)) {

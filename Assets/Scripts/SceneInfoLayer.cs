@@ -64,7 +64,7 @@ namespace Assets.Scripts {
 
 		private void OnEnable()
 		{
-			var materials = AddDetailPanel.Materials;
+			var colors = AppController.Instance.Resources.Colors;
 			var types = AddDetailPanel.Details.Select(o => o.name).ToArray();
 			var counts = new Dictionary<Color, Dictionary<string, int>>();
 
@@ -73,8 +73,8 @@ namespace Assets.Scripts {
 
 			Clear();
 
-			foreach (var material in materials) {
-				var color = material.color;
+			foreach (var material in colors) {
+				var color = material.Material.color;
 
 				counts.Add(color, new Dictionary<string, int>());
 
@@ -88,7 +88,7 @@ namespace Assets.Scripts {
 				var name = detail.gameObject.name;
 				var type = name.Remove(name.Length - "(Clone)".Length);
 
-				counts[detail.Material.color][type] += 1;
+				counts[detail.Color.Material.color][type] += 1;
 				bounds.Encapsulate(detail.Bounds);
 			}
 
@@ -102,14 +102,14 @@ namespace Assets.Scripts {
 				AddCell(type);
 			}
 
-			foreach (var material in materials)
+			foreach (var material in colors)
 			{
-				var materialName = material.name;
+				var materialName = material.Material.name;
 				AddCell(materialName, TextAnchor.MiddleRight);
 
 				foreach (var type in types)
 				{
-					AddCell(counts[material.color][type].ToString());
+					AddCell(counts[material.Material.color][type].ToString());
 				}
 			}
 

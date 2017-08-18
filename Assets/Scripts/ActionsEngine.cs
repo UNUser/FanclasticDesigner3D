@@ -16,7 +16,7 @@ namespace Assets.Scripts {
 			AppController.Instance.SelectedDetails.Move(offset);
 		}
 
-		public void SetColor(Material color)
+		public void SetColor(DetailColor color)
 		{
 			AppController.Instance.SelectedDetails.SetColor(color);
 		}

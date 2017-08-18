@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Newtonsoft.Json;
 #if UNITY_STANDALONE_WIN
 using System.Windows.Forms;
 #endif
@@ -37,6 +36,8 @@ namespace Assets.Scripts {
 	    public Session Session { get; private set; }
 		public AppMode Mode { get; private set; }
 
+	    public AppResources Resources;
+
 	    private string LastPath
 	    {
 		    get { return PlayerPrefs.GetString("LastPath", Application.persistentDataPath); }
@@ -48,7 +49,7 @@ namespace Assets.Scripts {
 	    }
 	    private static AppController _instance;
 
-        public Material[] DetailColors;
+//        public Material[] DetailColors;
 
 		public SelectedDetails SelectedDetails;
 

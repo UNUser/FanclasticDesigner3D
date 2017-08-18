@@ -13,34 +13,34 @@ namespace Assets.Scripts {
         public GameObject DetailButtonPrefab;
         public Transform DetailsContent;
 
-        public Material ActiveColor { get; private set; }
+        public DetailColor ActiveColor { get; private set; }
 
 
 
-        public static Material[] Materials;
+//        public static Material[] Materials;
         public static GameObject[] Details;
 
-        private static readonly Dictionary<string, Material> _name2Material = new Dictionary<string, Material>();
+        private static readonly Dictionary<string, DetailColor> _name2Color = new Dictionary<string, DetailColor>();
         private static readonly Dictionary<string, GameObject> _name2Detail = new Dictionary<string, GameObject>();
 
         private void Awake()
         {
-            Materials = Resources.LoadAll<Material>("Materials");
+            var colors = AppController.Instance.Resources.Colors;
 
-            for (var i = 0; i < Materials.Length; i++)
+            for (var i = 0; i < colors.Length; i++)
             {
                 var colorToggle = Instantiate(ColorSetterPrefab).GetComponent<Toggle>();
                 var index = i;
 
-                colorToggle.targetGraphic.color = Materials[i].color;
+                colorToggle.targetGraphic.color = colors[i].UiColor;
                 colorToggle.isOn = i == 0;
-                colorToggle.onValueChanged.AddListener(value => { if (value) ActiveColor = Materials[index]; });
+                colorToggle.onValueChanged.AddListener(value => { if (value) ActiveColor = colors[index]; });
                 colorToggle.group = ColorsContent.GetComponent<ToggleGroup>();
                 colorToggle.transform.SetParent(ColorsContent, false);
 
-                _name2Material.Add(Materials[i].name, Materials[i]);
+                _name2Color.Add(colors[i].Material.name, colors[i]);
             }
-            ActiveColor = Materials[0];
+            ActiveColor = colors[0];
 
             Details = Resources.LoadAll<GameObject>("Prefabs/Details");
 
@@ -56,16 +56,16 @@ namespace Assets.Scripts {
             }
         }
 
-        public static Material GetMaterial(string name) {
-            Material material;
+        public static DetailColor GetColor(string name) {
+            DetailColor color;
 
-            if (!_name2Material.TryGetValue(name, out material))
+            if (!_name2Color.TryGetValue(name, out color))
             {
-                Debug.LogError("No such material: " + name);
+                Debug.LogError("No such color: " + name);
                 return null;
             }
 
-            return material;
+            return color;
         }
 
         public static Detail GetDetail(string name) {

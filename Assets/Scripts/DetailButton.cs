@@ -44,7 +44,7 @@ namespace Assets.Scripts {
                 //TODO тут покрасивше как-то переделать
 	            _prevSelected = AppController.Instance.SelectedDetails.Selected;
 
-                _newDetail.GetComponent<MeshRenderer>().material = FindObjectOfType<AddDetailPanel>().ActiveColor;
+                _newDetail.Color = FindObjectOfType<AddDetailPanel>().ActiveColor;
                 _newDetail.transform.position = Vector3.down * 5;
                 _newDetail.OnPointerDown(null);
                 _newDetail.OnPointerUp(null);

@@ -16,7 +16,7 @@ namespace Assets.Scripts {
 		public Image CurrentColor;
 		public Toggle ColorsPanelOpener;
 
-		public Material ActiveColor
+		public DetailColor ActiveColor
 		{
 			get {
 				return _activeColor;
@@ -30,26 +30,26 @@ namespace Assets.Scripts {
 				foreach (Transform child in AvailableColors) {
 					var toggle = child.GetComponent<Toggle>();
 
-					toggle.isOn = value != null && toggle.targetGraphic.color == value.color;
+					toggle.isOn = value != null && toggle.targetGraphic.color == value.UiColor;
 				}
 			}
 		}
 
 		public GameObject ColorSetterPrefab;
 
-		public event Action<Material> ActiveColorChangedEvent;
+		public event Action<DetailColor> ActiveColorChangedEvent;
 
-		private Material _activeColor;
+		private DetailColor _activeColor;
 
 		public void Start()
 		{
-			var materials = AddDetailPanel.Materials;
+			var colors = AppController.Instance.Resources.Colors;
 
-			for (var i = 0; i < materials.Length; i++) {
+			for (var i = 0; i < colors.Length; i++) {
 				var colorToggle = Instantiate(ColorSetterPrefab).GetComponent<Toggle>();
 				var index = i;
 
-				colorToggle.targetGraphic.color = materials[i].color;
+				colorToggle.targetGraphic.color = colors[i].UiColor;
 				colorToggle.isOn = i == 0;
 				colorToggle.onValueChanged.AddListener(value => {
 					if (value) { OnToggleOn(index); }
@@ -58,23 +58,23 @@ namespace Assets.Scripts {
 				colorToggle.transform.SetParent(AvailableColors, false);
 
 			}
-			ActiveColor = materials[0];
-			CurrentColor.color = materials[0].color;
+			ActiveColor = colors[0];
+			CurrentColor.color = colors[0].UiColor;
 			OnToggleOn(0);
 		}
 
 		private void OnToggleOn(int toggleIndex)
 		{
-			var materials = AddDetailPanel.Materials;
+			var colors = AppController.Instance.Resources.Colors;
 			var selected = EventSystem.current.currentSelectedGameObject;
 			var userClicked = selected != null && selected.GetComponent<Toggle>() != null;
 
-			ActiveColor = materials[toggleIndex];
+			ActiveColor = colors[toggleIndex];
 
-			CurrentColor.color = materials[toggleIndex].color;
+			CurrentColor.color = colors[toggleIndex].UiColor;
 			ColorsPanelOpener.isOn = false;
 			if (ActiveColorChangedEvent != null && userClicked) {
-				ActiveColorChangedEvent(materials[toggleIndex]);
+				ActiveColorChangedEvent(colors[toggleIndex]);
 			}
 		}
 	}

@@ -95,11 +95,13 @@
     <Compile Include="Assets\Scripts\ActionsLog.cs" />
     <Compile Include="Assets\Scripts\AddDetailPanel.cs" />
     <Compile Include="Assets\Scripts\AppController.cs" />
+    <Compile Include="Assets\Scripts\AppResources.cs" />
     <Compile Include="Assets\Scripts\CameraController.cs" />
     <Compile Include="Assets\Scripts\ColorSetter.cs" />
     <Compile Include="Assets\Scripts\Detail.cs" />
     <Compile Include="Assets\Scripts\DetailBase.cs" />
     <Compile Include="Assets\Scripts\DetailButton.cs" />
+    <Compile Include="Assets\Scripts\DetailColor.cs" />
     <Compile Include="Assets\Scripts\DetailLinks.cs" />
     <Compile Include="Assets\Scripts\DetailsGroup.cs" />
     <Compile Include="Assets\Scripts\DirectoryContentItem.cs" />

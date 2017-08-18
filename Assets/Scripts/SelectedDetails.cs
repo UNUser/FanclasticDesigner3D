@@ -56,7 +56,7 @@ namespace Assets.Scripts
 			colorSetter.gameObject.SetActive(true);
 		    colorSetter.CurrentColor.enabled = _details.Count == 1;
 			colorSetter.ActiveColor = _details.Count == 1
-				? First.GetComponent<Renderer>().material
+				? First.Color
 				: null;
 
 	    }
@@ -71,7 +71,7 @@ namespace Assets.Scripts
 		    }
 		    if (_details.Count == 1) {
 			    AppController.Instance.ColorSetter.CurrentColor.enabled = true;
-			    AppController.Instance.ColorSetter.ActiveColor = First.GetComponent<Renderer>().material;
+			    AppController.Instance.ColorSetter.ActiveColor.Material = First.GetComponent<Renderer>().material;
 		    }
 	    }
 
@@ -277,12 +277,12 @@ namespace Assets.Scripts
 			targetDetail.transform.Translate(offset, Space.World);
 	    }
 
-	    public void SetColor(Material material)
+	    public void SetColor(DetailColor color)
 	    {
-			AppController.Instance.ActionsLog.RegisterAction(new SetColorAction(Selected, material));
+			AppController.Instance.ActionsLog.RegisterAction(new SetColorAction(Selected, color));
 
 		    foreach (var detail in _details) {
-			    detail.Material = material;
+			    detail.Color = color;
 		    }
 		    AppController.Instance.ColorSetter.CurrentColor.enabled = _details.Count == 1;
 	    }

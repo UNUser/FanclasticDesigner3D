@@ -286,7 +286,7 @@ namespace Assets.Scripts {
 
 			newDetail.transform.position = detailData.Position;
 			newDetail.transform.eulerAngles = detailData.Rotation;
-			newDetail.GetComponent<Renderer>().material = AddDetailPanel.GetMaterial(detailData.Color);
+			newDetail.Color = AddDetailPanel.GetColor(detailData.Color);
 
 			_id2Detail.Add(newId, newDetail);
 			detailData.Id = newId;

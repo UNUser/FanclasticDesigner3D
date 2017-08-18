@@ -187,26 +187,26 @@ namespace Assets.Scripts {
 			get { return ActionType.Coloring; }
 		}
 
-		private readonly Dictionary<Detail, Material> _oldMaterials = new Dictionary<Detail, Material>();
-		private readonly Material _newMaterial;
+		private readonly Dictionary<Detail, DetailColor> _prevColors = new Dictionary<Detail, DetailColor>();
+		private readonly DetailColor _newColor;
 
-		public SetColorAction(HashSet<Detail> targetDetails, Material newMaterial)
+		public SetColorAction(HashSet<Detail> targetDetails, DetailColor newColor)
 		{
-			_newMaterial = newMaterial;
+			_newColor = newColor;
 			foreach (var detail in targetDetails) {
-				_oldMaterials.Add(detail, detail.Material);
+				_prevColors.Add(detail, detail.Color);
 			}
 		}
 
 		public override void Do() {
-			foreach (var detail in _oldMaterials.Keys) {
-				detail.Material = _newMaterial;
+			foreach (var detail in _prevColors.Keys) {
+				detail.Color = _newColor;
 			}
 		}
 
 		public override void Undo() {
-			foreach (var oldMaterial in _oldMaterials) {
-				oldMaterial.Key.Material = oldMaterial.Value;
+			foreach (var prevColor in _prevColors) {
+				prevColor.Key.Color = prevColor.Value;
 			}
 		}
 	}
