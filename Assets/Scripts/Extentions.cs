@@ -150,6 +150,19 @@ namespace Assets.Scripts {
         public static bool IsOdd(this int value) {
             return (value & 1) == 1;
         }
+
+	    public static string Lang(this string key)
+	    {
+		    var language = UiLang.Lang;
+		    string text;
+
+		    if (UiLang.Dictionaries[language].TryGetValue(key, out text)) {
+			    return text;
+		    }
+
+		    Debug.LogError("Key " + key + " not found in dictionary " + language);
+		    return null;
+	    }
     }
 
     [Serializable]

@@ -5,16 +5,16 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1216E5A1-E2A3-1F84-6553-3978DFD82D1B}</ProjectGuid>
+    <ProjectGuid>{F41D1DD6-7032-7383-DEC4-9E29B35EBE32}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Assembly-CSharp</AssemblyName>
+    <AssemblyName>Assembly-CSharp-Editor</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
     <CompilerResponseFile></CompilerResponseFile>
-    <UnityProjectType>Game:1</UnityProjectType>
+    <UnityProjectType>Editor:5</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>5.6.1f1</UnityVersion>
     <RootNamespace></RootNamespace>
@@ -52,11 +52,26 @@
     <Reference Include="UnityEngine">
       <HintPath>Library\UnityAssemblies\UnityEngine.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor">
+      <HintPath>Library\UnityAssemblies\UnityEditor.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Advertisements">
+      <HintPath>Library\UnityAssemblies\UnityEditor.Advertisements.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>Library\UnityAssemblies\UnityEngine.UI.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.UI">
+      <HintPath>Library\UnityAssemblies\UnityEditor.UI.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Networking">
       <HintPath>Library\UnityAssemblies\UnityEngine.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Networking">
+      <HintPath>Library\UnityAssemblies\UnityEditor.Networking.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.TestRunner">
+      <HintPath>Library\UnityAssemblies\UnityEditor.TestRunner.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TestRunner">
       <HintPath>Library\UnityAssemblies\UnityEngine.TestRunner.dll</HintPath>
@@ -64,17 +79,44 @@
     <Reference Include="nunit.framework">
       <HintPath>Library\UnityAssemblies\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.TreeEditor">
+      <HintPath>Library\UnityAssemblies\UnityEditor.TreeEditor.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.Analytics">
       <HintPath>Library\UnityAssemblies\UnityEngine.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Analytics">
+      <HintPath>Library\UnityAssemblies\UnityEditor.Analytics.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.HoloLens">
+      <HintPath>Library\UnityAssemblies\UnityEditor.HoloLens.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.HoloLens">
       <HintPath>Library\UnityAssemblies\UnityEngine.HoloLens.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEditor.Purchasing">
+      <HintPath>Library\UnityAssemblies\UnityEditor.Purchasing.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.VR">
+      <HintPath>Library\UnityAssemblies\UnityEditor.VR.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.VR">
       <HintPath>Library\UnityAssemblies\UnityEngine.VR.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEditor">
-      <HintPath>Library\UnityAssemblies\UnityEditor.dll</HintPath>
+    <Reference Include="UnityEditor.Graphs">
+      <HintPath>Library\UnityAssemblies\UnityEditor.Graphs.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.Android.Extensions">
+      <HintPath>Library\UnityAssemblies\UnityEditor.Android.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.iOS.Extensions">
+      <HintPath>Library\UnityAssemblies\UnityEditor.iOS.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEditor.WindowsStandalone.Extensions">
+      <HintPath>Library\UnityAssemblies\UnityEditor.WindowsStandalone.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
+      <HintPath>Library\UnityAssemblies\SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
       <HintPath>Library\UnityAssemblies\UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
@@ -94,6 +136,9 @@
     <Reference Include="DOTween50">
       <HintPath>Assets\Packages\DOTween\DOTween50.dll</HintPath>
     </Reference>
+    <Reference Include="DOTweenEditor">
+      <HintPath>Assets\Packages\DOTween\Editor\DOTweenEditor.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms">
       <HintPath>Assets\Plugins\Windows\System.Windows.Forms.dll</HintPath>
     </Reference>
@@ -102,37 +147,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Packages\UnityFBXExporter\FBXExporter.cs" />
-    <Compile Include="Assets\Packages\UnityFBXExporter\FBXUnityMaterialGetter.cs" />
-    <Compile Include="Assets\Packages\UnityFBXExporter\FBXUnityMeshGetter.cs" />
-    <Compile Include="Assets\Scripts\Actions.cs" />
-    <Compile Include="Assets\Scripts\ActionsEngine.cs" />
-    <Compile Include="Assets\Scripts\ActionsLog.cs" />
-    <Compile Include="Assets\Scripts\AddDetailPanel.cs" />
-    <Compile Include="Assets\Scripts\AppController.cs" />
-    <Compile Include="Assets\Scripts\AppResources.cs" />
-    <Compile Include="Assets\Scripts\CameraController.cs" />
-    <Compile Include="Assets\Scripts\ColorSetter.cs" />
-    <Compile Include="Assets\Scripts\Detail.cs" />
-    <Compile Include="Assets\Scripts\DetailBase.cs" />
-    <Compile Include="Assets\Scripts\DetailButton.cs" />
-    <Compile Include="Assets\Scripts\DetailColor.cs" />
-    <Compile Include="Assets\Scripts\DetailLinks.cs" />
-    <Compile Include="Assets\Scripts\DetailsGroup.cs" />
-    <Compile Include="Assets\Scripts\DirectoryContentItem.cs" />
-    <Compile Include="Assets\Scripts\Extentions.cs" />
-    <Compile Include="Assets\Scripts\FileSelectionDialogLayer.cs" />
-    <Compile Include="Assets\Scripts\FpsMeter.cs" />
-    <Compile Include="Assets\Scripts\InstructionsLayer.cs" />
-    <Compile Include="Assets\Scripts\Platform.cs" />
-    <Compile Include="Assets\Scripts\PrefabsLinks.cs" />
-    <Compile Include="Assets\Scripts\Scene.cs" />
-    <Compile Include="Assets\Scripts\SceneInfoLayer.cs" />
-    <Compile Include="Assets\Scripts\SelectedDetails.cs" />
-    <Compile Include="Assets\Scripts\SelectionLayer.cs" />
-    <Compile Include="Assets\Scripts\Session.cs" />
-    <Compile Include="Assets\Scripts\UiLang.cs" />
-    <Compile Include="Assets\Scripts\UiLangDropdown.cs" />
+    <ProjectReference Include="FanclasticDesigner3D.CSharp.csproj">
+      <Project>{1216E5A1-E2A3-1F84-6553-3978DFD82D1B}</Project>
+      <Name>FanclasticDesigner3D.CSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assets\Packages\UnityFBXExporter\Editor\ExporterMenu.cs" />
+    <Compile Include="Assets\Packages\UnityFBXExporter\Editor\ProceduralTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Packages\DOTween\DOTween.XML" />

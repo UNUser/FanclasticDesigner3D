@@ -105,7 +105,7 @@ namespace Assets.Scripts {
 			foreach (var material in colors)
 			{
 				var materialName = material.Material.name;
-				AddCell(materialName, TextAnchor.MiddleRight);
+				AddCell(("SceneInfoLayer." + materialName).Lang(), TextAnchor.MiddleRight);
 
 				foreach (var type in types)
 				{
@@ -115,9 +115,9 @@ namespace Assets.Scripts {
 
 			var roundedSize = (SerializableVector3Int) bounds.size;
 
-			HeightValue.text = string.Format("{0} cm", roundedSize.y * UnitPhysicalSize);
-			LengthValue.text = string.Format("{0} cm", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
-			WidthValue.text = string.Format("{0} cm", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize);
+			HeightValue.text = string.Format("{0} ", roundedSize.y * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
+			LengthValue.text = string.Format("{0} ", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
+			WidthValue.text = string.Format("{0} ", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
 
 			CopyButton.SetActive(!Application.isMobilePlatform);
 		}

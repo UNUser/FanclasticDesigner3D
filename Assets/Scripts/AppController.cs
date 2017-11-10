@@ -5,11 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using DG.Tweening;
 #if UNITY_STANDALONE_WIN
 using System.Windows.Forms;
 #endif
 using UnityEngine;
 using UnityEngine.UI;
+using UnityFBXExporter;
 using Application = UnityEngine.Application;
 using Group = System.Collections.Generic.List<Assets.Scripts.Detail>;
 
@@ -23,14 +25,18 @@ namespace Assets.Scripts {
 
     public class AppController : MonoBehaviour
     {
+	    public CameraController CameraController;
         public FileSelectionDialogLayer FileSelectionDialogLayer;
         public Text DebugTextGroups;
         public Text DebugTextDetail;
 	    public ColorSetter ColorSetter;
 	    public GameObject ExitButton;
+	    public GameObject ExportButton;
 	    public ActionsLog ActionsLog;
 	    public GameObject EditorLayer;
+	    public SelectionLayer SelectionLayer;
 	    public Dropdown ModeSwitcher;
+	    public Dropdown LanguageSwitcher;
 	    public InstructionsLayer InstructionsLayer;
 
 	    public Session Session { get; private set; }
@@ -90,51 +96,57 @@ namespace Assets.Scripts {
 			Session.Reset();
 
 			EditorLayer.SetActive(Mode == AppMode.EditorMode);
-			InstructionsLayer.gameObject.SetActive(Mode == AppMode.InstructionsMode);
 
-		    if (Mode == AppMode.EditorMode) {
+		    if (Mode == AppMode.EditorMode)
+		    {
+			    var containers = GameObject.FindGameObjectsWithTag("Container");
+
+			    foreach (var container in containers) {
+				    Destroy(container.gameObject);
+			    }
+
+				InstructionsLayer.gameObject.SetActive(false);
+
 			    return;
 		    }
 
+			ModeSwitcher.gameObject.SetActive(false);
+		    SetDetailsVisible(false);
+			SelectionLayer.ShowSelection(Session.SceneData.ConnectedGroups, OnGroupSelected);
+	    }
+
+	    private void OnGroupSelected(ConnectedGroup selectedGroup)
+	    {
+			ModeSwitcher.gameObject.SetActive(true);
+			DestroyObject(ModeSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// проверить баг в новых версиях юнити!!!
+
+		    if (selectedGroup == null)
+		    {
+//			    SetDetailsVisible(true);
+				EditorLayer.SetActive(true);
+				ModeSwitcher.value = (int) AppMode.EditorMode;
+				return;
+		    }
+
+			foreach (var detailData in selectedGroup.Details) {
+				Session.GetDetail(detailData.Id).gameObject.SetActive(false);
+			}
+
+			InstructionsLayer.gameObject.SetActive(true);
+			InstructionsLayer.ShowInstructions(selectedGroup.Instructions, Session);
+	    }
+
+	    private void SetDetailsVisible(bool visible)
+	    {
 		    var sceneData = Session.SceneData;
 
-		    foreach (var detailData in sceneData.SingleDetails) {
-			    Session.GetDetail(detailData.Id).gameObject.SetActive(false);
-		    }
+			foreach (var detailData in sceneData.SingleDetails) {
+				Session.GetDetail(detailData.Id).gameObject.SetActive(visible);
+			}
 
-		    ConnectedGroup selectedGroup = null;
-
-		    foreach (var connectedGroup in sceneData.ConnectedGroups)
-		    {
-			    if (selectedGroup == null) {
-				    selectedGroup = connectedGroup;
-					continue;
-			    }
-
-			    ConnectedGroup unselectedGroup = connectedGroup;
-
-			    if (selectedGroup.Details.Count < connectedGroup.Details.Count)
-			    {
-				    unselectedGroup = selectedGroup;
-				    selectedGroup = connectedGroup;
-			    }
-
-				var id = unselectedGroup.Details.First().Id;
-				var detailsGroup = Session.GetDetail(id).Group;
-
-				detailsGroup.gameObject.SetActive(false);
-		    }
-
-		    if (selectedGroup == null) {
-			    return;
-		    }
-
-		    foreach (var detailData in selectedGroup.Details)
-		    {
-			    Session.GetDetail(detailData.Id).gameObject.SetActive(false);
-		    }
-
-			InstructionsLayer.ShowInstructions(selectedGroup.Instructions, Session);
+			foreach (var connectedGroup in sceneData.ConnectedGroups) {
+				Session.GetDetail(connectedGroup.Details.First().Id).Group.gameObject.SetActive(visible);
+			}
 	    }
 
         public void OnSaveButtonClicked() {
@@ -151,6 +163,21 @@ namespace Assets.Scripts {
 #endif
         }
 
+
+		public event Action<int> LanguageChanged;
+		private bool _isLangInited;
+
+		public void OnLanguageChanged(int index) {
+			if (!_isLangInited) {
+				return;
+			}
+
+			if (LanguageChanged != null) {
+				LanguageChanged(index);
+			}
+
+			UiLang.Lang = index;
+		}
 
 #if UNITY_STANDALONE_WIN
 
@@ -182,6 +209,42 @@ namespace Assets.Scripts {
 				Load(openFileDialog.FileName);
 			}
 		}
+
+		public void OnExportButtonClicked() {
+			var openFileDialog = new SaveFileDialog {
+				InitialDirectory = LastPath
+			};
+
+
+			if (openFileDialog.ShowDialog() == DialogResult.OK) {
+				ExportScene(openFileDialog.FileName + ".fbx");
+			}
+		}
+
+		private void ExportScene(string path) {
+			var groups = Session.SceneData.ConnectedGroups;
+			ConnectedGroup targetGroup = null;
+			
+
+			foreach (var group in groups) {
+				if (targetGroup == null || targetGroup.Details.Count < group.Details.Count) {
+					targetGroup = group;
+				}
+			}
+
+			if (targetGroup == null) return;
+
+			var detailId = targetGroup.Details.First().Id;
+			var targetGameObject = Session.GetDetail(detailId).Group.gameObject;
+			var success = FBXExporter.ExportGameObjToFBX(targetGameObject, path, true);
+
+			if (success) {
+				Debug.Log("Exported to " + path);
+			} else { 
+				Debug.LogError("Export failed!");
+			}
+		}
+
 #endif
 
 
@@ -216,6 +279,7 @@ namespace Assets.Scripts {
 	    {
 		    SelectedDetails = gameObject.AddComponent<SelectedDetails>();
 			ExitButton.SetActive(!Application.isMobilePlatform);
+			ExportButton.SetActive(!Application.isMobilePlatform);
 	    }
 
         public void Start()
@@ -223,7 +287,12 @@ namespace Assets.Scripts {
 			Session = new Session();
 	        ModeSwitcher.interactable = false;
             StartCoroutine(UpdateDebugInfo());
+
+	        LanguageSwitcher.value = UiLang.Lang;
+			_isLangInited = true;
         }
+
+		
 
         private IEnumerator UpdateDebugInfo()
         {
@@ -320,6 +389,13 @@ namespace Assets.Scripts {
 		public abstract string Action { get; }
 		public HashSet<int> TargetDetails;
 
+		[NonSerialized]
+		protected Sequence Animation;
+		[NonSerialized]
+		protected GameObject AnimationContainer;
+		[NonSerialized]
+		protected const float BackwardsAnimationTime = 0.001f;
+
 		public InstructionBase Copy(HashSet<int> targetDetails)
 		{
 			var instance = GetInstanceCopy();
@@ -331,7 +407,41 @@ namespace Assets.Scripts {
 		public abstract void Do();
 		public abstract void Undo();
 
+		public void PlayAnimation()
+		{
+			if (Animation == null) {
+				Animation = GetInstanceAnimation();
+				AnimationContainer.tag = "Container";
+				Animation.SetLoops(-1);
+			}
+			foreach (var id in TargetDetails)
+			{
+				var detail = AppController.Instance.Session.GetDetail(id);
+
+				detail.transform.SetParent(AnimationContainer.transform);
+			}
+			CheckCamera();
+			Animation.Play();
+		}
+		public void StopAnimation() { Animation.Rewind(); }
+
 		protected abstract InstructionBase GetInstanceCopy();
+		protected abstract Sequence GetInstanceAnimation();
+
+		protected void CheckCamera()
+		{
+			var targetPoint = AnimationContainer.transform.position;
+			var viewportTargetPoint = Camera.main.WorldToViewportPoint(targetPoint);
+
+			if (viewportTargetPoint.x > 0.25 && viewportTargetPoint.x < 0.75 &&
+			    viewportTargetPoint.y > 0.25 && viewportTargetPoint.y < 0.75 &&
+			    viewportTargetPoint.z > 0)
+			{
+				return;
+			}
+				
+			AppController.Instance.CameraController.Focus = targetPoint;
+		}
 	}
 
 
@@ -346,11 +456,12 @@ namespace Assets.Scripts {
 		public SerializableVector3Int Rotation;
 		public SerializableVector3 Offset;
 
+
+
 		public override void Do() {
 			foreach (var id in TargetDetails)
 			{
 				var detail = AppController.Instance.Session.GetDetail(id);
-				
 
 				detail.transform.RotateAround(Pivot, Vector3.forward, Rotation.z);
 				detail.transform.RotateAround(Pivot, Vector3.right, Rotation.x);
@@ -372,6 +483,53 @@ namespace Assets.Scripts {
 			}
 		}
 
+		protected override Sequence GetInstanceAnimation()
+		{
+			var animation = DOTween.Sequence();
+
+			AnimationContainer = new GameObject("Container");
+			var container = AnimationContainer.transform;
+
+			if (Rotation == Vector3.zero) Pivot = GetBounds().center - Offset;
+
+			container.position = /*Rotation == Vector3.zero ? GetBounds().center : */((Vector3) Pivot + Offset);
+
+			if (Offset != Vector3.zero) {
+				animation.Append(container.DOMove(Pivot, BackwardsAnimationTime));
+			}
+
+			if (Rotation != Vector3.zero) {
+				animation.Append(container.DORotate(-(Vector3) Rotation, BackwardsAnimationTime, RotateMode.WorldAxisAdd))
+					.Append(container.DORotate(Rotation, 1f, RotateMode.WorldAxisAdd))
+					.AppendInterval(1f);
+			}
+
+			if (Offset != Vector3.zero) {
+				animation.Append(container.DOMove((Vector3) Pivot + Offset, 1f))
+					.AppendInterval(1f);
+			}
+
+			return animation;
+		}
+
+		private Bounds GetBounds()
+		{
+			Bounds? sum = null;
+
+			foreach (var id in TargetDetails)
+			{
+				var detail = AppController.Instance.Session.GetDetail(id);
+
+				if (sum == null)
+				{
+					sum = detail.Bounds;
+					continue;
+				}
+				sum.Value.Encapsulate(detail.Bounds);
+			}
+			return sum.Value;
+		}
+
 		protected override InstructionBase GetInstanceCopy() {
 			return new InstructionMoveAndRotate{ Pivot = Pivot, Rotation = Rotation, Offset = Offset };
 		}
@@ -385,31 +543,159 @@ namespace Assets.Scripts {
 	[Serializable]
 	public class InstructionAdd : InstructionBase
 	{
-		public override string Action {
+		public override string Action
+		{
 			get { return "Add"; }
 		}
 
 		public SerializableVector3Int Rotation;
 		public SerializableVector3Int Position;
 
-		public override void Do() {
-			var id = TargetDetails.First();
-			var detail = AppController.Instance.Session.GetDetail(id);
+		[NonSerialized] protected Detail TargetDetail;
+		[NonSerialized] private const float OffsetLength = 3f;
 
-			detail.transform.eulerAngles = Rotation;
-			detail.transform.position = Position;
+		public override void Do()
+		{
 
-			detail.gameObject.SetActive(true);
+			if (TargetDetail == null)
+			{
+				var id = TargetDetails.First();
+
+				TargetDetail = AppController.Instance.Session.GetDetail(id);
+			}
+
+			TargetDetail.transform.eulerAngles = Rotation;
+			TargetDetail.transform.position = Position;
+
+			TargetDetail.gameObject.SetActive(true);
 		}
 
-		public override void Undo() {
-			var id = TargetDetails.First();
-			var detail = AppController.Instance.Session.GetDetail(id);
+		public override void Undo()
+		{
 
-			detail.gameObject.SetActive(false);
+			TargetDetail.gameObject.SetActive(false);
 		}
 
-		protected override InstructionBase GetInstanceCopy() {
+		protected override Sequence GetInstanceAnimation()
+		{
+			var animation = DOTween.Sequence();
+
+			var targetDetailPos = TargetDetail.transform.position;
+
+			var connectedDetails = TargetDetail.GetLinks().Connections;
+			var offsetDirection = connectedDetails.Any() ? Vector3.zero : Vector3.up;
+
+			if (connectedDetails.Any())
+			{
+				var straightDirections = new List<Vector3>();
+				var mixedDirections = new List<Vector3>();
+
+				foreach (var connectedDetail in connectedDetails)
+				{
+					var connectionDirection = GetConnectionDirection(connectedDetail);
+
+					if (connectionDirection.sqrMagnitude < 1f)
+					{
+						mixedDirections.Add(connectionDirection);
+					}
+					else
+					{
+						straightDirections.Add(connectionDirection);
+					}
+
+					Debug.Log(connectionDirection);
+				}
+
+				foreach (var direction in straightDirections) {
+					if (offsetDirection == Vector3.zero) {
+						offsetDirection = direction;
+						continue;
+					}
+					if (direction == -offsetDirection) {
+						continue;
+					}
+					if (direction != offsetDirection) {
+						offsetDirection += direction;
+						break;
+					}
+				}
+
+				// mixed directions
+				if (offsetDirection.sqrMagnitude <= 1f && mixedDirections.Any())
+				{
+					var sum = Vector3.zero;
+
+					foreach (var direction in mixedDirections) {
+						if (offsetDirection != Vector3.zero)
+						{
+							var test = direction - 0.5f * offsetDirection;
+							if (test.sqrMagnitude <= 0.25f) {
+								continue;
+							}
+						}
+						sum += direction;
+					}
+
+					var maxValue = 0f;
+					var maxIndex = 0;
+
+					for (var i = 0; i < 3; i++)
+					{
+						var currentValue = Mathf.Abs(sum[i]);
+
+						if (currentValue > maxValue) {
+							maxValue = currentValue;
+							maxIndex = i;
+						}
+					}
+
+					offsetDirection[maxIndex] = Mathf.Sign(sum[maxIndex]);
+				}
+
+
+//				offsetDirection = connectionDirection;
+			}
+
+
+
+			var offset = offsetDirection.normalized * OffsetLength;
+			var sourcePos = targetDetailPos + offset;
+			var resultPos = targetDetailPos;
+
+			AnimationContainer = new GameObject("Container");
+			var container = AnimationContainer.transform;
+
+			container.position = TargetDetail.transform.position;
+
+			animation.Append(container.DOMove(sourcePos, BackwardsAnimationTime))
+				.Append(container.DOMove(resultPos, 1f))
+				.AppendInterval(1f);
+
+			return animation;
+		}
+
+		private Vector3 GetConnectionDirection(Detail connectedDetail)
+		{
+			var targetDetailBounds = TargetDetail.Bounds;
+			var connectionPoint = Extentions.Overlap(targetDetailBounds, connectedDetail.Bounds).center;
+			var connectionPointLocal = connectionPoint - TargetDetail.transform.position;
+			var diff = targetDetailBounds.extents -
+					   new Vector3(Mathf.Abs(connectionPointLocal.x),
+						   Mathf.Abs(connectionPointLocal.y),
+						   Mathf.Abs(connectionPointLocal.z));
+
+			var connectionDirection = Vector3.zero;
+			var sum = 0;
+
+			for (var i = 0; i < 3; i++) {
+				connectionDirection[i] = (diff[i] < 0.5f ? 1 : 0) * Mathf.Sign(connectionPointLocal[i]);
+				sum += (int) Mathf.Abs(connectionDirection[i]);
+			}
+
+			return connectionDirection / -sum;
+		}
+
+	protected override InstructionBase GetInstanceCopy() {
 			return new InstructionAdd { Rotation = Rotation, Position = Position };
 		}
 

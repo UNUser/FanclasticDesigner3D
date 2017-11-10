@@ -14,6 +14,8 @@ namespace Assets.Scripts
 		public GameObject NextInstructionButton;
 		public Text StepNumberText;
 
+		private InstructionBase CurrentInstuction { get { return _instructions[_stepNumber - 1]; } }
+
 		private int StepNumber
 		{
 			get { return _stepNumber; }
@@ -30,6 +32,8 @@ namespace Assets.Scripts
 					return;
 				}
 
+				CurrentInstuction.StopAnimation();
+
 				if (_stepNumber < value) {
 					for (_stepNumber += 1; _stepNumber <= value; _stepNumber++) {
 						_instructions[_stepNumber - 1].Do();
@@ -41,6 +45,7 @@ namespace Assets.Scripts
 				}
 
 				_stepNumber = value;
+				CurrentInstuction.PlayAnimation();
 			}
 		}
 
@@ -58,6 +63,7 @@ namespace Assets.Scripts
 			_stepNumber = Mathf.RoundToInt(Slider.minValue);
 			StepNumber = _stepNumber;
 			_instructions[0].Do();
+			_instructions[0].PlayAnimation();
 		}
 
 		public void OnSliderValueChanged(float value)
