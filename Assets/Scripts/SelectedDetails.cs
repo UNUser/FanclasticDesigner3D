@@ -14,10 +14,11 @@ namespace Assets.Scripts
 		public Detail First { get { return _details.FirstOrDefault(); } }
 		public int Count { get { return _details.Count; } }
 
-	    void Start()
+	    void Awake()
 	    {
 		    AppController.Instance.ColorSetter.ActiveColorChangedEvent += SetColor;
 			AppController.Instance.ColorSetter.gameObject.SetActive(false);
+		    
 		    IsValid = true;
 	    }
 

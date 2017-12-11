@@ -397,6 +397,10 @@ namespace UnityFBXExporter
 		{
 //#if UNITY_EDITOR
 			int folderIndex = path.LastIndexOf('/');
+
+			if (folderIndex < 0) 
+				folderIndex = path.LastIndexOf('\\');
+
 			path = path.Remove(folderIndex, path.Length - folderIndex);
 
 			// 1. First create the directories that are needed

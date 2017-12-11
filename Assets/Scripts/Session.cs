@@ -10,6 +10,8 @@ namespace Assets.Scripts {
 	{
 		public SceneData SceneData { get; private set; }
 
+		public string FileName { get { return _fileName; } }
+
 		private readonly Dictionary<int, Detail> _id2Detail = new Dictionary<int, Detail>();
 		private List<InstructionBase> _sourceInstructions;
 		private string _fileName;
@@ -121,11 +123,12 @@ namespace Assets.Scripts {
 				TypeNameHandling = TypeNameHandling.Auto
 			};
 			var json = JsonConvert.SerializeObject(SceneData, Formatting.Indented, settings);
+			var checkedFileName = fileName.EndsWith(".fcl") ? fileName : (fileName + ".fcl");
 
-			File.WriteAllText(fileName, json);
-			_fileName = fileName;
+			File.WriteAllText(checkedFileName, json);
+			_fileName = checkedFileName;
 
-			Debug.Log("Saved: " + fileName);
+			Debug.Log("Saved: " + checkedFileName);
 		}
 
 		private void AcceptChanges()

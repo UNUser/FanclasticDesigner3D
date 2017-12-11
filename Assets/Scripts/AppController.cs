@@ -38,6 +38,7 @@ namespace Assets.Scripts {
 	    public Dropdown ModeSwitcher;
 	    public Dropdown LanguageSwitcher;
 	    public InstructionsLayer InstructionsLayer;
+	    public GameObject TutorialLayer;
 
 	    public Session Session { get; private set; }
 		public AppMode Mode { get; private set; }
@@ -155,14 +156,20 @@ namespace Assets.Scripts {
 		        return;
 	        }
 
-#if UNITY_STANDALONE_WIN
-
-			ShowSaveFileDialog(LastPath);
-#else
-            FileSelectionDialogLayer.ShowFileSelectionDialog(LastPath, Save, true);
-#endif
+			SaveCrossVer(LastPath);
         }
 
+	    private void SaveCrossVer(string path)
+	    {
+
+#if UNITY_STANDALONE_WIN
+
+		    ShowSaveFileDialog(path);
+#else
+            FileSelectionDialogLayer.ShowFileSelectionDialog(path, Save, true);
+#endif
+
+		}
 
 		public event Action<int> LanguageChanged;
 		private bool _isLangInited;
@@ -189,7 +196,11 @@ namespace Assets.Scripts {
 		public void ShowSaveFileDialog(string path) {
 
 			var saveFileDialog = new SaveFileDialog {
-				InitialDirectory = path
+				InitialDirectory = path,
+				FileName = Instance.Session.FileName,
+				AddExtension = true,
+				DefaultExt = "fcl",
+				Filter = "(*.fcl)|*.fcl"
 			};
 
 
@@ -201,7 +212,10 @@ namespace Assets.Scripts {
 		public void ShowOpenFileDialog(string path) {
 
 			var openFileDialog = new OpenFileDialog {
-				InitialDirectory = path
+				InitialDirectory = path,
+				AddExtension = true,
+				DefaultExt = "fcl",
+				Filter = "*.fcl|*.fcl|*.*|*.*"
 			};
 
 
@@ -249,17 +263,27 @@ namespace Assets.Scripts {
 
 
 
-        public void OnLoadButtonClicked() {
+        public void OnLoadButtonClicked() 
+		{
+			LoadCrossVer(LastPath);
+		}
 
+	    private void LoadCrossVer(string path)
+	    {
 
 #if UNITY_STANDALONE_WIN
 
-			ShowOpenFileDialog(LastPath);
+		    ShowOpenFileDialog(path);
 #else
-            FileSelectionDialogLayer.ShowFileSelectionDialog(LastPath, Load, false);
+            FileSelectionDialogLayer.ShowFileSelectionDialog(path, Load, false);
 #endif
 
 		}
+
+		public void OnDemoButtonClicked()
+	    {
+		    LoadCrossVer(Application.persistentDataPath + "/Demo/");
+	    }
 
 	    private void Save(string fileName)
 	    {
@@ -290,9 +314,49 @@ namespace Assets.Scripts {
 
 	        LanguageSwitcher.value = UiLang.Lang;
 			_isLangInited = true;
+
+			CheckForFirstLaunch();
         }
 
 		
+
+	    private void CheckForFirstLaunch()
+	    {
+		    var isFirstLaunch = !PlayerPrefs.HasKey("WasLaunched");
+
+		    if (!isFirstLaunch) {
+			    return;
+		    }
+
+		    CopyDemoModels();
+		    Load(Application.persistentDataPath + "/Demo/F.fcl");
+
+			PlayerPrefs.SetInt("WasLaunched", 1);
+		    TutorialLayer.SetActive(true);
+	    }
+
+	    private void CopyDemoModels()
+	    {
+		    var destinationPath = Application.persistentDataPath + "/Demo/";
+		    var sourcePath = "Assets/Resources/Demo/";
+			
+			var files = Directory.GetFiles(sourcePath);
+
+		    if (!Directory.Exists(destinationPath)) {
+			    Directory.CreateDirectory(destinationPath);
+		    }
+
+			foreach (var file in files) {
+
+				if (file.EndsWith(".meta")) {
+					continue;
+				}
+
+				var fileName = file.Remove(0, file.LastIndexOfAny("\\/".ToCharArray()) + 1);
+
+			    File.Copy(file, destinationPath + fileName, true);
+		    }
+		}
 
         private IEnumerator UpdateDebugInfo()
         {
