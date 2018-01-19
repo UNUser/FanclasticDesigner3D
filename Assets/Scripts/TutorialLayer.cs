@@ -1,4 +1,5 @@
-﻿using Assets.Scripts;
+﻿using System;
+using Assets.Scripts;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,13 +48,11 @@ public class TutorialLayer : MonoBehaviour
 
 	protected void Start()
 	{
-		var isMobile = !Application.isMobilePlatform;
+		var isMobile = Application.isMobilePlatform;
 
 		ZoomImage.sprite = isMobile ? PinchZoomImage : MouseZoomImage;
 		LinkedSelectionImage.sprite = isMobile ? TapSelectionImage : ClickSelectionImage;
 
-		ZoomText.text = string.Format("TutorialLayer.ZoomHint.Base".Lang(), 
-			(isMobile ? "TutorialLayer.ZoomHint.Pinch" : "TutorialLayer.ZoomHint.Wheel").Lang());
 //		LinkedSelectionText.text = ;
 	}
 
@@ -63,6 +62,9 @@ public class TutorialLayer : MonoBehaviour
 
 		_setColorButtonState = SetColorButton.activeSelf;
 		SetColorButton.SetActive(true);
+
+		ZoomText.text = string.Format("TutorialLayer.ZoomHint.Base".Lang(),
+			(Application.isMobilePlatform ? "TutorialLayer.ZoomHint.Pinch" : "TutorialLayer.ZoomHint.Wheel").Lang());
 	}
 
 	protected void OnDisable()
@@ -74,6 +76,8 @@ public class TutorialLayer : MonoBehaviour
 	{
 		if (ActiveHint == HintsContainer.childCount - 1) {
 			gameObject.SetActive(false);
+			AppController.Instance.OnTutorialEnd();
+
 			return;
 		}
 

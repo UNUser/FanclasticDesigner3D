@@ -12,8 +12,7 @@ namespace Assets.Scripts {
 			new Dictionary<string, string>
 			{
 				{"EditorLayer.ActiveColor", "Active color"},
-				{"EditorLayer.Details", "Details"},
-				
+				{"EditorLayer.Details", "Elements"},
 
 				{"Menu.Menu", "Menu"},
 				{"Menu.Save", "Save..."},
@@ -22,11 +21,9 @@ namespace Assets.Scripts {
 				{"Menu.SceneInfo", "Scene Info"},
 				{"Menu.Demo", "Demo"},
 				{"Menu.Help", "Help"},
-				{"Menu.Exit", "Exit"},
-
+				{"Menu.Exit", "Exit"},
 				{"ModeSwitcher.Editor", "Editor mode"},
-				{"ModeSwitcher.Instructions", "Instructions mode"},
-
+				{"ModeSwitcher.Instructions", "Instructions mode"},
 				{"SceneInfoLayer.Copy", "Copy"},
 				{"SceneInfoLayer.Height", "Height:"},
 				{"SceneInfoLayer.Length", "Length:"},
@@ -39,26 +36,24 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Green", "Green"},
 				{"SceneInfoLayer.Red", "Red"},
 				{"SceneInfoLayer.White", "White"},
-				{"SceneInfoLayer.Yellow", "Yellow"},
-
+				{"SceneInfoLayer.Yellow", "Yellow"},
 				{"FileSelectionDialogLayer.SelectFile", "Select file..."},
 				{"FileSelectionDialogLayer.EnterName", "Enter name..."},
 				{"FileSelectionDialogLayer.Up", "Up"},
 				{"FileSelectionDialogLayer.Downloads", "Downloads"},
 				{"FileSelectionDialogLayer.Save", "Save"},
-				{"FileSelectionDialogLayer.Cancel", "Cancel"},
-
+				{"FileSelectionDialogLayer.Cancel", "Cancel"},
 				{"TutorialLayer.Next", "Next"},
-				{"TutorialLayer.Welcome", "Welcome to Fanclastic 3D Designer!\n\nUsing this program you can view the assembly instructions for various models, built with the Fanclastic designer and create your own!"},
-				{"TutorialLayer.DetailsHint", "To add a new detail to the scene simply drag the corresponding icon from the details panel to the scene."},
-				{"TutorialLayer.SetFocusHint", "To change the camera's fixing point click on the focus setting button and then on any detail or point on the scene."},
-				{"TutorialLayer.ChangeColorHint", "Use the color select button to set the color for the selected details."},
-				{"TutorialLayer.RotateHint", "To rotate the selected details in space use the rotation buttons. Each button rotates the details around the drawn axis of the corresponding color."},
-				{"TutorialLayer.DeleteHint", "Use this button to delete selected details from the scene."},
-				{"TutorialLayer.ZoomHint.Base", "Use {0} to zoom in and out of the camera."},
+				{"TutorialLayer.Welcome", "Welcome to Fanclastic 3D Designer!\n\nThis program helps you to build Fanclastic models, view assembly instructions and create your own."},
+				{"TutorialLayer.DetailsHint", "To add an element to the scene drag a corresponding icon from the elements' panel to the scene."},
+				{"TutorialLayer.SetFocusHint", "To change camera anchor point click on the focus setting button and then on any element or spot on the scene."},
+				{"TutorialLayer.ChangeColorHint", "Use the color select button to set a color for selected elements."},
+				{"TutorialLayer.RotateHint", "To rotate selected elements use rotation buttons. Each button rotates elements around a drawn axis of a corresponding color."},
+				{"TutorialLayer.DeleteHint", "Use this button to delete selected elements from the scene."},
+				{"TutorialLayer.ZoomHint.Base", "Use {0} to zoom in and out the camera."},
 				{"TutorialLayer.ZoomHint.Wheel", "mouse wheel"},
 				{"TutorialLayer.ZoomHint.Pinch", "pinch"},
-				{"TutorialLayer.LinkedSelection", "Click on the detail and hold to select all the linked parts."},
+				{"TutorialLayer.LinkedSelection", "Click on an element and hold to select all linked parts."},
 			}, 
 			new Dictionary<string, string>
 			{
@@ -99,8 +94,8 @@ namespace Assets.Scripts {
 				{"FileSelectionDialogLayer.Cancel", "Отмена"},
 
 				{"TutorialLayer.Next", "Далее"},
-				{"TutorialLayer.Welcome", "Добро пожаловать в программу Fanclastic 3D Designer!\n\nЗдесь вы можете просматривать инструкции по сборке различных моделей из конструктора Fanclastic и создавать свои собственные!"},
-				{"TutorialLayer.DetailsHint", "Чтобы добавить на сцену новую деталь, просто перетащите соответствующую иконку с панели деталей на сцену."},
+				{"TutorialLayer.Welcome", "Добро пожаловать в Fanclastic 3D Designer!\n\nВ этой программе вы можете строить модели из конструктора Fanclastic, просматривать инструкции по сборке и создавать свои собственные!"},
+				{"TutorialLayer.DetailsHint", "Чтобы добавить на сцену новую деталь, перетащите соответствующую иконку с панели деталей на сцену."},
 				{"TutorialLayer.SetFocusHint", "Чтобы изменить точку привязки камеры, нажмите на кнопку установки фокуса, а затем на любую деталь или точку на сцене."},
 				{"TutorialLayer.ChangeColorHint", "Используйте кнопку выбора цвета, чтобы задать цвет выделенным деталям."},
 				{"TutorialLayer.RotateHint", "Для поворота выделенных деталей в пространстве используйте кнопки поворота. Каждая кнопка поворачивает детали вокруг нарисованной оси соответствующего цвета."},

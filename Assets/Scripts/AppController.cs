@@ -10,6 +10,7 @@ using DG.Tweening;
 using System.Windows.Forms;
 #endif
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityFBXExporter;
 using Application = UnityEngine.Application;
@@ -282,7 +283,7 @@ namespace Assets.Scripts {
 
 		public void OnDemoButtonClicked()
 	    {
-		    LoadCrossVer(Application.persistentDataPath + "/Demo/");
+		    LoadCrossVer(Application.persistentDataPath + "/DemoModels/");
 	    }
 
 	    private void Save(string fileName)
@@ -318,7 +319,14 @@ namespace Assets.Scripts {
 			CheckForFirstLaunch();
         }
 
-		
+	    private bool _loadDemo;
+
+	    public void OnTutorialEnd()
+	    {
+		    if (_loadDemo) {
+			    Load(Application.persistentDataPath + "/DemoModels/F.fcl");
+		    }
+		}
 
 	    private void CheckForFirstLaunch()
 	    {
@@ -329,33 +337,167 @@ namespace Assets.Scripts {
 		    }
 
 		    CopyDemoModels();
-		    Load(Application.persistentDataPath + "/Demo/F.fcl");
+		    _loadDemo = true;
 
 			PlayerPrefs.SetInt("WasLaunched", 1);
-		    TutorialLayer.SetActive(true);
+			TutorialLayer.SetActive(true);
 	    }
 
-	    private void CopyDemoModels()
-	    {
-		    var destinationPath = Application.persistentDataPath + "/Demo/";
-		    var sourcePath = "Assets/Resources/Demo/";
-			
-			var files = Directory.GetFiles(sourcePath);
 
-		    if (!Directory.Exists(destinationPath)) {
-			    Directory.CreateDirectory(destinationPath);
+
+	    private IEnumerator CopyFile(string file) {
+		    UnityWebRequest www = new UnityWebRequest(Path.Combine(Application.streamingAssetsPath, file));
+		    www.downloadHandler = new DownloadHandlerBuffer();
+
+		    yield return www.SendWebRequest();
+
+//		    while (!www.downloadHandler.isDone)
+//		    {
+//				Debug.Log("waiting " + file);
+//			    yield return new WaitForEndOfFrame();
+//		    }
+
+//			Debug.LogWarning(www.url);
+
+		    if (www.isNetworkError || www.isHttpError) {
+			    Debug.LogError(www.error + www.url);
+		    } else {
+			    // Show results as text
+//			    Debug.Log(www.downloadHandler.text);
+
+			    var fileName = Path.GetFileName(file) ?? string.Empty;
+			    var directory = Path.GetDirectoryName(file) ?? string.Empty;
+				var destination = Path.Combine(Application.persistentDataPath, directory);
+
+				if (!Directory.Exists(destination)) {
+					Directory.CreateDirectory(destination);
+				}
+
+//			    if (!fileName.EndsWith(".fcl")) {
+//				    fileName += ".fcl";
+//			    }
+
+//				Debug.Log(file + "\n" + fileName + "\n" + directory + "\n" + destination);
+
+			    // Or retrieve results as binary data
+			    byte[] results = www.downloadHandler.data;
+
+//				Debug.Log(Path.Combine(destination, fileName) + " " + results.Length + " " + www.downloadHandler.isDone);
+
+				File.WriteAllBytes(Path.Combine(destination, fileName), results);
 		    }
+	    }
+
+
+		private void CopyDemoModels()
+	    {
+		    var destinationPath = Path.Combine(Application.persistentDataPath, "DemoModels");
+			var sourcePath = Path.Combine(Application.streamingAssetsPath, "DemoModels");
+
+
+		    var files = new string[]
+		    {
+				"F.fcl",
+
+//				Path.Combine("AirCraft", "Башня самолет вертолет.fcl"),
+//				Path.Combine("AirCraft", "самолет_вертолет_1.fcl"),
+//				Path.Combine("AirCraft", "самолет_вертолет_2.fcl"),
+
+				Path.Combine("ANIMALS", "lamb.fcl"),
+				Path.Combine("ANIMALS", "panda.fcl"),
+				Path.Combine("ANIMALS", "dog.fcl"),
+
+				Path.Combine("ARCHITECTURE", "Tower1_A.fcl"),
+				Path.Combine("ARCHITECTURE", "Tower2_217_A.fcl"),
+				Path.Combine("ARCHITECTURE", "Tower3_A.fcl"),
+//				Path.Combine("ARCHITECTURE", "КрепостьБашня А.fcl"),
+//				Path.Combine("ARCHITECTURE", "КрепостьЦерковь А.fcl"),
+
+				Path.Combine("Bird_Lama", "lama.fcl"),
+				Path.Combine("Bird_Lama", "bird.fcl"),
+
+				Path.Combine("Buterfly", "Buterfly_1.fcl"),
+				Path.Combine("Buterfly", "Buterfly_2.fcl"),
+
+				Path.Combine("Deer_Giraffe", "deer_giraffe_1.fcl"),
+				Path.Combine("Deer_Giraffe", "deer_giraffe_2.fcl"),
+
+				Path.Combine("DINOSAURUS", "dino_3.fcl"),
+//				Path.Combine("DINOSAURUS", "Король завр.fcl"),
+//				Path.Combine("DINOSAURUS", "Трицерапторс.fcl"),
+
+				Path.Combine("Flowers", "blowball.fcl"),
+				Path.Combine("Flowers", "flower.fcl"),
+
+//				Path.Combine("GEOMETRY", "Башня_155.fcl"),
+//				Path.Combine("GEOMETRY", "Волна.fcl"),
+//				Path.Combine("GEOMETRY", "Гексо_Шар.fcl"),
+//				Path.Combine("GEOMETRY", "Глобус.fcl"),
+//				Path.Combine("GEOMETRY", "Кубик.fcl"),
+//				Path.Combine("GEOMETRY", "Мини_гексаном.fcl"),
+//				Path.Combine("GEOMETRY", "Пружина.fcl"),
+//				Path.Combine("GEOMETRY", "Фигура 1.fcl"),
+//				Path.Combine("GEOMETRY", "Фрактал.fcl"),
+//				Path.Combine("GEOMETRY", "Шар.fcl"),
+
+//				Path.Combine("MARINE", "Батискаф.fcl"),
+//				Path.Combine("MARINE", "Башня морская.fcl"),
+//				Path.Combine("MARINE", "Катамаран.fcl"),
+//				Path.Combine("MARINE", "Корабль.fcl"),
+
+//				Path.Combine("Mask", "Рожицы.fcl"),
+
+//				Path.Combine("MIX", "башенка.fcl"),
+//				Path.Combine("MIX", "вертолетик.fcl"),
+//				Path.Combine("MIX", "жирафик.fcl"),
+//				Path.Combine("MIX", "переностик.fcl"),
+//				Path.Combine("MIX", "Пружинка.fcl"),
+//				Path.Combine("MIX", "Робот.fcl"),
+//				Path.Combine("MIX", "самолет.fcl"),
+//				Path.Combine("MIX", "Стрекоза.fcl"),
+//				Path.Combine("MIX", "Цветок.fcl"),
+
+				Path.Combine("Plane_Ship", "ship.fcl"),
+				Path.Combine("Plane_Ship", "plane.fcl"),
+
+				Path.Combine("Racing", "Quad_Bike.fcl"),
+				Path.Combine("Racing", "Race_Car_F1.fcl"),
+
+				Path.Combine("Rally_Rade", "Buggy.fcl"),
+				Path.Combine("Rally_Rade", "Motocycle.fcl"),
+				Path.Combine("Rally_Rade", "Tricycle.fcl"),
+
+//				Path.Combine("SPACE", "Башня космос сред.fcl"),
+//				Path.Combine("SPACE", "Звездолет3.fcl"),
+//				Path.Combine("SPACE", "Корабль 2 X Wing.fcl"),
+//				Path.Combine("SPACE", "Ракета.fcl"),
+
+//				Path.Combine("SPACESHIPS", "Башня Звезд.fcl"),
+				Path.Combine("SPACESHIPS", "Spaceship_1.fcl"),
+				Path.Combine("SPACESHIPS", "Spaceship_2.fcl"),
+				Path.Combine("SPACESHIPS", "Spaceship_3.fcl"),
+				Path.Combine("SPACESHIPS", "Spaceship_4.fcl"),
+
+//				Path.Combine("Карусели", "Башня Карусели.fcl"),
+//				Path.Combine("Карусели", "Карусель Б.fcl"),
+//				Path.Combine("Карусели", "Качалка.fcl"),
+
+
+		    };//Directory.GetFiles(sourcePath);
+
+			if (!Directory.Exists(destinationPath)) {
+				Directory.CreateDirectory(destinationPath);
+			}
 
 			foreach (var file in files) {
 
-				if (file.EndsWith(".meta")) {
-					continue;
-				}
+//				if (file.EndsWith(".meta")) {
+//					continue;
+//				}
 
-				var fileName = file.Remove(0, file.LastIndexOfAny("\\/".ToCharArray()) + 1);
-
-			    File.Copy(file, destinationPath + fileName, true);
-		    }
+//			    File.Copy(file, destinationPath + fileName, true);
+				StartCoroutine(CopyFile(Path.Combine("DemoModels", file)));
+			}
 		}
 
         private IEnumerator UpdateDebugInfo()
