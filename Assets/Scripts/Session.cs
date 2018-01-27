@@ -289,7 +289,9 @@ namespace Assets.Scripts {
 
 			newDetail.transform.position = detailData.Position;
 			newDetail.transform.eulerAngles = detailData.Rotation;
-			newDetail.Color = AddDetailPanel.GetColor(detailData.Color);
+			if (!newDetail.FixedColor) {
+				newDetail.Color = AddDetailPanel.GetColor(detailData.Color);
+			}
 
 			_id2Detail.Add(newId, newDetail);
 			detailData.Id = newId;

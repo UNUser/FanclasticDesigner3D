@@ -39,10 +39,16 @@ namespace Assets.Scripts
 	    public void Add(DetailBase detailBase)
 	    {
 		    var detailsGroup = detailBase as DetailsGroup;
+		    var fixedColor = true;
 
 		    if (detailsGroup != null) {
 			    foreach (var detail in detailsGroup.Details) {
 					detail.gameObject.layer = LayerMask.NameToLayer("SelectedItem");
+					detail.Linkage.layer = LayerMask.NameToLayer("SelectedLinkage");
+
+				    if (!detail.FixedColor) {
+					    fixedColor = false;
+				    }
 			    }
 			    _details.UnionWith(detailsGroup.Details);
 		    } else {
@@ -50,9 +56,17 @@ namespace Assets.Scripts
 
 				_details.Add(detail);
 				detail.gameObject.layer = LayerMask.NameToLayer("SelectedItem");
+				detail.Linkage.layer = LayerMask.NameToLayer("SelectedLinkage");
+
+			    fixedColor = detail.FixedColor;
 		    }
 
 			var colorSetter = AppController.Instance.ColorSetter;
+
+		    if (fixedColor) {
+			    colorSetter.gameObject.SetActive(false);
+				return;
+		    }
 
 			colorSetter.gameObject.SetActive(true);
 		    colorSetter.CurrentColor.enabled = _details.Count == 1;
@@ -62,10 +76,12 @@ namespace Assets.Scripts
 
 	    }
 
+		//TODO этот код нигде не используется
 	    public void Remove(Detail detail)
 	    {
 		    _details.Remove(detail);
-			detail.gameObject.layer = LayerMask.NameToLayer("Default");
+			detail.gameObject.layer = LayerMask.NameToLayer("Item");
+			detail.Linkage.layer = LayerMask.NameToLayer("Linkage");
 
 		    if (!_details.Any()) {
 				AppController.Instance.ColorSetter.gameObject.SetActive(false);
@@ -80,7 +96,8 @@ namespace Assets.Scripts
 	    {
 			// TODO update links учитывать, что детали могут удаляться
 		    foreach (var detail in _details) {
-				detail.gameObject.layer = LayerMask.NameToLayer("Default");
+				detail.gameObject.layer = LayerMask.NameToLayer("Item");
+				detail.Linkage.layer = LayerMask.NameToLayer("Linkage");
 		    }
 			_details.Clear();
 		    IsValid = true;
@@ -324,8 +341,8 @@ namespace Assets.Scripts
 
 			if (!_details.Any()) return;
 
-            var combinedBounds = new Bounds();
-            combinedBounds.center = First.transform.position;
+			var combinedBounds = First.Bounds;//new Bounds();
+//            combinedBounds.center = First.transform.position;
             foreach (var child in _details) {
                 combinedBounds.Encapsulate(child.Bounds);
             }

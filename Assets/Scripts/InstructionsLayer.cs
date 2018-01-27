@@ -103,10 +103,10 @@ namespace Assets.Scripts
 		private void OnRenderObject()
 		{
 			var targetDetails = _instructions[_stepNumber - 1].TargetDetails;
-			var combinedBounds = new Bounds();
-			var firstDetail = _session.GetDetail(targetDetails.First());
+			var combinedBounds = _session.GetDetail(targetDetails.First()).Bounds;//new Bounds();
+//			var firstDetail = _session.GetDetail(targetDetails.First());
 
-			combinedBounds.center = firstDetail.transform.position;
+//			combinedBounds.center = firstDetail.transform.position;
 			foreach (var id in targetDetails)
 			{
 				var detail = _session.GetDetail(id);

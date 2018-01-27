@@ -9,8 +9,12 @@ namespace Assets.Scripts {
 	public class SceneInfoLayer : MonoBehaviour
 	{
 		public GameObject CopyButton;
+
 		public GridLayoutGroup Grid;
 		public GameObject CellPrefab;
+
+		public Transform OtherDetailsCount;
+		public GameObject LinePrefab;
 
 		public Text HeightValue;
 		public Text LengthValue;
@@ -37,6 +41,22 @@ namespace Assets.Scripts {
 				str.Append(isNewRow ? "\t" : "\n");
 			}
 
+			str.Append("\n");
+			isPrefab = true;
+
+			foreach (Transform child in OtherDetailsCount)
+			{
+				if (isPrefab) {
+					isPrefab = false;
+					continue;
+				}
+
+				var lineText = child.gameObject.GetComponent<Text>().text;
+
+				str.Append(lineText);
+				str.Append("\n");
+			}
+
 			GUIUtility.systemCopyBuffer = str.ToString();
 		}
 
@@ -48,6 +68,7 @@ namespace Assets.Scripts {
 		private void Start()
 		{
 			CellPrefab.SetActive(false);
+			LinePrefab.SetActive(false);
 		}
 
 		private void AddCell(string text, TextAnchor alignment = TextAnchor.MiddleCenter)
@@ -65,11 +86,14 @@ namespace Assets.Scripts {
 		private void OnEnable()
 		{
 			var colors = AppController.Instance.Resources.Colors;
-			var types = AddDetailPanel.Details.Select(o => o.name).ToArray();
+			var types = AddDetailPanel.Details.Where(obj => char.IsDigit(obj.name[0])).Select(o => o.name).ToArray();
 			var counts = new Dictionary<Color, Dictionary<string, int>>();
 
 			var details = GetAll();
 			var bounds = new Bounds(details.Any() ? details[0].Bounds.center : Vector3.zero, Vector3.zero);
+
+			var otherTypes = AddDetailPanel.Details.Where(obj => !char.IsDigit(obj.name[0])).Select(o => o.name).ToArray();
+			var otherCounts = otherTypes.ToDictionary(s => s, s => 0);
 
 			Clear();
 
@@ -88,7 +112,11 @@ namespace Assets.Scripts {
 				var name = detail.gameObject.name;
 				var type = name.Remove(name.Length - "(Clone)".Length);
 
-				counts[detail.Color.Material.color][type] += 1;
+				if (char.IsDigit(name[0])) {
+					counts[detail.Color.Material.color][type] += 1;
+				} else {
+					otherCounts[type] += 1;
+				}
 				bounds.Encapsulate(detail.Bounds);
 			}
 
@@ -113,6 +141,17 @@ namespace Assets.Scripts {
 				}
 			}
 
+			foreach (var type in otherTypes)
+			{
+				var line = Instantiate(LinePrefab).GetComponent<Text>();
+
+				line.transform.SetParent(OtherDetailsCount.transform, false);
+
+				line.text = string.Format("{0}: {1}", ("SceneInfoLayer." + type).Lang(), otherCounts[type]);
+
+				line.gameObject.SetActive(true);
+			}
+
 			var roundedSize = (SerializableVector3Int) bounds.size;
 
 			HeightValue.text = string.Format("{0} ", roundedSize.y * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
@@ -124,9 +163,15 @@ namespace Assets.Scripts {
 
 		private void Clear()
 		{
-			for (var childIndex = Grid.transform.childCount - 1; childIndex > 0; childIndex--)
-			{
+			for (var childIndex = Grid.transform.childCount - 1; childIndex > 0; childIndex--) {
 				var child = Grid.transform.GetChild(childIndex);
+
+				child.SetParent(null);
+				Destroy(child.gameObject);
+			}
+
+			for (var childIndex = OtherDetailsCount.transform.childCount - 1; childIndex > 0; childIndex--) {
+				var child = OtherDetailsCount.transform.GetChild(childIndex);
 
 				child.SetParent(null);
 				Destroy(child.gameObject);

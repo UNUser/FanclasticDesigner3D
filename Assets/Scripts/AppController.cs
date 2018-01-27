@@ -914,7 +914,7 @@ namespace Assets.Scripts {
 	[Serializable]
 	public class SceneData
 	{
-		public string Version = "1.0";
+		public string Version = "1.1";
 		public List<DetailData> SingleDetails = new List<DetailData>();
 		public List<ConnectedGroup> ConnectedGroups = new List<ConnectedGroup>();
 	}

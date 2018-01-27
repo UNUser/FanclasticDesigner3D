@@ -17,6 +17,10 @@ namespace Assets.Scripts {
 		public void ShowSelection(List<ConnectedGroup> connectedGroups, Action<ConnectedGroup> onSelectedAction) {
 
 			if (connectedGroups.Count == 1) {
+				var id = connectedGroups[0].Details.First().Id;
+				var detailsGroup = AppController.Instance.Session.GetDetail(id).Group;
+
+				detailsGroup.gameObject.SetActive(true);
 				onSelectedAction(connectedGroups.First());
 				return;
 			}

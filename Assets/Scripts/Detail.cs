@@ -22,7 +22,11 @@ namespace Assets.Scripts
     [RequireComponent(typeof (BoxCollider))]
 	public class Detail : DetailBase, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerUpHandler, IPointerDownHandler
     {
-		 
+	    public BoxCollider SpaceBounds;
+	    public GameObject Linkage;
+	    public Vector3 AlignmentPoint;
+	    public bool FixedColor;
+
 		public override bool IsSelected {
 			get { return AppController.Instance.SelectedDetails.IsSelected(this); }
 		}
@@ -44,6 +48,9 @@ namespace Assets.Scripts
 	    {
 		    get { return _color; }
 		    set {
+			    if (FixedColor) {
+				    return;
+			    }
 			    _color = value;
 				GetComponent<Renderer>().material = _color.Material; 
 			}
@@ -63,7 +70,7 @@ namespace Assets.Scripts
                     Position = transform.position,
                     Rotation = transform.rotation.eulerAngles,
                     Type = name.Remove(name.Length - "(Clone)".Length),
-                    Color = materialName.Remove(materialName.Length - " (Instance)".Length)
+                    Color = FixedColor ? "None" : materialName.Remove(materialName.Length - " (Instance)".Length)
                 };
 
                 return data;
@@ -77,7 +84,7 @@ namespace Assets.Scripts
         private int _sizeZ;
         private Vector3[] _raysOrigins;
         private Vector3[] _connectorsLocalPos;
-//        private List<Transform> _currentConnections; 
+        private BoxCollider[] _linkageColliders; 
         private int _holdingConnector;
         private Vector3 _prevPointerPos;
         private bool _isClick;
@@ -110,6 +117,8 @@ namespace Assets.Scripts
                                                     -i / _sizeX + _sizeZ / 2);
 
             }
+
+	        _linkageColliders = Linkage.GetComponents<BoxCollider>();
         }
 
         public void OnBeginDrag(PointerEventData eventData)
@@ -247,7 +256,7 @@ namespace Assets.Scripts
         {
             // Кидаем лучи, идущие  в новом направлении параллельно через все коннекторы детали и определяем самый короткий из них
             RaycastHit? minRayHitInfo = null;
-            LayerMask layerMask = ~(1 << LayerMask.NameToLayer("SelectedItem"));
+			LayerMask layerMask = ~(1 << LayerMask.NameToLayer("SelectedItem") | 1 << LayerMask.NameToLayer("SelectedLinkage"));
 
             raycaster = this;
             rayOriginIndex = -1;
@@ -383,13 +392,13 @@ namespace Assets.Scripts
             {
                 // - + +, + + -, - - -, + - +
                 var begin = new Vector3(ext.x*(i.IsOdd() ? 1 : -1), ext.y*(i/2 < 1 ? 1 : -1), ext.z*(i%3 == 0 ? 1 : -1));
-                var beginGL = transform.TransformPoint(begin);
+                var beginGL = transform.TransformPoint(begin + mesh.bounds.center);
                 for (var j = 0; j < 3; j++)
                 {
                     GL.Vertex3(beginGL.x, beginGL.y, beginGL.z);
                     var end = begin;
                     end[j] *= -1;
-                    var endGL = transform.TransformPoint(end);
+					var endGL = transform.TransformPoint(end + mesh.bounds.center);
                     GL.Vertex3(endGL.x, endGL.y, endGL.z);
                 }
             }
@@ -403,59 +412,108 @@ namespace Assets.Scripts
         /// </summary>
         public override LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected, Vector3? offset = null) 
         {
-            var detailPos = transform.position + (offset ?? Vector3.zero);
-            var col = GetComponent<BoxCollider>();
-            var overlapArea = col.bounds;
-            var links = new DetailLinks(this, linksMode);
+            var offsetValue = offset ?? Vector3.zero;
+			var links = new DetailLinks(this, linksMode);
 
-            overlapArea.center = detailPos;
-            LayerMask layerMask;
+	        links.IsValid = CheckOverlapping(linksMode, offsetValue);
 
-	        if (linksMode == LinksMode.SelectedOnly) {
-				layerMask = 1 << LayerMask.NameToLayer("SelectedItem");
-	        } else {
-				var selectedMask = linksMode == LinksMode.All ? 0 : 1 << LayerMask.NameToLayer("SelectedItem");
-
-		        layerMask = ~(selectedMask | 1 << LayerMask.NameToLayer("Workspace"));
+	        if (!links.IsValid) {
+		        return links;
 	        }
 
-	        var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
-                //TODO если будет жрать память, то можно заменить на NonAlloc версию
+	        foreach (var linkageCollider in _linkageColliders)
+	        {
+		        var overlapArea = linkageCollider.bounds;
 
-            foreach (var neighbor in neighbors)
-            {
-				if (neighbor == col) continue;
+		        overlapArea.center += offsetValue;
+		        LayerMask layerMask;
 
-                var detail = neighbor.GetComponent<Detail>();
+		        if (linksMode == LinksMode.SelectedOnly)
+		        {
+			        layerMask = 1 << LayerMask.NameToLayer("SelectedLinkage");
+		        }
+		        else
+		        {
+			        var selectedMask = linksMode == LinksMode.All
+						? 1 << LayerMask.NameToLayer("SelectedLinkage")
+				        : 0;
 
-                var overlap = Extentions.Overlap(overlapArea, neighbor.bounds);
+			        layerMask = 1 << LayerMask.NameToLayer("Linkage") | selectedMask;
+		        }
 
-                var size = overlap.size;
+		        var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
+		        //TODO если будет жрать память, то можно заменить на NonAlloc версию
 
-				// все координаты больше 2.25
-				var invalidTest = Mathf.Min(size.x, 2.25f) + Mathf.Min(size.y, 2.25f) + Mathf.Min(size.z, 2.25f) > 6.5;
+		        foreach (var neighbor in neighbors)
+		        {
+			        if (neighbor.gameObject == linkageCollider.gameObject) continue;
 
-	            if (invalidTest) {
-		            links.IsValid = false;
-					break;
-	            }
+			        var neighborDetail = neighbor.GetComponentInParent <Detail>();
 
-                // у всех координат размеры больше 1.25 и минимум у двух координат размеры больше 2.25
-                var test = Mathf.Min(size.x, 2.25f) + Mathf.Min(size.y, 2.25f) + Mathf.Min(size.z, 2.25f) > 5;
+//					if (links.Connections.Contains(neighborDetail)) continue;
 
-				// у всех координат размеры больше 1.25 и минимум у одной координаты размер больше 2.25
-                var weakTest =  Mathf.Min(size.x, 1.75f) + Mathf.Min(size.y, 1.75f) + Mathf.Min(size.z, 1.75f) > 4;
-	            var dot = Vector3.Dot(detail.transform.up.normalized, transform.up.normalized);
-	            var cohesionTest = Mathf.Abs(dot) < 0.00001f; // если плоскости деталей параллельны, то они не сцепляются
+//					var neighborShell = neighborDetail.GetComponent<BoxCollider>().bounds;
+//			        var thisShell = GetComponent<BoxCollider>().bounds;
+//
+//			        thisShell.center += offsetValue;
+//
+//			        var overlap = Extentions.Overlap(thisShell, neighborShell);
+//			        var size = overlap.size;
+//
+//			        // все координаты больше 2.25
+//			        var invalidTest = Mathf.Min(size.x, 2.25f) + Mathf.Min(size.y, 2.25f) + Mathf.Min(size.z, 2.25f) > 6.5;
+//
+//			        if (invalidTest)
+//			        {
+//				        links.IsValid = false;
+//				        return links;
+//			        }
 
-				if (test || (weakTest && cohesionTest)) {
-					links.Connections.Add(detail); 
-                }
-            }
+				    links.Connections.Add(neighborDetail);
+		        }
+
+	        }
 
 	        return links;
         }
 
+	    private bool CheckOverlapping(LinksMode linksMode, Vector3 offset)
+	    {
+			var overlapArea = SpaceBounds.bounds;
+			LayerMask layerMask;
+
+			overlapArea.center += offset;
+			
+			if (linksMode == LinksMode.SelectedOnly) {
+				layerMask = 1 << LayerMask.NameToLayer("SelectedItem");
+			} else {
+				var selectedMask = linksMode == LinksMode.All
+					? 1 << LayerMask.NameToLayer("SelectedItem")
+					: 0;
+
+				layerMask = 1 << LayerMask.NameToLayer("Item") | selectedMask;
+			}
+
+			var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
+
+		    foreach (var neighbor in neighbors)
+		    {
+				if (neighbor == SpaceBounds) continue;
+
+				var overlap = Extentions.Overlap(overlapArea, neighbor.bounds);
+				var size = overlap.size;
+
+				// все координаты больше 2.25
+				var invalidTest = Mathf.Min(size.x, 2.25f) + Mathf.Min(size.y, 2.25f) + Mathf.Min(size.z, 2.25f) > 6.5;
+
+				if (invalidTest) {
+//					Debug.Log(gameObject.name + " " + neighbor.gameObject.name + " " + overlap + " " + linksMode);
+					return false;
+				}
+		    }
+
+		    return true;
+	    }
 
 		protected override void UpdateConnections(LinksBase newLinks)
         {
