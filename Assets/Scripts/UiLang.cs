@@ -46,6 +46,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Lego1x1", "Lego 1x1"},
 				{"SceneInfoLayer.Lego2x1", "Lego 2x1"},
 				{"SceneInfoLayer.Roll", "Roll"},
+				{"SceneInfoLayer.RailX2", "Rail"},
 
 				{"FileSelectionDialogLayer.SelectFile", "Select file..."},
 				{"FileSelectionDialogLayer.EnterName", "Enter name..."},
@@ -103,6 +104,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Lego1x1", "Лего 1x1"},
 				{"SceneInfoLayer.Lego2x1", "Лего 2x1"},
 				{"SceneInfoLayer.Roll", "Валик"},
+				{"SceneInfoLayer.RailX2", "Рельса"},
 
 				{"FileSelectionDialogLayer.SelectFile", "Выберите файл..."},
 				{"FileSelectionDialogLayer.EnterName", "Введите имя..."},
@@ -133,8 +135,10 @@ namespace Assets.Scripts {
 					return _lang;
 				}
 
-				if (!PlayerPrefs.HasKey("Language")) {
-					PlayerPrefs.SetInt("Language", 0);
+				if (!PlayerPrefs.HasKey("Language"))
+				{
+					var defaultLang = Application.systemLanguage == SystemLanguage.Russian ? 1 : 0;
+					PlayerPrefs.SetInt("Language", defaultLang);
 				}
 
 				_lang = PlayerPrefs.GetInt("Language");

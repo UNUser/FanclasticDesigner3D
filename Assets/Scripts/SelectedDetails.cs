@@ -186,7 +186,11 @@ namespace Assets.Scripts
 
 				if (detail.transform.root != targetGroup.transform) continue;
 
-				return detail.GetComponent<Detail>();
+				var result = detail.GetComponent<Detail>();
+
+				if (result == null) continue;
+
+				return result;
 			}
 
 			Debug.LogError("Wrong bounds in details group!");

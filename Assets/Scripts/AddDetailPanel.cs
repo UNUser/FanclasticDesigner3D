@@ -13,6 +13,8 @@ namespace Assets.Scripts {
         public GameObject DetailButtonPrefab;
         public Transform DetailsContent;
 
+	    public Sprite[] DetailsIcons;
+
         public DetailColor ActiveColor { get; private set; }
 
 
@@ -43,13 +45,18 @@ namespace Assets.Scripts {
             ActiveColor = colors[0];
 
             Details = Resources.LoadAll<GameObject>("Prefabs/Details");
+	        var iconIndex = 0;
 
             foreach (var detail in Details)
             {
                 var detailButton = Instantiate(DetailButtonPrefab).GetComponent<DetailButton>();
+                var detailName = detail.name;
 
-                detailButton.GetComponentInChildren<Text>().text = detail.name;
-                detailButton.SetDetail(detail);
+	            if (char.IsDigit(detailName[0])) {
+		            detailButton.SetDetail(detail, detailName);
+	            } else {
+					detailButton.SetDetail(detail, DetailsIcons[iconIndex++]);
+	            }
                 detailButton.transform.SetParent(DetailsContent, false);
 
                 _name2Detail.Add(detail.name, detail);

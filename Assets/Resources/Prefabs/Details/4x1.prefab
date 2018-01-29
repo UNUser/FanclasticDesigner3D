@@ -125,7 +125,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 8.25, y: 2.25, z: 2.25}
+  m_Size: {x: 8.1, y: 2.1, z: 2.1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &65493748174492120
 BoxCollider:
@@ -164,3 +164,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   SpaceBounds: {fileID: 65000013061320460}
   Linkage: {fileID: 1236606922546970}
+  AlignmentPoint: {x: 1, y: 0, z: 0}
+  FixedColor: 0

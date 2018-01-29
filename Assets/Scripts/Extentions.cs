@@ -91,6 +91,25 @@ namespace Assets.Scripts {
             return v;
         }
 
+		public static Vector3 AlignByCrossPoint(this Vector3 vector, Vector3 crossPoint) {
+			var oddSum = (Mathf.RoundToInt(crossPoint.x) & 1)
+					   + (Mathf.RoundToInt(crossPoint.y) & 1)
+				       + (Mathf.RoundToInt(crossPoint.z) & 1);
+			var isOddY = Mathf.RoundToInt(crossPoint.y).IsOdd();
+			var isFloor = Mathf.RoundToInt(vector.y) == 0;
+			var isOddAlignment = isFloor ? isOddY : (oddSum > 1);
+
+			var newCrossPoint = new Vector3(AlignValue(isOddAlignment, crossPoint.x),
+											AlignValue(isOddAlignment, crossPoint.y),
+											AlignValue(isOddAlignment, crossPoint.z));
+
+			var crossPointAlignment = newCrossPoint - crossPoint;
+			/*Debug.Log("Old: " + vector + ", new: " + v + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
+								+ (Mathf.RoundToInt(vector.y) & 1) + " "
+								+ (Mathf.RoundToInt(vector.z) & 1) + " " + sum);*/
+			return vector + crossPointAlignment;
+		}
+
         /// <summary>
         /// Выравнивание координат вектора по сетке квадратных дырок-коннекторов (все координаты вектора должны быть целые и четность одной координаты должна отличаться)
         /// Если ForceAlignment указан None, то выравнивание идет в сторону четности большинства координат вектора

@@ -1,22 +1,39 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 
 namespace Assets.Scripts {
 
     public class DetailButton : MonoBehaviour, IPointerUpHandler, IDragHandler
     {
+	    public Text Text;
+	    public Image Icon;
+
         private GameObject _detailPrefab;
         private Detail _newDetail;
         private bool _isDrag;
 
 	    private HashSet<Detail> _prevSelected;
 
-        public void SetDetail(GameObject detail)
+        public void SetDetail(GameObject detail, string text)
         {
             _detailPrefab = detail;
+	        Text.text = text;
+
+			Text.gameObject.SetActive(true);
+			Icon.gameObject.SetActive(false);
         }
+
+		public void SetDetail(GameObject detail, Sprite icon)
+		{
+			_detailPrefab = detail;
+			Icon.sprite = icon;
+
+			Text.gameObject.SetActive(false);
+			Icon.gameObject.SetActive(true);
+		}
 
         public void OnPointerUp(PointerEventData eventData)
         {

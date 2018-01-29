@@ -16,6 +16,7 @@ using UnityFBXExporter;
 using Application = UnityEngine.Application;
 using Group = System.Collections.Generic.List<Assets.Scripts.Detail>;
 
+
 namespace Assets.Scripts {
 
 	public enum AppMode
@@ -120,7 +121,7 @@ namespace Assets.Scripts {
 	    private void OnGroupSelected(ConnectedGroup selectedGroup)
 	    {
 			ModeSwitcher.gameObject.SetActive(true);
-			DestroyObject(ModeSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// проверить баг в новых версиях юнити!!!
+			DestroyObject(ModeSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
 
 		    if (selectedGroup == null)
 		    {
@@ -183,6 +184,7 @@ namespace Assets.Scripts {
 			if (LanguageChanged != null) {
 				LanguageChanged(index);
 			}
+			DestroyObject(LanguageSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
 
 			UiLang.Lang = index;
 		}
@@ -311,12 +313,13 @@ namespace Assets.Scripts {
         {
 			Session = new Session();
 	        ModeSwitcher.interactable = false;
-            StartCoroutine(UpdateDebugInfo());
+//            StartCoroutine(UpdateDebugInfo());
 
 	        LanguageSwitcher.value = UiLang.Lang;
 			_isLangInited = true;
 
 			CheckForFirstLaunch();
+			CheckForDemoModelsUpdate();
         }
 
 	    private bool _loadDemo;
@@ -336,7 +339,6 @@ namespace Assets.Scripts {
 			    return;
 		    }
 
-		    CopyDemoModels();
 		    _loadDemo = true;
 
 			PlayerPrefs.SetInt("WasLaunched", 1);
@@ -345,160 +347,66 @@ namespace Assets.Scripts {
 
 
 
-	    private IEnumerator CopyFile(string file) {
-		    UnityWebRequest www = new UnityWebRequest(Path.Combine(Application.streamingAssetsPath, file));
-		    www.downloadHandler = new DownloadHandlerBuffer();
+	    private IEnumerator CopyDemoModels()
+	    {
+			var filesListPath = Path.Combine(Application.streamingAssetsPath, Path.Combine("DemoModels", "FilesList.txt"));
+			var filesListRequest = new UnityWebRequest(filesListPath) { downloadHandler = new DownloadHandlerBuffer() };
 
-		    yield return www.SendWebRequest();
+			yield return filesListRequest.SendWebRequest();
 
-//		    while (!www.downloadHandler.isDone)
-//		    {
-//				Debug.Log("waiting " + file);
-//			    yield return new WaitForEndOfFrame();
-//		    }
+			if (filesListRequest.isNetworkError || filesListRequest.isHttpError) {
+				Debug.LogError("Can't get files list: " + filesListRequest.error + filesListRequest.url);
+				yield break;
+			}
 
-//			Debug.LogWarning(www.url);
+		    var filesListRequestResult = filesListRequest.downloadHandler.text;
+			var filesRelativePaths = filesListRequestResult.Split(new[] { "\r\n", "\r", "\n"}, StringSplitOptions.RemoveEmptyEntries);
 
-		    if (www.isNetworkError || www.isHttpError) {
-			    Debug.LogError(www.error + www.url);
-		    } else {
-			    // Show results as text
-//			    Debug.Log(www.downloadHandler.text);
+			foreach (var fileRelativePath in filesRelativePaths) {
 
-			    var fileName = Path.GetFileName(file) ?? string.Empty;
-			    var directory = Path.GetDirectoryName(file) ?? string.Empty;
-				var destination = Path.Combine(Application.persistentDataPath, directory);
+				var destination = Path.Combine(Application.persistentDataPath, fileRelativePath);
+				var directory = Path.GetDirectoryName(destination) ?? string.Empty;
 
-				if (!Directory.Exists(destination)) {
-					Directory.CreateDirectory(destination);
+				var source = Path.Combine(Application.streamingAssetsPath, fileRelativePath);
+				var fileRequest = new UnityWebRequest(source) { downloadHandler = new DownloadHandlerBuffer() };
+
+				yield return fileRequest.SendWebRequest();
+
+				if (fileRequest.isNetworkError || fileRequest.isHttpError) {
+					Debug.LogError("Can't get demo model's file: " + fileRequest.error + fileRequest.url);
+					continue;
 				}
 
-//			    if (!fileName.EndsWith(".fcl")) {
-//				    fileName += ".fcl";
-//			    }
+				if (!Directory.Exists(directory)) {
+					Directory.CreateDirectory(directory);
+				}
 
-//				Debug.Log(file + "\n" + fileName + "\n" + directory + "\n" + destination);
+				File.WriteAllBytes(destination, fileRequest.downloadHandler.data);
+			}
 
-			    // Or retrieve results as binary data
-			    byte[] results = www.downloadHandler.data;
-
-//				Debug.Log(Path.Combine(destination, fileName) + " " + results.Length + " " + www.downloadHandler.isDone);
-
-				File.WriteAllBytes(Path.Combine(destination, fileName), results);
-		    }
+			Debug.Log("Demo models successfully updated!");
 	    }
 
+		private void CheckForDemoModelsUpdate()
+		{
+			const int demoModelsVersion = 2;
 
-		private void CopyDemoModels()
-	    {
-		    var destinationPath = Path.Combine(Application.persistentDataPath, "DemoModels");
-			var sourcePath = Path.Combine(Application.streamingAssetsPath, "DemoModels");
+			var currentVersion = PlayerPrefs.GetInt("DemoModelsVersion", 0);
 
-
-		    var files = new string[]
-		    {
-				"F.fcl",
-
-//				Path.Combine("AirCraft", "Башня самолет вертолет.fcl"),
-//				Path.Combine("AirCraft", "самолет_вертолет_1.fcl"),
-//				Path.Combine("AirCraft", "самолет_вертолет_2.fcl"),
-
-				Path.Combine("ANIMALS", "lamb.fcl"),
-				Path.Combine("ANIMALS", "panda.fcl"),
-				Path.Combine("ANIMALS", "dog.fcl"),
-
-				Path.Combine("ARCHITECTURE", "Tower1_A.fcl"),
-				Path.Combine("ARCHITECTURE", "Tower2_217_A.fcl"),
-				Path.Combine("ARCHITECTURE", "Tower3_A.fcl"),
-//				Path.Combine("ARCHITECTURE", "КрепостьБашня А.fcl"),
-//				Path.Combine("ARCHITECTURE", "КрепостьЦерковь А.fcl"),
-
-				Path.Combine("Bird_Lama", "lama.fcl"),
-				Path.Combine("Bird_Lama", "bird.fcl"),
-
-				Path.Combine("Buterfly", "Buterfly_1.fcl"),
-				Path.Combine("Buterfly", "Buterfly_2.fcl"),
-
-				Path.Combine("Deer_Giraffe", "deer_giraffe_1.fcl"),
-				Path.Combine("Deer_Giraffe", "deer_giraffe_2.fcl"),
-
-				Path.Combine("DINOSAURUS", "dino_3.fcl"),
-//				Path.Combine("DINOSAURUS", "Король завр.fcl"),
-//				Path.Combine("DINOSAURUS", "Трицерапторс.fcl"),
-
-				Path.Combine("Flowers", "blowball.fcl"),
-				Path.Combine("Flowers", "flower.fcl"),
-
-//				Path.Combine("GEOMETRY", "Башня_155.fcl"),
-//				Path.Combine("GEOMETRY", "Волна.fcl"),
-//				Path.Combine("GEOMETRY", "Гексо_Шар.fcl"),
-//				Path.Combine("GEOMETRY", "Глобус.fcl"),
-//				Path.Combine("GEOMETRY", "Кубик.fcl"),
-//				Path.Combine("GEOMETRY", "Мини_гексаном.fcl"),
-//				Path.Combine("GEOMETRY", "Пружина.fcl"),
-//				Path.Combine("GEOMETRY", "Фигура 1.fcl"),
-//				Path.Combine("GEOMETRY", "Фрактал.fcl"),
-//				Path.Combine("GEOMETRY", "Шар.fcl"),
-
-//				Path.Combine("MARINE", "Батискаф.fcl"),
-//				Path.Combine("MARINE", "Башня морская.fcl"),
-//				Path.Combine("MARINE", "Катамаран.fcl"),
-//				Path.Combine("MARINE", "Корабль.fcl"),
-
-//				Path.Combine("Mask", "Рожицы.fcl"),
-
-//				Path.Combine("MIX", "башенка.fcl"),
-//				Path.Combine("MIX", "вертолетик.fcl"),
-//				Path.Combine("MIX", "жирафик.fcl"),
-//				Path.Combine("MIX", "переностик.fcl"),
-//				Path.Combine("MIX", "Пружинка.fcl"),
-//				Path.Combine("MIX", "Робот.fcl"),
-//				Path.Combine("MIX", "самолет.fcl"),
-//				Path.Combine("MIX", "Стрекоза.fcl"),
-//				Path.Combine("MIX", "Цветок.fcl"),
-
-				Path.Combine("Plane_Ship", "ship.fcl"),
-				Path.Combine("Plane_Ship", "plane.fcl"),
-
-				Path.Combine("Racing", "Quad_Bike.fcl"),
-				Path.Combine("Racing", "Race_Car_F1.fcl"),
-
-				Path.Combine("Rally_Rade", "Buggy.fcl"),
-				Path.Combine("Rally_Rade", "Motocycle.fcl"),
-				Path.Combine("Rally_Rade", "Tricycle.fcl"),
-
-//				Path.Combine("SPACE", "Башня космос сред.fcl"),
-//				Path.Combine("SPACE", "Звездолет3.fcl"),
-//				Path.Combine("SPACE", "Корабль 2 X Wing.fcl"),
-//				Path.Combine("SPACE", "Ракета.fcl"),
-
-//				Path.Combine("SPACESHIPS", "Башня Звезд.fcl"),
-				Path.Combine("SPACESHIPS", "Spaceship_1.fcl"),
-				Path.Combine("SPACESHIPS", "Spaceship_2.fcl"),
-				Path.Combine("SPACESHIPS", "Spaceship_3.fcl"),
-				Path.Combine("SPACESHIPS", "Spaceship_4.fcl"),
-
-//				Path.Combine("Карусели", "Башня Карусели.fcl"),
-//				Path.Combine("Карусели", "Карусель Б.fcl"),
-//				Path.Combine("Карусели", "Качалка.fcl"),
-
-
-		    };//Directory.GetFiles(sourcePath);
-
-			if (!Directory.Exists(destinationPath)) {
-				Directory.CreateDirectory(destinationPath);
+			if (currentVersion == demoModelsVersion) {
+				return;
 			}
 
-			foreach (var file in files) {
+			var demoModelsDirectoryPath = Path.Combine(Application.persistentDataPath, "DemoModels");
 
-//				if (file.EndsWith(".meta")) {
-//					continue;
-//				}
-
-//			    File.Copy(file, destinationPath + fileName, true);
-				StartCoroutine(CopyFile(Path.Combine("DemoModels", file)));
+			if (Directory.Exists(demoModelsDirectoryPath)) {
+				Directory.Delete(demoModelsDirectoryPath, true);
 			}
-		}
+
+			StartCoroutine(CopyDemoModels());
+
+			PlayerPrefs.SetInt("DemoModelsVersion", demoModelsVersion);
+	    }
 
         private IEnumerator UpdateDebugInfo()
         {
@@ -809,7 +717,7 @@ namespace Assets.Scripts {
 						straightDirections.Add(connectionDirection);
 					}
 
-					Debug.Log(connectionDirection);
+//					Debug.Log(connectionDirection);
 				}
 
 				foreach (var direction in straightDirections) {

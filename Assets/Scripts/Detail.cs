@@ -230,7 +230,7 @@ namespace Assets.Scripts
 			var offset = newPos - raycaster.transform.position;
 			var links = AppController.Instance.SelectedDetails.GetLinks(LinksMode.ExceptSelected, offset);
 
-	        if (hitPoint.y > 0 && !links.HasConnections) {
+	        if (!links.IsValid || (hitPoint.y > 0 && !links.HasConnections)) {
 				return;
 	        }
 
@@ -283,8 +283,10 @@ namespace Assets.Scripts
             var bottomPointIndex = CorrectHeightAboveFloor(ref pos);
 
             var offsetFromCurrentPos = pos - transform.position;
-            var bottomPointPos = transform.TransformPoint(_connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
-            var alignment = bottomPointPos.AlignAsCross() - bottomPointPos;
+            var alignmentPoint = transform.TransformPoint(AlignmentPoint) + offsetFromCurrentPos;
+			var bottomPoint = transform.TransformPoint(_connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
+
+			var alignment = bottomPoint.AlignByCrossPoint(alignmentPoint) - bottomPoint;
 
             pos += alignment;
         }
@@ -503,8 +505,8 @@ namespace Assets.Scripts
 				var overlap = Extentions.Overlap(overlapArea, neighbor.bounds);
 				var size = overlap.size;
 
-				// все координаты больше 2.25
-				var invalidTest = Mathf.Min(size.x, 2.25f) + Mathf.Min(size.y, 2.25f) + Mathf.Min(size.z, 2.25f) > 6.5;
+				// все координаты больше 1.1 
+				var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) >= 3.6;
 
 				if (invalidTest) {
 //					Debug.Log(gameObject.name + " " + neighbor.gameObject.name + " " + overlap + " " + linksMode);

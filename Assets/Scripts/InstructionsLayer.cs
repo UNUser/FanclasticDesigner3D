@@ -59,9 +59,9 @@ namespace Assets.Scripts
 			_session = session;
 			_instructions = instructions;
 
-			Slider.maxValue = instructions.Count;
 			_stepNumber = Mathf.RoundToInt(Slider.minValue);
 			StepNumber = _stepNumber;
+			Slider.maxValue = instructions.Count;
 			_instructions[0].Do();
 			_instructions[0].PlayAnimation();
 		}

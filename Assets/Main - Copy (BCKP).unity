@@ -161,9 +161,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CopyButton: {fileID: 2038929401}
   Grid: {fileID: 2026708426}
-  CellPrefab: {fileID: 1499093947}
+  BaseCellPrefab: {fileID: 1499093947}
   OtherDetailsCount: {fileID: 2079846461}
-  LinePrefab: {fileID: 1448989468}
+  OthersCellPrefab: {fileID: 1448989468}
   HeightValue: {fileID: 1120688506}
   LengthValue: {fileID: 1600746772}
   WidthValue: {fileID: 1123445685}
@@ -13864,13 +13864,13 @@ MonoBehaviour:
     m_BestFit: 0
     m_MinSize: 2
     m_MaxSize: 40
-    m_Alignment: 0
+    m_Alignment: 5
     m_AlignByGeometry: 1
     m_RichText: 1
     m_HorizontalOverflow: 1
-    m_VerticalOverflow: 0
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: New Text
+  m_Text: 'New Text: '
 --- !u!222 &1448989470
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -13883,7 +13883,7 @@ RectTransform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1448989468}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -667.3267, y: -400, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -18035,6 +18035,15 @@ MonoBehaviour:
   DetailButtonPrefab: {fileID: 1000013737994854, guid: 73045c6d54384724c9b584de2e00fc73,
     type: 2}
   DetailsContent: {fileID: 73506542}
+  DetailsIcons:
+  - {fileID: 21300000, guid: cdd82d15e3341304cac9d5a4ec4cef1f, type: 3}
+  - {fileID: 21300000, guid: e05e0b0a554daa54bb48b52f4ec65eda, type: 3}
+  - {fileID: 21300000, guid: 23aab857b09d5d14a88e63bc09a4bc60, type: 3}
+  - {fileID: 21300000, guid: 74f60f2b8ea547e49a012f6cfea7bb28, type: 3}
+  - {fileID: 21300000, guid: 5cef6c9a58bef0c468f4cdea732560cb, type: 3}
+  - {fileID: 21300000, guid: 5c1fdedf3a5e1f849b3513f5b2796c80, type: 3}
+  - {fileID: 21300000, guid: 30116c9a5901d3c4cb42605af9cc1f1c, type: 3}
+  - {fileID: 21300000, guid: 4de7054307fc86548ac32ee22536d9a3, type: 3}
 --- !u!1 &1899350037
 GameObject:
   m_ObjectHideFlags: 0
@@ -19497,7 +19506,7 @@ GameObject:
   - component: {fileID: 2079846461}
   - component: {fileID: 2079846462}
   m_Layer: 0
-  m_Name: Other
+  m_Name: Others
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19530,20 +19539,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 2079846460}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 1297475563, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: -2095666955, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 50
+    m_Left: 125
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 0
-  m_Spacing: 0
-  m_ChildForceExpandWidth: 1
-  m_ChildForceExpandHeight: 0
-  m_ChildControlWidth: 1
-  m_ChildControlHeight: 0
+  m_ChildAlignment: 4
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 200, y: 30}
+  m_Spacing: {x: 0, y: 0}
+  m_Constraint: 1
+  m_ConstraintCount: 4
 --- !u!1 &2103474003
 GameObject:
   m_ObjectHideFlags: 0

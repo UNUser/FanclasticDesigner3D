@@ -11,10 +11,10 @@ namespace Assets.Scripts {
 		public GameObject CopyButton;
 
 		public GridLayoutGroup Grid;
-		public GameObject CellPrefab;
+		public GameObject BaseCellPrefab;
 
 		public Transform OtherDetailsCount;
-		public GameObject LinePrefab;
+		public GameObject OthersCellPrefab;
 
 		public Text HeightValue;
 		public Text LengthValue;
@@ -35,10 +35,10 @@ namespace Assets.Scripts {
 				}
 
 				var cellText = child.gameObject.GetComponent<Text>().text;
-				var isNewRow = child.GetSiblingIndex()%Grid.constraintCount > 0;
+				var isNewRow = !(child.GetSiblingIndex() % Grid.constraintCount > 0);
 
 				str.Append(cellText);
-				str.Append(isNewRow ? "\t" : "\n");
+				str.Append(isNewRow ? "\n" : "\t");
 			}
 
 			str.Append("\n");
@@ -51,10 +51,11 @@ namespace Assets.Scripts {
 					continue;
 				}
 
-				var lineText = child.gameObject.GetComponent<Text>().text;
+				var cellText = child.gameObject.GetComponent<Text>().text;
+				var isNewRow = !child.GetSiblingIndex().IsOdd();
 
-				str.Append(lineText);
-				str.Append("\n");
+				str.Append(cellText);
+				str.Append(isNewRow ? "\n" : "\t");
 			}
 
 			GUIUtility.systemCopyBuffer = str.ToString();
@@ -67,15 +68,15 @@ namespace Assets.Scripts {
 
 		private void Start()
 		{
-			CellPrefab.SetActive(false);
-			LinePrefab.SetActive(false);
+			BaseCellPrefab.SetActive(false);
+			OthersCellPrefab.SetActive(false);
 		}
 
-		private void AddCell(string text, TextAnchor alignment = TextAnchor.MiddleCenter)
+		private void AddCell(GameObject prefab, string text, TextAnchor alignment = TextAnchor.MiddleCenter)
 		{
-			var cell = Instantiate(CellPrefab).GetComponent<Text>();
+			var cell = Instantiate(prefab).GetComponent<Text>();
 
-			cell.transform.SetParent(Grid.transform, false);
+			cell.transform.SetParent(prefab.transform.parent, false);
 
 			cell.text = text;
 			cell.alignment = alignment;
@@ -123,33 +124,28 @@ namespace Assets.Scripts {
 			Grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
 			Grid.constraintCount = types.Length + 1;
 
-			AddCell(string.Empty);
+			AddCell(BaseCellPrefab, string.Empty);
 
 			foreach (var type in types)
 			{
-				AddCell(type);
+				AddCell(BaseCellPrefab, type);
 			}
 
 			foreach (var material in colors)
 			{
 				var materialName = material.Material.name;
-				AddCell(("SceneInfoLayer." + materialName).Lang(), TextAnchor.MiddleRight);
+				AddCell(BaseCellPrefab, ("SceneInfoLayer." + materialName).Lang(), TextAnchor.MiddleRight);
 
 				foreach (var type in types)
 				{
-					AddCell(counts[material.Material.color][type].ToString());
+					AddCell(BaseCellPrefab, counts[material.Material.color][type].ToString());
 				}
 			}
 
 			foreach (var type in otherTypes)
 			{
-				var line = Instantiate(LinePrefab).GetComponent<Text>();
-
-				line.transform.SetParent(OtherDetailsCount.transform, false);
-
-				line.text = string.Format("{0}: {1}", ("SceneInfoLayer." + type).Lang(), otherCounts[type]);
-
-				line.gameObject.SetActive(true);
+				AddCell(OthersCellPrefab, string.Format("{0}: ", ("SceneInfoLayer." + type).Lang()), TextAnchor.MiddleRight);
+				AddCell(OthersCellPrefab, otherCounts[type].ToString(), TextAnchor.MiddleLeft);
 			}
 
 			var roundedSize = (SerializableVector3Int) bounds.size;
