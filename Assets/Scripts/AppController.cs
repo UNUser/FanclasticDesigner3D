@@ -389,7 +389,7 @@ namespace Assets.Scripts {
 
 		private void CheckForDemoModelsUpdate()
 		{
-			const int demoModelsVersion = 2;
+			const int demoModelsVersion = 3;
 
 			var currentVersion = PlayerPrefs.GetInt("DemoModelsVersion", 0);
 

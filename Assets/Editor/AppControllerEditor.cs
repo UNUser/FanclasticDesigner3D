@@ -22,7 +22,7 @@ namespace Assets.Editor
 			var demoModelsPath = Path.Combine(streamingAssetsPath, "DemoModels");
 			var filesListPath = Path.Combine(demoModelsPath, "FilesList.txt");
 			var filesList = Directory.GetFiles(demoModelsPath, "*.fcl", SearchOption.AllDirectories)
-									 .Select(s => s.Remove(0, streamingAssetsPath.Length + 1))
+									 .Select(s => s.Remove(0, streamingAssetsPath.Length + 1).Replace('\\', '/'))
 									 .ToArray();
 
 			File.WriteAllLines(filesListPath, filesList);
