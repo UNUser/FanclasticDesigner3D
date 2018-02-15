@@ -40,6 +40,7 @@ GameObject:
   - component: {fileID: 4881551598654738}
   - component: {fileID: 65762048720317998}
   - component: {fileID: 65891965136881652}
+  - component: {fileID: 65696810579525610}
   m_Layer: 10
   m_Name: Linkage
   m_TagString: Untagged
@@ -127,6 +128,18 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 10.1, y: 2.1, z: 2.1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!65 &65696810579525610
+BoxCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1304502309943162}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 9.2, y: 0.85, z: 0.85}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &65762048720317998
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -137,7 +150,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 8.95, y: 1.15, z: 0.95}
+  m_Size: {x: 8.85, y: 0.85, z: 1.2}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &65891965136881652
 BoxCollider:
@@ -149,7 +162,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 9.15, y: 0.15, z: 1.15}
+  m_Size: {x: 8.1, y: 1.05, z: 0.1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &114000014082413708
 MonoBehaviour:

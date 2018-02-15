@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -100,10 +101,11 @@ namespace Assets.Scripts
 	        _links = new DetailLinks(this);
 
             // Определяем по размерам коллайдера тип детали и локальные координаты всех ее коннекторов
-            var collider = GetComponent<Collider>();
+            var colliderSize = GetComponent<Collider>().bounds.size;
+	        var swapZY = colliderSize.y > colliderSize.z;
 
-            _sizeX = (int) collider.bounds.size.x - 1;
-            _sizeZ = (int) collider.bounds.size.z - 1;
+			_sizeX = (int) colliderSize.x - 1;
+			_sizeZ = (int) (swapZY ? colliderSize.y : colliderSize.z) - 1;
 
             var totalConnectors = _sizeX*_sizeZ;
 
@@ -112,9 +114,11 @@ namespace Assets.Scripts
 
             for (var i = 0; i < _connectorsLocalPos.Length; i++)
             {
+				var valueZ = -i / _sizeX + _sizeZ / 2;
+
                 _connectorsLocalPos[i] = new Vector3(i % _sizeX - _sizeX / 2,
-													0,
-                                                    -i / _sizeX + _sizeZ / 2);
+													swapZY ? valueZ : 0,
+                                                    swapZY ? 0 : valueZ);
 
             }
 
@@ -507,7 +511,7 @@ namespace Assets.Scripts
 
 				// все координаты больше 1.1 
 				var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) >= 3.6;
-
+				Debug.Log(gameObject.name + " " + neighbor.gameObject.name + " " + overlap + " " + (Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f)).ToString(new NumberFormatInfo{PercentDecimalDigits = 4}) + " " + invalidTest);
 				if (invalidTest) {
 //					Debug.Log(gameObject.name + " " + neighbor.gameObject.name + " " + overlap + " " + linksMode);
 					return false;
