@@ -158,7 +158,7 @@ namespace Assets.Scripts
 			bottomDetail.AlignPosition(ref newPos);
 
 			alignment = newPos - bottomDetail.transform.position;
-			targetDetail.transform.Translate(alignment, Space.World);
+			targetDetail.transform.Translate(alignment, Space.World);    
 
 		    var links = targetDetail.GetLinks();
 			IsValid = links.IsValid;

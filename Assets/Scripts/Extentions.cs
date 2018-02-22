@@ -104,9 +104,12 @@ namespace Assets.Scripts {
 											AlignValue(isOddAlignment, crossPoint.z));
 
 			var crossPointAlignment = newCrossPoint - crossPoint;
-			/*Debug.Log("Old: " + vector + ", new: " + v + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
+			/*Debug.Log("Old: " + vector + ", crossPointAlignment: " + crossPointAlignment + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
 								+ (Mathf.RoundToInt(vector.y) & 1) + " "
-								+ (Mathf.RoundToInt(vector.z) & 1) + " " + sum);*/
+								+ (Mathf.RoundToInt(vector.z) & 1) + " " + oddSum
+								 + ", isOddY: " + isOddY
+								  + ", isFloor: " + isFloor
+								   + ", newCrossPoint: " + newCrossPoint);*/
 			return vector + crossPointAlignment;
 		}
 
@@ -161,7 +164,7 @@ namespace Assets.Scripts {
             if (isOddAlignment != roundValue.IsOdd())
                 return roundValue != (int) value
                     ? (int) value
-                    : roundValue + Math.Sign(value);
+                    : roundValue + (value != 0 ? Math.Sign(value) : 1);
 
             return roundValue;
         }

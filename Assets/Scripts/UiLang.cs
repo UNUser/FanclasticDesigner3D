@@ -6,8 +6,21 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts {
 
+//	public enum Languages
+//	{
+//		English,
+//		Russian,
+//	}
+
 	public class UiLang : MonoBehaviour
 	{
+
+//		public static readonly Dictionary<int, SystemLanguage>[] Lang2SystemLang = {
+//			new Dictionary<Languages, SystemLanguage>
+//			{
+//				{"EditorLayer.ActiveColor", "Active color"},
+//			}
+
 		public static readonly Dictionary<string, string>[] Dictionaries = {
 			new Dictionary<string, string>
 			{
@@ -15,6 +28,7 @@ namespace Assets.Scripts {
 				{"EditorLayer.Details", "Elements"},
 
 				{"Menu.Menu", "Menu"},
+				{"Menu.NewScene", "New scene"},
 				{"Menu.Save", "Save..."},
 				{"Menu.Load", "Load..."},
 				{"Menu.Export", "Export..."},
@@ -73,6 +87,7 @@ namespace Assets.Scripts {
 				{"EditorLayer.Details", "Детали"},
 
 				{"Menu.Menu", "Меню"},
+				{"Menu.NewScene", "Новая сцена"},
 				{"Menu.Save", "Сохранить..."},
 				{"Menu.Load", "Загрузить..."},
 				{"Menu.Export", "Экспорт..."},

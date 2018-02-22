@@ -511,7 +511,7 @@ namespace Assets.Scripts
 
 				// все координаты больше 1.1 
 				var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) >= 3.6;
-				Debug.Log(gameObject.name + " " + neighbor.gameObject.name + " " + overlap + " " + (Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f)).ToString(new NumberFormatInfo{PercentDecimalDigits = 4}) + " " + invalidTest);
+
 				if (invalidTest) {
 //					Debug.Log(gameObject.name + " " + neighbor.gameObject.name + " " + overlap + " " + linksMode);
 					return false;

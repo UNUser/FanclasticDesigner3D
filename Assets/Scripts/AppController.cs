@@ -152,6 +152,12 @@ namespace Assets.Scripts {
 			}
 	    }
 
+	    public void OnNewSceneButtonClicked()
+	    {
+			Session = new Session();
+			ModeSwitcher.interactable = false;
+	    }
+
         public void OnSaveButtonClicked() {
 
 	        if (!SelectedDetails.IsValid) {
