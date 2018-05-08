@@ -126,7 +126,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 1.3.5
+  bundleVersion: 1.3.7
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -164,8 +164,8 @@ PlayerSettings:
     iOS: ru.fanclastic.Fanclastic3DDesigner
     tvOS: ru.fanclastic.Fanclastic3DDesigner
   buildNumber:
-    iOS: 1
-  AndroidBundleVersionCode: 10305
+    iOS: 0
+  AndroidBundleVersionCode: 10307
   AndroidMinSdkVersion: 16
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 1
@@ -240,7 +240,7 @@ PlayerSettings:
   metalEditorSupport: 1
   metalAPIValidation: 1
   iOSRenderExtraFrameOnPause: 1
-  appleDeveloperTeamID: JF2A8J4UV8
+  appleDeveloperTeamID: 
   iOSManualSigningProvisioningProfileID: 
   tvOSManualSigningProvisioningProfileID: 
   appleEnableAutomaticSigning: 0
@@ -265,7 +265,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: ed22a8fc10bf94738b16762c0909553d, type: 3}
+      m_Icon: {fileID: 2800000, guid: d59e22883cd9d8045b2a218468e34ca8, type: 3}
       m_Width: 128
       m_Height: 128
       m_Kind: 0

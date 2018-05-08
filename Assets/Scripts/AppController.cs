@@ -61,6 +61,20 @@ namespace Assets.Scripts {
 
 //        public Material[] DetailColors;
 
+//
+//	    private static int N;
+//	    protected void Update()
+//	    {
+//		    if (Input.GetKeyDown(KeyCode.P))
+//		    {
+//			    var fileName = "C:\\" + Camera.main.pixelWidth + "x" + Camera.main.pixelHeight + "(" + N++ + ").png";
+//
+//			    ScreenCapture.CaptureScreenshot(fileName);
+//		    }
+//	    }
+
+
+
 		public SelectedDetails SelectedDetails;
 
         public void RotateSelectedByX() {
@@ -315,7 +329,7 @@ namespace Assets.Scripts {
 			ExitButton.SetActive(!Application.isMobilePlatform);
 			ExportButton.SetActive(!Application.isMobilePlatform);
 
-			AotHelper.EnsureList<int> ();
+			AotHelper.EnsureList<int>();
 	    }
 
         public void Start()
@@ -359,10 +373,9 @@ namespace Assets.Scripts {
 	    private IEnumerator CopyDemoModels()
 	    {
 			var filesListPath = Path.Combine(Application.streamingAssetsPath, Path.Combine("DemoModels", "FilesList.txt"));
-			#if PLATFORM_IOS
-			filesListPath = "file://" + filesListPath;
-			#endif
-//			var filesListRequest = new WWW (filesListPath);
+#if PLATFORM_IOS
+            filesListPath = "file://" + filesListPath;
+#endif
 			var filesListRequest = new UnityWebRequest(filesListPath) { downloadHandler = new DownloadHandlerBuffer() };
 
 			yield return filesListRequest.SendWebRequest();
@@ -381,9 +394,9 @@ namespace Assets.Scripts {
 				var directory = Path.GetDirectoryName(destination) ?? string.Empty;
 
 				var source = Path.Combine(Application.streamingAssetsPath, fileRelativePath);
-				#if PLATFORM_IOS
-				source = "file://" + source;
-				#endif
+#if PLATFORM_IOS
+                source = "file://" + source;
+#endif
 				var fileRequest = new UnityWebRequest(source) { downloadHandler = new DownloadHandlerBuffer() };
 
 				yield return fileRequest.SendWebRequest();
@@ -405,18 +418,12 @@ namespace Assets.Scripts {
 
 		private void CheckForDemoModelsUpdate()
 		{
-			const int demoModelsVersion = 3;
+			const int demoModelsVersion = 6;
 
 			var currentVersion = PlayerPrefs.GetInt("DemoModelsVersion", 0);
 
 			if (currentVersion == demoModelsVersion) {
 				return;
-			}
-
-			var demoModelsDirectoryPath = Path.Combine(Application.persistentDataPath, "DemoModels");
-
-			if (Directory.Exists(demoModelsDirectoryPath)) {
-				Directory.Delete(demoModelsDirectoryPath, true);
 			}
 
 			StartCoroutine(CopyDemoModels());
