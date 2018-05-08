@@ -2049,8 +2049,8 @@
         },
         {
           "Id": -2768,
-          "Type": "1x1",
-          "Color": "White",
+          "Type": "Roll",
+          "Color": "None",
           "Position": {
             "x": -32,
             "y": 6,
@@ -2262,8 +2262,8 @@
         },
         {
           "Id": -2980,
-          "Type": "1x1",
-          "Color": "White",
+          "Type": "Roll",
+          "Color": "None",
           "Position": {
             "x": -32,
             "y": 28,

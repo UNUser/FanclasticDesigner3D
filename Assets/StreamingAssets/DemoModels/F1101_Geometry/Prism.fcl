@@ -673,6 +673,23 @@
           "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
           "Rotation": {
             "x": 0,
+            "y": 90,
+            "z": 0
+          },
+          "Position": {
+            "x": -1,
+            "y": 8,
+            "z": -6
+          },
+          "TargetDetails": [
+            -1040
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
             "y": 0,
             "z": 0
           },
