@@ -13,6 +13,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using UnityFBXExporter;
+using Newtonsoft.Json.Utilities;
 using Application = UnityEngine.Application;
 using Group = System.Collections.Generic.List<Assets.Scripts.Detail>;
 
@@ -313,6 +314,8 @@ namespace Assets.Scripts {
 		    SelectedDetails = gameObject.AddComponent<SelectedDetails>();
 			ExitButton.SetActive(!Application.isMobilePlatform);
 			ExportButton.SetActive(!Application.isMobilePlatform);
+
+			AotHelper.EnsureList<int> ();
 	    }
 
         public void Start()
@@ -356,12 +359,16 @@ namespace Assets.Scripts {
 	    private IEnumerator CopyDemoModels()
 	    {
 			var filesListPath = Path.Combine(Application.streamingAssetsPath, Path.Combine("DemoModels", "FilesList.txt"));
+			#if PLATFORM_IOS
+			filesListPath = "file://" + filesListPath;
+			#endif
+//			var filesListRequest = new WWW (filesListPath);
 			var filesListRequest = new UnityWebRequest(filesListPath) { downloadHandler = new DownloadHandlerBuffer() };
 
 			yield return filesListRequest.SendWebRequest();
 
 			if (filesListRequest.isNetworkError || filesListRequest.isHttpError) {
-				Debug.LogError("Can't get files list: " + filesListRequest.error + filesListRequest.url);
+				Debug.LogError("Can't get files list: " + filesListRequest.error + " " + filesListRequest.url);
 				yield break;
 			}
 
@@ -374,6 +381,9 @@ namespace Assets.Scripts {
 				var directory = Path.GetDirectoryName(destination) ?? string.Empty;
 
 				var source = Path.Combine(Application.streamingAssetsPath, fileRelativePath);
+				#if PLATFORM_IOS
+				source = "file://" + source;
+				#endif
 				var fileRequest = new UnityWebRequest(source) { downloadHandler = new DownloadHandlerBuffer() };
 
 				yield return fileRequest.SendWebRequest();
