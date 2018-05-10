@@ -77,6 +77,7 @@
      <Compile Include="Assets\Scripts\AddDetailPanel.cs" />
      <Compile Include="Assets\Scripts\AppController.cs" />
      <Compile Include="Assets\Scripts\AppResources.cs" />
+     <Compile Include="Assets\Scripts\AxisMover.cs" />
      <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\ColorSetter.cs" />
      <Compile Include="Assets\Scripts\Detail.cs" />
@@ -88,6 +89,7 @@
      <Compile Include="Assets\Scripts\DirectoryContentItem.cs" />
      <Compile Include="Assets\Scripts\Extentions.cs" />
      <Compile Include="Assets\Scripts\FileSelectionDialogLayer.cs" />
+     <Compile Include="Assets\Scripts\FixedDirectionMover.cs" />
      <Compile Include="Assets\Scripts\FpsMeter.cs" />
      <Compile Include="Assets\Scripts\InstructionsLayer.cs" />
      <Compile Include="Assets\Scripts\Platform.cs" />

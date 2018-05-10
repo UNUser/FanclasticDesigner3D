@@ -240,7 +240,7 @@ PlayerSettings:
   metalEditorSupport: 1
   metalAPIValidation: 1
   iOSRenderExtraFrameOnPause: 1
-  appleDeveloperTeamID: 
+  appleDeveloperTeamID: JF2A8J4UV8
   iOSManualSigningProvisioningProfileID: 
   tvOSManualSigningProvisioningProfileID: 
   appleEnableAutomaticSigning: 0
@@ -265,7 +265,7 @@ PlayerSettings:
   - m_BuildTarget: 
     m_Icons:
     - serializedVersion: 2
-      m_Icon: {fileID: 2800000, guid: d59e22883cd9d8045b2a218468e34ca8, type: 3}
+      m_Icon: {fileID: 2800000, guid: ed22a8fc10bf94738b16762c0909553d, type: 3}
       m_Width: 128
       m_Height: 128
       m_Kind: 0
