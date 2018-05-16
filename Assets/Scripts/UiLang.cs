@@ -139,6 +139,65 @@ namespace Assets.Scripts {
 				{"TutorialLayer.ZoomHint.Wheel", "колесо мыши"},
 				{"TutorialLayer.ZoomHint.Pinch", "жест двумя пальцами"},
 				{"TutorialLayer.LinkedSelection", "Нажмите на деталь и удерживайте, чтобы выделить одновременно все связанные с ней детали."},
+			},
+			new Dictionary<string, string>
+			{
+				{"EditorLayer.ActiveColor", "Aktive Farbe"},
+				{"EditorLayer.Details", "Details"},
+
+				{"Menu.Menu", "Menü"},
+				{"Menu.NewScene", "Neue szene"},
+				{"Menu.Save", "Speichern..."},
+				{"Menu.Load", "Herunterladen..."},
+				{"Menu.Export", "Export..."},
+				{"Menu.SceneInfo", "Szenen info"},
+				{"Menu.Demo", "Demo"},
+				{"Menu.Help", "Hilfe"},
+				{"Menu.Exit", "Beenden"},
+
+				{"ModeSwitcher.Editor", "Editor"},
+				{"ModeSwitcher.Instructions", "Anleitungen"},
+
+				{"SceneInfoLayer.Copy", "Kopieren"},
+				{"SceneInfoLayer.Height", "Höhe:"},
+				{"SceneInfoLayer.Length", "Länge:"},
+				{"SceneInfoLayer.Width", "Breite:"},
+				{"SceneInfoLayer.cm", "cm"},
+				{"SceneInfoLayer.Black", "Schwarz"},
+				{"SceneInfoLayer.Blue", "Blau"},
+				{"SceneInfoLayer.Brown", "Braun"},
+				{"SceneInfoLayer.Gray", "Grau"},
+				{"SceneInfoLayer.Green", "Grün"},
+				{"SceneInfoLayer.Red", "Rot"},
+				{"SceneInfoLayer.White", "Weiß"},
+				{"SceneInfoLayer.Yellow", "Gelb"},
+				{"SceneInfoLayer.BraceLineX2", "Dünne Klammer (2x1)"},
+				{"SceneInfoLayer.BraceLineX3", "Dünne Klammer (3x1)"},
+				{"SceneInfoLayer.BraceSquareX2", "Quadratische Klammer (2x1)"},
+				{"SceneInfoLayer.BraceSquareX3", "Quadratische Klammer (3x1)"},
+				{"SceneInfoLayer.Lego1x1", "Lego 1x1"},
+				{"SceneInfoLayer.Lego2x1", "Lego 2x1"},
+				{"SceneInfoLayer.Roll", "Rolle"},
+				{"SceneInfoLayer.RailX2", "Schiene"},
+
+				{"FileSelectionDialogLayer.SelectFile", "Datei auswählen..."},
+				{"FileSelectionDialogLayer.EnterName", "Namen eingeben..."},
+				{"FileSelectionDialogLayer.Up", "Nach oben "},
+				{"FileSelectionDialogLayer.Downloads", "Herunterladen"},
+				{"FileSelectionDialogLayer.Save", "Speichern"},
+				{"FileSelectionDialogLayer.Cancel", "Abbrechen"},
+
+				{"TutorialLayer.Next", "Nächster"},
+				{"TutorialLayer.Welcome", "Willkommen bei Fanclastic 3D Designer!\n\nIn diesem Programm können Sie Modelle aus dem Fanclastic-Baukasten erstellen, Bauanleitungen ansehen und eigene erstellen!"},
+				{"TutorialLayer.DetailsHint", "Um der Szene ein neues Detail hinzuzufügen, ziehen Sie das entsprechende Symbol aus der Detail-Palette in die Szene"},
+				{"TutorialLayer.SetFocusHint", "Um den Fangpunkt der Kamera zu ändern, klicken Sie auf die Schaltfläche für die Fokuseinstellung und dann auf jeden Punkt oder jedes Detail auf der Bühne.."},
+				{"TutorialLayer.ChangeColorHint", "Verwenden Sie die Farbauswahltaste, um die Farbe für die markierten Elemente festzulegen."},
+				{"TutorialLayer.RotateHint", "Verwenden Sie die Drehschaltflächen, um die ausgewählten Details im Raum zu drehen. Jede Schaltfläche dreht die Details um die gezeichnete Achse der entsprechenden Farbe."},
+				{"TutorialLayer.DeleteHint", "Verwenden Sie diese Schaltfläche, um ausgewählte Details aus der Szene zu löschen.."},
+				{"TutorialLayer.ZoomHint.Base", "Verwenden Sie {0}, um die Kamera zu vergrößern oder zu verkleinern."},
+				{"TutorialLayer.ZoomHint.Wheel", "Mausrad"},
+				{"TutorialLayer.ZoomHint.Pinch", "Zwei-Finger-Geste"},
+				{"TutorialLayer.LinkedSelection", "Klicken Sie auf das Detail und halten Sie es gedrückt, um alle zugehörigen Details gleichzeitig auszuwählen."},
 			} 
 		};
 
@@ -152,7 +211,7 @@ namespace Assets.Scripts {
 
 				if (!PlayerPrefs.HasKey("Language"))
 				{
-					var defaultLang = Application.systemLanguage == SystemLanguage.Russian ? 1 : 0;
+					var defaultLang = Application.systemLanguage == SystemLanguage.Russian ? 1 : (Application.systemLanguage == SystemLanguage.German ? 2 : 0);
 					PlayerPrefs.SetInt("Language", defaultLang);
 				}
 

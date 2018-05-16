@@ -53,8 +53,8 @@ DemoModels/F1101_Geometry/VectorTower.fcl
 DemoModels/F1102_Architecture/ArrowTower.fcl
 DemoModels/F1102_Architecture/FortRoyal.fcl
 DemoModels/F1102_Architecture/KingsCastle.fcl
-DemoModels/F1102_Architecture/SkySpearTower.fcl
 DemoModels/F1102_Architecture/Skyscraper.fcl
+DemoModels/F1102_Architecture/SkySpearTower.fcl
 DemoModels/F1103_Spaceships/Destroyer.fcl
 DemoModels/F1103_Spaceships/GlitchSender.fcl
 DemoModels/F1103_Spaceships/SpaceIntruder.fcl

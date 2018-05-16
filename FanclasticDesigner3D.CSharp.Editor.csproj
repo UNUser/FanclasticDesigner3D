@@ -13,11 +13,13 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile></CompilerResponseFile>
+    <CompilerResponseFile>
+    </CompilerResponseFile>
     <UnityProjectType>Editor:5</UnityProjectType>
     <UnityBuildTarget>Android:13</UnityBuildTarget>
     <UnityVersion>2017.3.1f1</UnityVersion>
-    <RootNamespace></RootNamespace>
+    <RootNamespace>
+    </RootNamespace>
     <LangVersion Condition=" '$(VisualStudioVersion)' != '10.0' ">4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -387,7 +389,9 @@
     <Compile Include="Assets\Fabric\Editor\Update\PeriodicAnalyticsPinger.cs" />
     <Compile Include="Assets\Fabric\Editor\Update\PeriodicUpdateChecker.cs" />
     <Compile Include="Assets\Fabric\Editor\Update\PeriodicUpdateManager.cs" />
-    <Compile Include="Assets\Fabric\Editor\Update\TimeoutWebClient.cs" />
+    <Compile Include="Assets\Fabric\Editor\Update\TimeoutWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Assets\Fabric\Kits\Crashlytics\Editor\CrashlyticsSetup.cs" />
     <Compile Include="Assets\Fabric\Kits\Crashlytics\Editor\GUI\Controller\Controller.cs" />
     <Compile Include="Assets\Fabric\Kits\Crashlytics\Editor\GUI\CrashlyticsMenuItems.cs" />
@@ -421,6 +425,7 @@
     <None Include="Assets\Plugins\Android\fabric\Template-AndroidManifest.xml" />
     <None Include="Assets\Plugins\Android\fabric\res\values\strings.xml" />
     <None Include="Assets\StreamingAssets\DemoModels\FilesList.txt" />
+    <None Include="Assets\link.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2013\UnityVS.CSharp.targets" />
 </Project>

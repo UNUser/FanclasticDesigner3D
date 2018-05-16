@@ -43,6 +43,9 @@ namespace Assets.Scripts {
 	    public InstructionsLayer InstructionsLayer;
 	    public GameObject TutorialLayer;
 
+	    public Toggle MovementMode;
+	    public AxisMover AxisMover;
+
 	    public Session Session { get; private set; }
 		public AppMode Mode { get; private set; }
 
@@ -73,7 +76,11 @@ namespace Assets.Scripts {
 //		    }
 //	    }
 
-
+	    public void OnMovementModeChanged(bool value)
+	    {
+		    AxisMover.gameObject.SetActive(value);
+//			AxisMover.
+	    }
 
 		public SelectedDetails SelectedDetails;
 

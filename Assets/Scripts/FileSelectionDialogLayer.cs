@@ -33,7 +33,13 @@ namespace Assets.Scripts {
 	    public string CurrentPath
 	    {
 		    get {
-			    return (_currentPath ?? (CurrentPath = PlayerPrefs.GetString("LastPath", Application.persistentDataPath)));
+			    if (_currentPath == null) {
+				    CurrentPath = PlayerPrefs.GetString("LastPath", Application.persistentDataPath);
+			    }
+			    if (Directory.Exists(_currentPath)) {
+				    return _currentPath;
+			    }
+				return (CurrentPath = Application.persistentDataPath);
 		    }
 			private set {
 				if (value == null || value == _currentPath) {
