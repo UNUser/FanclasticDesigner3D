@@ -6,41 +6,48 @@ namespace Assets.Scripts
 	public class AxisMover : MonoBehaviour
 	{
 		public GameObject Root;
+		public Canvas Canvas;
 
-
+		private SelectedDetails Selected { get { return _selected ?? (_selected = AppController.Instance.SelectedDetails); } }
 		private SelectedDetails _selected;
-		private readonly Vector3 _screenSourceOffset = new Vector3(Screen.width / 2, Screen.height / 2, 0);
+		private readonly Vector3 _screenOriginOffset = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
 
-		public void Start()
+		protected void OnDisable()
 		{
-			_selected = AppController.Instance.SelectedDetails;
+			Root.SetActive(false);
 		}
 
+		public Vector3 Correction { get; set; }
 
-		public void UpdatePos()
+
+		public void Update()
 		{
-			
-		}
-
-		protected void Update()
-		{
-			Root.SetActive(_selected.Selected.Any());
-
-			if (!Root.activeSelf) {
+			if (!Selected.Selected.Any()) {
+				Root.SetActive(false);
 				return;
 			}
 
-			Root.transform.rotation = Quaternion.identity;
+			var bounds = Selected.First.Bounds;
 
-			var bounds =_selected.First.Bounds;
-
-			foreach (var detail in _selected.Selected) {
+			foreach (var detail in Selected.Selected) {
 				bounds.Encapsulate(detail.Bounds);
 			}
 
-			var rootPos = Camera.main.WorldToScreenPoint(bounds.center);
+			var centerToScreenPoint = Camera.main.WorldToScreenPoint(bounds.center - Correction);
 
-			Root.transform.localPosition = rootPos - _screenSourceOffset;
+			if (centerToScreenPoint.z < 0) {
+				Root.SetActive(false);
+				return;
+			}
+
+			var rootLocalPos = centerToScreenPoint - _screenOriginOffset;
+
+			rootLocalPos.z = 0;
+
+			Root.transform.localPosition = rootLocalPos;
+			Root.transform.rotation = Quaternion.identity;
+
+			Root.SetActive(true);
 		}
 	}
 }

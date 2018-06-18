@@ -79,7 +79,6 @@ namespace Assets.Scripts {
 	    public void OnMovementModeChanged(bool value)
 	    {
 		    AxisMover.gameObject.SetActive(value);
-//			AxisMover.
 	    }
 
 		public SelectedDetails SelectedDetails;

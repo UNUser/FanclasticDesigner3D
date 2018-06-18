@@ -22,6 +22,8 @@ namespace Assets.Scripts {
 				newLinks = GetLinks(linksMode);
 			}
 
+		    AppController.Instance.SelectedDetails.IsValid = newLinks.IsValid;
+
 		    if (!newLinks.IsValid) {
 			    return;
 		    }

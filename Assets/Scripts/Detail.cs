@@ -514,6 +514,18 @@ namespace Assets.Scripts
 
 				if (invalidTest) {
 //					Debug.Log(gameObject.name + " " + neighbor.gameObject.name + " " + overlap + " " + linksMode);
+					var neighborDetail = neighbor.GetComponent<Detail>();
+
+					if (neighborDetail.name.StartsWith("BraceLine") && char.IsDigit(name[0]) ||
+					    char.IsDigit(neighborDetail.name[0]) && name.StartsWith("BraceLine"))
+					{
+						var relativePos = neighborDetail.transform.TransformPoint(neighborDetail.AlignmentPoint) - transform.TransformPoint(AlignmentPoint) + offset;
+
+						if (Mathf.RoundToInt(relativePos.x).IsOdd()) {
+							continue;
+						}
+					}
+
 					return false;
 				}
 		    }

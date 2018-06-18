@@ -167,7 +167,7 @@ namespace Assets.Scripts
 	    }
 
 
-		private Detail GetBottomDetail() {
+		public Detail GetBottomDetail() {
 
 			var targetGroup = Detach();
 			var boundingBox = targetGroup.Bounds;

@@ -146,7 +146,7 @@ namespace Assets.Scripts {
 				{"EditorLayer.Details", "Details"},
 
 				{"Menu.Menu", "Menü"},
-				{"Menu.NewScene", "Neue szene"},
+				{"Menu.NewScene", "Neue Szene"},
 				{"Menu.Save", "Speichern..."},
 				{"Menu.Load", "Herunterladen..."},
 				{"Menu.Export", "Export..."},
