@@ -327,6 +327,19 @@ namespace Assets.Scripts {
 		    Session = new Session(fileName);
 			ModeSwitcher.interactable = Session.SceneData.ConnectedGroups.Count > 0;
 		    LastPath = Path.GetDirectoryName(fileName);
+
+			if (Session.SceneData.ConnectedGroups.Count == 0) {
+			    return;
+		    }
+
+		    var detailsData = Session.SceneData.ConnectedGroups[0].Details;
+		    var bounds = detailsData[0].Detail.Bounds;
+
+		    foreach (var detailData in detailsData) {
+			    bounds.Encapsulate(detailData.Detail.Bounds);
+		    }
+
+		    CameraController.Focus = bounds.center;
 	    }
 
 	    public void Awake()

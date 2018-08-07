@@ -295,6 +295,7 @@ namespace Assets.Scripts {
 
 			_id2Detail.Add(newId, newDetail);
 			detailData.Id = newId;
+			detailData.Detail = newDetail;
 
 			return newDetail;
 		}
