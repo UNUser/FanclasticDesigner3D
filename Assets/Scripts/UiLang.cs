@@ -198,6 +198,65 @@ namespace Assets.Scripts {
 				{"TutorialLayer.ZoomHint.Wheel", "Mausrad"},
 				{"TutorialLayer.ZoomHint.Pinch", "Zwei-Finger-Geste"},
 				{"TutorialLayer.LinkedSelection", "Klicken Sie auf das Detail und halten Sie es gedrückt, um alle zugehörigen Details gleichzeitig auszuwählen."},
+			},
+			new Dictionary<string, string>
+			{
+				{"EditorLayer.ActiveColor", "Kolory"},
+				{"EditorLayer.Details", "Elementy"},
+
+				{"Menu.Menu", "Menu"},
+				{"Menu.NewScene", "Nowy projekt"},
+				{"Menu.Save", "Zapisz..."},
+				{"Menu.Load", "Wczytaj..."},
+				{"Menu.Export", "Eksportuj..."},
+				{"Menu.SceneInfo", "Szczegóły projektu"},
+				{"Menu.Demo", "Demo"},
+				{"Menu.Help", "Pomoc"},
+				{"Menu.Exit", "Wyjście"},
+
+				{"ModeSwitcher.Editor", "Tryb edycji"},
+				{"ModeSwitcher.Instructions", "Tryb instrukcji"},
+
+				{"SceneInfoLayer.Copy", "Kopiuj"},
+				{"SceneInfoLayer.Height", "Wysokość:"},
+				{"SceneInfoLayer.Length", "Długość:"},
+				{"SceneInfoLayer.Width", "Szerokość:"},
+				{"SceneInfoLayer.cm", "cm"},
+				{"SceneInfoLayer.Black", "Czarny"},
+				{"SceneInfoLayer.Blue", "Niebieski"},
+				{"SceneInfoLayer.Brown", "Brązowy"},
+				{"SceneInfoLayer.Gray", "Szary"},
+				{"SceneInfoLayer.Green", "Zielony"},
+				{"SceneInfoLayer.Red", "Czerwony"},
+				{"SceneInfoLayer.White", "Biały"},
+				{"SceneInfoLayer.Yellow", "Żółty"},
+				{"SceneInfoLayer.BraceLineX2", "Łacznik wewnętrzny (2x1)"},
+				{"SceneInfoLayer.BraceLineX3", "Łącznik wewnętrzny (3x1)"},
+				{"SceneInfoLayer.BraceSquareX2", "Łącznik zewnętrzny  (2x1)"},
+				{"SceneInfoLayer.BraceSquareX3", "Łącznik zewnętrzny (3x1)"},
+				{"SceneInfoLayer.Lego1x1", "Lego adapter 1x1"},
+				{"SceneInfoLayer.Lego2x1", "Lego adapter 2x1"},
+				{"SceneInfoLayer.Roll", "Zawias"},
+				{"SceneInfoLayer.RailX2", "Szyna"},
+
+				{"FileSelectionDialogLayer.SelectFile", "Wybierz projekt..."},
+				{"FileSelectionDialogLayer.EnterName", "Nazwij projekt..."},
+				{"FileSelectionDialogLayer.Up", "Do góry"},
+				{"FileSelectionDialogLayer.Downloads", "Pobrane"},
+				{"FileSelectionDialogLayer.Save", "Zapisz"},
+				{"FileSelectionDialogLayer.Cancel", "Anuluj"},
+
+				{"TutorialLayer.Next", "Dalej"},
+				{"TutorialLayer.Welcome", "Witaj w Fanclastic 3D Designer™!\n\nTen program umożliwi Ci projektowanie własnych budowli Fanclastic i generowanie do nich animowanych instrukcji oraz przeglądanie już istniejących projektów. \n\nwww.fanclastic.pl"},
+				{"TutorialLayer.DetailsHint", "Aby dodać element do obecnego projektu, przeciągnij odpowiednią ikonę z panelu elementów na wybrane miejsce na planie."},
+				{"TutorialLayer.SetFocusHint", "Aby zmienić punkt widzenia kamery, kliknij przycisk ustawienia ostrości, a następnie na dowolny element lub punkt na planie."},
+				{"TutorialLayer.ChangeColorHint", "Użyj przycisku wyboru koloru, aby zmienić barwę dla użytych elementów."},
+				{"TutorialLayer.RotateHint", "Aby obrócić wybrany element, użyj przycisków obrotu, każdy z nich obraca elementy wokół danej osi odpowiedniego koloru."},
+				{"TutorialLayer.DeleteHint", "Użyj tego przycisku, aby usunąć wybrane elementy z planu."},
+				{"TutorialLayer.ZoomHint.Base", "Użyj  {0} aby powiększyć i pomniejszyć zbliżenie kamery."},
+				{"TutorialLayer.ZoomHint.Wheel", "kółka w myszce"},
+				{"TutorialLayer.ZoomHint.Pinch", "uszczypnięcia"},
+				{"TutorialLayer.LinkedSelection", "Kliknij i przytrzymaj element, aby zobaczyć wszystkie połączone części i obrócić budowlę przyciskami obrotu."},
 			} 
 		};
 
@@ -211,7 +270,24 @@ namespace Assets.Scripts {
 
 				if (!PlayerPrefs.HasKey("Language"))
 				{
-					var defaultLang = Application.systemLanguage == SystemLanguage.Russian ? 1 : (Application.systemLanguage == SystemLanguage.German ? 2 : 0);
+					int defaultLang;
+
+					switch (Application.systemLanguage)
+					{
+						case SystemLanguage.Russian:
+							defaultLang = 1;
+							break;
+						case SystemLanguage.German: 
+							defaultLang = 2;
+							break;
+						case SystemLanguage.Polish: 
+							defaultLang = 3;
+							break;
+						default: 
+							defaultLang = 0;
+							break;
+					}
+
 					PlayerPrefs.SetInt("Language", defaultLang);
 				}
 
