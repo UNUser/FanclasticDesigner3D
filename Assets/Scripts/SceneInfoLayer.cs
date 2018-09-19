@@ -19,8 +19,35 @@ namespace Assets.Scripts {
 		public Text HeightValue;
 		public Text LengthValue;
 		public Text WidthValue;
+		public Text WeightValue;
+		public Text TotalDetailsValue;
 
 		private const float UnitPhysicalSize = 0.8f; //cm
+
+		private readonly Dictionary<string, float> Weights = new Dictionary<string, float>
+		{
+			{"1x1", 0.983f},
+			{"2x1", 1.709f},
+			{"2x2", 3.476f},
+			{"3x1", 2.474f},
+			{"3x2", 5.39f},
+			{"3x3", 7.748f},
+			{"4x1", 3.382f},
+			{"4x2", 6.848f},
+			{"5x1", 4.22f},
+			{"5x2", 8.556f},
+			{"6x1", 5.0f},
+			{"6x2", 10.214f},
+
+			{"BraceLineX2", 0.67f},
+			{"BraceLineX3", 0.96f},
+			{"BraceSquareX2", 0.92f},
+			{"BraceSquareX3", 1.35f},
+			{"Lego1x1", 1.33f},
+			{"Lego2x1", 2.42f},
+			{"RailX2", 0.85f},
+			{"Roll", 0.92f},
+		};
 
 		public void OnCopyButtonClicked()
 		{
@@ -57,6 +84,8 @@ namespace Assets.Scripts {
 				str.Append(cellText);
 				str.Append(isNewRow ? "\n" : "\t");
 			}
+
+			//Width, Height, Length, Weight - ???
 
 			GUIUtility.systemCopyBuffer = str.ToString();
 		}
@@ -95,6 +124,8 @@ namespace Assets.Scripts {
 
 			var otherTypes = AddDetailPanel.Details.Where(obj => !char.IsDigit(obj.name[0])).Select(o => o.name).ToArray();
 			var otherCounts = otherTypes.ToDictionary(s => s, s => 0);
+
+			var totalWeight = 0f;
 
 			Clear();
 
@@ -139,6 +170,8 @@ namespace Assets.Scripts {
 				foreach (var type in types)
 				{
 					AddCell(BaseCellPrefab, counts[material.Material.color][type].ToString());
+
+					totalWeight += counts[material.Material.color][type] * Weights[type];
 				}
 			}
 
@@ -146,6 +179,8 @@ namespace Assets.Scripts {
 			{
 				AddCell(OthersCellPrefab, string.Format("{0}: ", ("SceneInfoLayer." + type).Lang()), TextAnchor.MiddleRight);
 				AddCell(OthersCellPrefab, otherCounts[type].ToString(), TextAnchor.MiddleLeft);
+
+				totalWeight += otherCounts[type] * Weights[type];
 			}
 
 			var roundedSize = (SerializableVector3Int) bounds.size;
@@ -153,6 +188,9 @@ namespace Assets.Scripts {
 			HeightValue.text = string.Format("{0} ", roundedSize.y * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
 			LengthValue.text = string.Format("{0} ", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
 			WidthValue.text = string.Format("{0} ", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
+
+			WeightValue.text = string.Format("{0} ", Mathf.RoundToInt(totalWeight)) + "SceneInfoLayer.gram".Lang();
+			TotalDetailsValue.text = details.Count.ToString();
 
 			CopyButton.SetActive(!Application.isMobilePlatform);
 		}

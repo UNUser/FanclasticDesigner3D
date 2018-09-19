@@ -27,6 +27,7 @@ namespace Assets.Scripts {
         public float ScrollZoomSpeed = 0.5f;
 
         public float MaxDistance = 100f;
+        public float MaxZoomDistance = 2000f;
         public float MinDistance = 5f;
         public float MinHeight = 1f;
 
@@ -185,7 +186,7 @@ namespace Assets.Scripts {
             
 #endif
             var curr = Vector3.Angle(oldCameraPos, Vector3.up);
-            var maxDistance = curr > 90 ? (_focus.y - MinHeight) / (Mathf.Cos((180 - curr) * Mathf.Deg2Rad)) : MaxDistance;
+			var maxDistance = curr > 90 ? (_focus.y - MinHeight) / (Mathf.Cos((180 - curr) * Mathf.Deg2Rad)) : MaxZoomDistance;
             var newDistance = Mathf.Clamp(oldCameraPos.magnitude + distanceDelta, MinDistance, maxDistance);
 
             Camera.transform.position = _focus + oldCameraPos.normalized * newDistance;

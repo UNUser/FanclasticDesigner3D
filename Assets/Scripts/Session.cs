@@ -75,7 +75,7 @@ namespace Assets.Scripts {
 
 			SceneData = new SceneData();
 
-			AcceptChanges();
+			var mergedInstructions = GetMergedInstructions();
 
 			foreach (var root in roots) {
 				var detailBase = root.GetComponent<DetailBase>();
@@ -85,7 +85,7 @@ namespace Assets.Scripts {
 				}
 
 				if (!detailBase.gameObject.activeSelf) {
-					Object.Destroy(detailBase.gameObject);
+//					Object.Destroy(detailBase.gameObject);
 					continue;
 				}
 
@@ -109,7 +109,7 @@ namespace Assets.Scripts {
 			}
 
 
-			var group2Instructions = SplitInstructions(_id2Detail);
+			var group2Instructions = SplitInstructions(_id2Detail, mergedInstructions);
 
 			foreach (var connectedGroup in SceneData.ConnectedGroups)
 			{
@@ -131,7 +131,7 @@ namespace Assets.Scripts {
 			Debug.Log("Saved: " + checkedFileName);
 		}
 
-		private void AcceptChanges()
+		private List<InstructionBase> GetMergedInstructions()
 		{
 			HashSet<Detail> invalidDetails;
 			var actionsLog = AppController.Instance.ActionsLog;
@@ -139,25 +139,33 @@ namespace Assets.Scripts {
 			var mergedInstructions = new List<InstructionBase>();
 			var invalidIds = new HashSet<int>(invalidDetails.Select(detail => detail.GetInstanceID()));
 
-			foreach (var instruction in _sourceInstructions) {
-				instruction.TargetDetails.ExceptWith(invalidIds);
+			foreach (var instruction in _sourceInstructions)
+			{
+				var mergedTargetDetails = new HashSet<int>(instruction.TargetDetails);
 
-				if (instruction.TargetDetails.Any()) {
-					mergedInstructions.Add(instruction);
+				mergedTargetDetails.ExceptWith(invalidIds);
+				
+				var mergedInstruction = instruction.Copy(mergedTargetDetails);
+
+//				instruction.TargetDetails.ExceptWith(invalidIds);
+
+				if (mergedInstruction.TargetDetails.Any()) {
+					mergedInstructions.Add(mergedInstruction);
 				}
 			}
 
 			mergedInstructions.AddRange(newInstructions);
-			_sourceInstructions = mergedInstructions;
+			return mergedInstructions;
+//			_sourceInstructions = mergedInstructions;
 
-			actionsLog.Clear();
+//			actionsLog.Clear();
 		}
 
-		private Dictionary<DetailsGroup, List<InstructionBase>> SplitInstructions(Dictionary<int, Detail> id2Detail)
+		private Dictionary<DetailsGroup, List<InstructionBase>> SplitInstructions(Dictionary<int, Detail> id2Detail, List<InstructionBase> mergedInstrucions)
 		{
 			var group2Instructions = new Dictionary<DetailsGroup, List<InstructionBase>>();
 
-			foreach (var instruction in _sourceInstructions)
+			foreach (var instruction in mergedInstrucions)
 			{
 				if (instruction.TargetDetails.Count == 1)
 				{
