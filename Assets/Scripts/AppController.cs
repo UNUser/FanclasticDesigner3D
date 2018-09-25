@@ -142,7 +142,7 @@ namespace Assets.Scripts {
 	    private void OnGroupSelected(ConnectedGroup selectedGroup)
 	    {
 			ModeSwitcher.gameObject.SetActive(true);
-			DestroyObject(ModeSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
+			Destroy(ModeSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
 
 		    if (selectedGroup == null)
 		    {
@@ -211,7 +211,7 @@ namespace Assets.Scripts {
 			if (LanguageChanged != null) {
 				LanguageChanged(index);
 			}
-			DestroyObject(LanguageSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
+			Destroy(LanguageSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
 
 			UiLang.Lang = index;
 		}

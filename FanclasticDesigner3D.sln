@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FanclasticDesigner3D", "Assembly-CSharp.csproj", "{76867A70-0C39-1BE1-4343-3574F9673074}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp", "Assembly-CSharp.csproj", "{76867A70-0C39-1BE1-4343-3574F9673074}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FanclasticDesigner3D", "Assembly-CSharp-Editor.csproj", "{C7F936EF-23E9-D2E4-CDCA-34C0DFADF673}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{C7F936EF-23E9-D2E4-CDCA-34C0DFADF673}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

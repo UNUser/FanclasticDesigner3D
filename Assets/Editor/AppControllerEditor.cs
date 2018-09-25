@@ -3,15 +3,16 @@ using Assets.Scripts;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 namespace Assets.Editor 
 {
 	[CustomEditor(typeof(AppController))]
-	public class AppControllerEditor : UnityEditor.Editor, IPreprocessBuild
+	public class AppControllerEditor : UnityEditor.Editor, IPreprocessBuildWithReport
 	{
 		public int callbackOrder { get { return 0; }}
-		public void OnPreprocessBuild(BuildTarget target, string path)
+		public void OnPreprocessBuild(BuildReport report)
 		{
 			Call();
 		}
