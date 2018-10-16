@@ -111,6 +111,9 @@
      <None Include="Assets\Packages\DOTween\DOTween43.xml" />
      <None Include="Assets\Packages\DOTween\readme.txt" />
      <None Include="Assets\StreamingAssets\DemoModels\FilesList.txt" />
+ <Reference Include="UnityEditor.StandardEvents">
+ <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
+ </Reference>
  <Reference Include="Unity.TextMeshPro.Editor">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
  </Reference>

@@ -131,6 +131,9 @@
      <Compile Include="Assets\Fabric\Kits\Crashlytics\Editor\Postbuild\CrashlyticsPostBuildiOS.cs" />
      <Compile Include="Assets\Packages\UnityFBXExporter\Editor\ExporterMenu.cs" />
      <Compile Include="Assets\Packages\UnityFBXExporter\Editor\ProceduralTest.cs" />
+ <Reference Include="UnityEditor.StandardEvents">
+ <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
+ </Reference>
  <Reference Include="Unity.TextMeshPro.Editor">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
  </Reference>
