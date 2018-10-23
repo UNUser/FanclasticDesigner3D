@@ -1,5 +1,4 @@
 ﻿
-
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -56,14 +55,14 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Red"},
 				{"SceneInfoLayer.White", "White"},
 				{"SceneInfoLayer.Yellow", "Yellow"},
-				{"SceneInfoLayer.BraceLineX2", "Brace Line (2x1)"},
-				{"SceneInfoLayer.BraceLineX3", "Brace Line (3x1)"},
-				{"SceneInfoLayer.BraceSquareX2", "Brace Square (2x1)"},
-				{"SceneInfoLayer.BraceSquareX3", "Brace Square (3x1)"},
-				{"SceneInfoLayer.Lego1x1", "Lego 1x1"},
-				{"SceneInfoLayer.Lego2x1", "Lego 2x1"},
-				{"SceneInfoLayer.Roll", "Roll"},
-				{"SceneInfoLayer.RailX2", "Rail"},
+				{"SceneInfoLayer.BraceLineX2", "Brace Line (2x1): "},
+				{"SceneInfoLayer.BraceLineX3", "Brace Line (3x1): "},
+				{"SceneInfoLayer.BraceSquareX2", "Brace Square (2x1): "},
+				{"SceneInfoLayer.BraceSquareX3", "Brace Square (3x1): "},
+				{"SceneInfoLayer.Lego1x1", "Lego 1x1: "},
+				{"SceneInfoLayer.Lego2x1", "Lego 2x1: "},
+				{"SceneInfoLayer.Roll", "Roll: "},
+				{"SceneInfoLayer.RailX2", "Rail: "},
 
 				{"FileSelectionDialogLayer.SelectFile", "Select file..."},
 				{"FileSelectionDialogLayer.EnterName", "Enter name..."},
@@ -73,7 +72,7 @@ namespace Assets.Scripts {
 				{"FileSelectionDialogLayer.Cancel", "Cancel"},
 
 				{"TutorialLayer.Next", "Next"},
-				{"TutorialLayer.Welcome", "Welcome to Fanclastic 3D Designer!\n\nThis program helps you to build Fanclastic models, view assembly instructions and create your own."},
+				{"TutorialLayer.Welcome", "Welcome to\nFanclastic 3D Designer!\n\nThis program helps you to build Fanclastic models, view assembly instructions and create your own."},
 				{"TutorialLayer.DetailsHint", "To add an element to the scene drag a corresponding icon from the elements' panel to the scene."},
 				{"TutorialLayer.SetFocusHint", "To change camera anchor point click on the focus setting button and then on any element or spot on the scene."},
 				{"TutorialLayer.ChangeColorHint", "Use the color select button to set a color for selected elements."},
@@ -118,14 +117,14 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Красный"},
 				{"SceneInfoLayer.White", "Белый"},
 				{"SceneInfoLayer.Yellow", "Желтый"},
-				{"SceneInfoLayer.BraceLineX2", "Скобка тонкая (2x1)"},
-				{"SceneInfoLayer.BraceLineX3", "Скобка тонкая (3x1)"},
-				{"SceneInfoLayer.BraceSquareX2", "Скобка квадратная (2x1)"},
-				{"SceneInfoLayer.BraceSquareX3", "Скобка квадратная (3x1)"},
-				{"SceneInfoLayer.Lego1x1", "Лего 1x1"},
-				{"SceneInfoLayer.Lego2x1", "Лего 2x1"},
-				{"SceneInfoLayer.Roll", "Валик"},
-				{"SceneInfoLayer.RailX2", "Рельса"},
+				{"SceneInfoLayer.BraceLineX2", "Скобка тонкая (2x1): "},
+				{"SceneInfoLayer.BraceLineX3", "Скобка тонкая (3x1): "},
+				{"SceneInfoLayer.BraceSquareX2", "Скобка квадратная (2x1): "},
+				{"SceneInfoLayer.BraceSquareX3", "Скобка квадратная (3x1): "},
+				{"SceneInfoLayer.Lego1x1", "Лего 1x1: "},
+				{"SceneInfoLayer.Lego2x1", "Лего 2x1: "},
+				{"SceneInfoLayer.Roll", "Валик: "},
+				{"SceneInfoLayer.RailX2", "Рельса: "},
 
 				{"FileSelectionDialogLayer.SelectFile", "Выберите файл..."},
 				{"FileSelectionDialogLayer.EnterName", "Введите имя..."},
@@ -135,7 +134,7 @@ namespace Assets.Scripts {
 				{"FileSelectionDialogLayer.Cancel", "Отмена"},
 
 				{"TutorialLayer.Next", "Далее"},
-				{"TutorialLayer.Welcome", "Добро пожаловать в Fanclastic 3D Designer!\n\nВ этой программе вы можете строить модели из конструктора Fanclastic, просматривать инструкции по сборке и создавать свои собственные!"},
+				{"TutorialLayer.Welcome", "Добро пожаловать в\nFanclastic 3D Designer!\n\nВ этой программе вы можете строить модели из конструктора Fanclastic, просматривать инструкции по сборке и создавать свои собственные!"},
 				{"TutorialLayer.DetailsHint", "Чтобы добавить на сцену новую деталь, перетащите соответствующую иконку с панели деталей на сцену."},
 				{"TutorialLayer.SetFocusHint", "Чтобы изменить точку привязки камеры, нажмите на кнопку установки фокуса, а затем на любую деталь или точку на сцене."},
 				{"TutorialLayer.ChangeColorHint", "Используйте кнопку выбора цвета, чтобы задать цвет выделенным деталям."},
@@ -180,14 +179,14 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Rot"},
 				{"SceneInfoLayer.White", "Weiß"},
 				{"SceneInfoLayer.Yellow", "Gelb"},
-				{"SceneInfoLayer.BraceLineX2", "Dünne Klammer (2x1)"},
-				{"SceneInfoLayer.BraceLineX3", "Dünne Klammer (3x1)"},
-				{"SceneInfoLayer.BraceSquareX2", "Quadratische Klammer (2x1)"},
-				{"SceneInfoLayer.BraceSquareX3", "Quadratische Klammer (3x1)"},
-				{"SceneInfoLayer.Lego1x1", "Lego 1x1"},
-				{"SceneInfoLayer.Lego2x1", "Lego 2x1"},
-				{"SceneInfoLayer.Roll", "Rolle"},
-				{"SceneInfoLayer.RailX2", "Schiene"},
+				{"SceneInfoLayer.BraceLineX2", "Dünne Klammer (2x1): "},
+				{"SceneInfoLayer.BraceLineX3", "Dünne Klammer (3x1): "},
+				{"SceneInfoLayer.BraceSquareX2", "Quadratische Klammer (2x1): "},
+				{"SceneInfoLayer.BraceSquareX3", "Quadratische Klammer (3x1): "},
+				{"SceneInfoLayer.Lego1x1", "Lego 1x1: "},
+				{"SceneInfoLayer.Lego2x1", "Lego 2x1: "},
+				{"SceneInfoLayer.Roll", "Rolle: "},
+				{"SceneInfoLayer.RailX2", "Schiene: "},
 
 				{"FileSelectionDialogLayer.SelectFile", "Datei auswählen..."},
 				{"FileSelectionDialogLayer.EnterName", "Namen eingeben..."},
@@ -197,7 +196,7 @@ namespace Assets.Scripts {
 				{"FileSelectionDialogLayer.Cancel", "Abbrechen"},
 
 				{"TutorialLayer.Next", "Nächster"},
-				{"TutorialLayer.Welcome", "Willkommen bei Fanclastic 3D Designer!\n\nIn diesem Programm können Sie Modelle aus dem Fanclastic-Baukasten erstellen, Bauanleitungen ansehen und eigene erstellen!"},
+				{"TutorialLayer.Welcome", "Willkommen bei\nFanclastic 3D Designer!\n\nIn diesem Programm können Sie Modelle aus dem Fanclastic-Baukasten erstellen, Bauanleitungen ansehen und eigene erstellen!"},
 				{"TutorialLayer.DetailsHint", "Um der Szene ein neues Detail hinzuzufügen, ziehen Sie das entsprechende Symbol aus der Detail-Palette in die Szene"},
 				{"TutorialLayer.SetFocusHint", "Um den Fangpunkt der Kamera zu ändern, klicken Sie auf die Schaltfläche für die Fokuseinstellung und dann auf jeden Punkt oder jedes Detail auf der Bühne.."},
 				{"TutorialLayer.ChangeColorHint", "Verwenden Sie die Farbauswahltaste, um die Farbe für die markierten Elemente festzulegen."},
@@ -242,14 +241,14 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Czerwony"},
 				{"SceneInfoLayer.White", "Biały"},
 				{"SceneInfoLayer.Yellow", "Żółty"},
-				{"SceneInfoLayer.BraceLineX2", "Łacznik wewnętrzny (2x1)"},
-				{"SceneInfoLayer.BraceLineX3", "Łącznik wewnętrzny (3x1)"},
-				{"SceneInfoLayer.BraceSquareX2", "Łącznik zewnętrzny  (2x1)"},
-				{"SceneInfoLayer.BraceSquareX3", "Łącznik zewnętrzny (3x1)"},
-				{"SceneInfoLayer.Lego1x1", "Lego adapter 1x1"},
-				{"SceneInfoLayer.Lego2x1", "Lego adapter 2x1"},
-				{"SceneInfoLayer.Roll", "Zawias"},
-				{"SceneInfoLayer.RailX2", "Szyna"},
+				{"SceneInfoLayer.BraceLineX2", "Łacznik wewnętrzny (2x1): "},
+				{"SceneInfoLayer.BraceLineX3", "Łącznik wewnętrzny (3x1): "},
+				{"SceneInfoLayer.BraceSquareX2", "Łącznik zewnętrzny  (2x1): "},
+				{"SceneInfoLayer.BraceSquareX3", "Łącznik zewnętrzny (3x1): "},
+				{"SceneInfoLayer.Lego1x1", "Lego adapter 1x1: "},
+				{"SceneInfoLayer.Lego2x1", "Lego adapter 2x1: "},
+				{"SceneInfoLayer.Roll", "Zawias: "},
+				{"SceneInfoLayer.RailX2", "Szyna: "},
 
 				{"FileSelectionDialogLayer.SelectFile", "Wybierz projekt..."},
 				{"FileSelectionDialogLayer.EnterName", "Nazwij projekt..."},
@@ -259,7 +258,7 @@ namespace Assets.Scripts {
 				{"FileSelectionDialogLayer.Cancel", "Anuluj"},
 
 				{"TutorialLayer.Next", "Dalej"},
-				{"TutorialLayer.Welcome", "Witaj w Fanclastic 3D Designer™!\n\nTen program umożliwi Ci projektowanie własnych budowli Fanclastic i generowanie do nich animowanych instrukcji oraz przeglądanie już istniejących projektów. \n\nwww.fanclastic.pl"},
+				{"TutorialLayer.Welcome", "Witaj w\nFanclastic 3D Designer™!\n\nTen program umożliwi Ci projektowanie własnych budowli Fanclastic i generowanie do nich animowanych instrukcji oraz przeglądanie już istniejących projektów. \n\nwww.fanclastic.pl"},
 				{"TutorialLayer.DetailsHint", "Aby dodać element do obecnego projektu, przeciągnij odpowiednią ikonę z panelu elementów na wybrane miejsce na planie."},
 				{"TutorialLayer.SetFocusHint", "Aby zmienić punkt widzenia kamery, kliknij przycisk ustawienia ostrości, a następnie na dowolny element lub punkt na planie."},
 				{"TutorialLayer.ChangeColorHint", "Użyj przycisku wyboru koloru, aby zmienić barwę dla użytych elementów."},
@@ -269,7 +268,70 @@ namespace Assets.Scripts {
 				{"TutorialLayer.ZoomHint.Wheel", "kółka w myszce"},
 				{"TutorialLayer.ZoomHint.Pinch", "uszczypnięcia"},
 				{"TutorialLayer.LinkedSelection", "Kliknij i przytrzymaj element, aby zobaczyć wszystkie połączone części i obrócić budowlę przyciskami obrotu."},
-			} 
+			},
+			new Dictionary<string, string>
+			{
+				{"EditorLayer.ActiveColor", "גוון פעיל"},
+				{"EditorLayer.Details", "רכיבים"},
+
+				{"Menu.Menu", "תפריט"},
+				{"Menu.NewScene", "פעולה חדשה"},
+				{"Menu.Save", "שמירה..."},
+				{"Menu.Load", "הזנה..."},
+				{"Menu.Export", "ייצוא..."},
+				{"Menu.SceneInfo", "זירת מידע"},
+				{"Menu.Demo", "גרסת ניסיון"},
+				{"Menu.Help", "עזרה"},
+				{"Menu.Exit", "יציאה"},
+
+                {"ModeSwitcher.Editor", "עריכה"},
+				{"ModeSwitcher.Instructions", "הוראות"},
+
+				{"SceneInfoLayer.Copy", "העתק"},
+				{"SceneInfoLayer.Height", "גובה"},
+				{"SceneInfoLayer.Length", "אורך"},
+				{"SceneInfoLayer.Width", "עובי"},
+				{"SceneInfoLayer.Weight", "משקל"},
+				{"SceneInfoLayer.TotalDetails", "סה\"כ רכיבים"},
+				{"SceneInfoLayer.cm", "ס\"מ"},
+				{"SceneInfoLayer.gram", "גרם"},
+				{"SceneInfoLayer.Black", "שחור"},
+				{"SceneInfoLayer.Blue", "כחול"},
+				{"SceneInfoLayer.Brown", "חום"},
+				{"SceneInfoLayer.Gray", "אפור"},
+				{"SceneInfoLayer.Green", "ירוק"},
+				{"SceneInfoLayer.Red", "אדום"},
+				{"SceneInfoLayer.White", "לבן"},
+				{"SceneInfoLayer.Yellow", "צהוב"},
+				{"SceneInfoLayer.BraceLineX2","סוגר מסולסל" + " (2x1) "},
+				{"SceneInfoLayer.BraceLineX3", "סוגר מסולסל" + " (3x1) "},
+				{"SceneInfoLayer.BraceSquareX2", "סוגר מלבני" + " (2x1) "},
+				{"SceneInfoLayer.BraceSquareX3", "סוגר מלבני" + " (3x1) "},
+				{"SceneInfoLayer.Lego1x1", "לגו" + " 1x1 "},
+				{"SceneInfoLayer.Lego2x1", "לגו" + " 2x1 "},
+				{"SceneInfoLayer.Roll", "רול "},
+				{"SceneInfoLayer.RailX2", "רכבת "},
+
+				{"FileSelectionDialogLayer.SelectFile", "בחר קובץ..."},
+				{"FileSelectionDialogLayer.EnterName", "הזן שם..."},
+				{"FileSelectionDialogLayer.Up", "למעלה"},
+				{"FileSelectionDialogLayer.Downloads", "הורדות"},
+				{"FileSelectionDialogLayer.Save", "שמירה"},
+				{"FileSelectionDialogLayer.Cancel", "ביטול"},
+
+				{"TutorialLayer.Next", "הבא"},
+				{"TutorialLayer.Welcome", "ברוכים הבאים ל\nFanclastic 3D Designer!\n\nתוכנית זו מסייעת לך לבנות מודלים ,להציג הוראות הרכבה וליצור מודלים משלך."},
+				{"TutorialLayer.DetailsHint", "כדי להוסיף רכיב לזירה גרור סמל המתאים מה לוח רכיבים לזירה."},
+				{"TutorialLayer.SetFocusHint", "לשינוי נקודת עיגון המצלמה לחצו על לחצן הגדרת המוקד ולאחר מכן על כל רכיב או מקום האירוע."},
+				{"TutorialLayer.ChangeColorHint", "השתמש בלחצן בחירת צבע כדי להגדיר צבעעבור הרכיבים שנבחרו."},
+				{"TutorialLayer.RotateHint", "כדי לסובב הרכיבים הנבחרים השתמש בלחצנים הסיבוב. כל כפתור מסובב את האלמנת סביב ציר נמשך בצבע תואם."},
+				{"TutorialLayer.DeleteHint", "השתמש בלחצן זה כדי למחוק את הרכיבים הנבחרים מהזירה."},
+			
+                {"TutorialLayer.ZoomHint.Base", "כדי לקרב ולהרחיק את המצלמה השתמש" + " {0}."},
+                {"TutorialLayer.ZoomHint.Wheel", "השתמש בגלגל של עכבר"},
+				{"TutorialLayer.ZoomHint.Pinch", "קמצוץ"},
+				{"TutorialLayer.LinkedSelection", "הלחץ על רכיב והחזק כדי לבחור את כל החלקים מקושרים."},
+			}
 		};
 
 		public static int Lang
@@ -323,8 +385,12 @@ namespace Assets.Scripts {
 		public void Awake()
 		{
 			AppController.Instance.LanguageChanged += SetLanguage;
-			SetLanguage(Lang);
 		}
+
+	    public void Start()
+	    {
+            SetLanguage(Lang);
+	    }
 
 		public void SetLanguage(int index)
 		{
@@ -346,7 +412,7 @@ namespace Assets.Scripts {
 				return;
 			}
 
-			_text.text = newText;
+            _text.TextRespectingRtl(newText);
 		}
 	}
 }
