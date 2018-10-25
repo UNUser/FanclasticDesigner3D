@@ -176,6 +176,7 @@ namespace Assets.Scripts {
             return (value & 1) == 1;
         }
 
+        // Чтобы RTL тексты отображались правильно, их нужно передавать только в активные текстовые компоненты
         public static void TextRespectingRtl(this Text textComponent, string text)
         {
             var langIdx = UiLang.Lang;

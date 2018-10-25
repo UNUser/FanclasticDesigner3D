@@ -370,6 +370,7 @@ namespace Assets.Scripts {
 	    {
 		    if (_loadDemo) {
 			    Load(Application.persistentDataPath + "/DemoModels/F.fcl");
+		        _loadDemo = false;
 		    }
 		}
 

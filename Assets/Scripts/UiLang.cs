@@ -357,6 +357,9 @@ namespace Assets.Scripts {
 						case SystemLanguage.Polish: 
 							defaultLang = 3;
 							break;
+                        case SystemLanguage.Hebrew: 
+							defaultLang = 4;
+							break;
 						default: 
 							defaultLang = 0;
 							break;
@@ -381,6 +384,8 @@ namespace Assets.Scripts {
 		public string TextKey;
 
 		private Text _text;
+	    private bool _updateOnEnable; // чтобы RTL тексты отображались правильно, 
+                                      // их нужно передавать только в активные текстовые компоненты
 
 		public void Awake()
 		{
@@ -390,6 +395,16 @@ namespace Assets.Scripts {
 	    public void Start()
 	    {
             SetLanguage(Lang);
+	    }
+
+	    protected void OnEnable()
+	    {
+	        if (!_updateOnEnable) {
+	            return;
+	        }
+
+            SetLanguage(Lang);
+	        _updateOnEnable = false;
 	    }
 
 		public void SetLanguage(int index)
@@ -403,6 +418,11 @@ namespace Assets.Scripts {
 					return;
 				}
 			}
+
+		    if (!isActiveAndEnabled) {
+		        _updateOnEnable = true;
+                return;
+		    }
 
 			string newText;
 
