@@ -208,12 +208,12 @@ namespace Assets.Scripts {
 				return;
 			}
 
+            UiLang.Lang = index;
+
 			if (LanguageChanged != null) {
 				LanguageChanged(index);
 			}
 			Destroy(LanguageSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
-
-			UiLang.Lang = index;
 		}
 
 #if UNITY_STANDALONE_WIN
@@ -370,6 +370,7 @@ namespace Assets.Scripts {
 	    {
 		    if (_loadDemo) {
 			    Load(Application.persistentDataPath + "/DemoModels/F.fcl");
+		        _loadDemo = false;
 		    }
 		}
 

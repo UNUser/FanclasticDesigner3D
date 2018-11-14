@@ -106,11 +106,10 @@ namespace Assets.Scripts {
 			var cell = Instantiate(prefab).GetComponent<Text>();
 
 			cell.transform.SetParent(prefab.transform.parent, false);
+            cell.gameObject.SetActive(true);
 
-			cell.text = text;
+            cell.TextRespectingRtl(text);
 			cell.alignment = alignment;
-
-			cell.gameObject.SetActive(true);
 		}
 
 		private void OnEnable()
@@ -177,7 +176,7 @@ namespace Assets.Scripts {
 
 			foreach (var type in otherTypes)
 			{
-				AddCell(OthersCellPrefab, string.Format("{0}: ", ("SceneInfoLayer." + type).Lang()), TextAnchor.MiddleRight);
+				AddCell(OthersCellPrefab, ("SceneInfoLayer." + type).Lang(), TextAnchor.MiddleRight);
 				AddCell(OthersCellPrefab, otherCounts[type].ToString(), TextAnchor.MiddleLeft);
 
 				totalWeight += otherCounts[type] * Weights[type];
@@ -185,11 +184,11 @@ namespace Assets.Scripts {
 
 			var roundedSize = (SerializableVector3Int) bounds.size;
 
-			HeightValue.text = string.Format("{0} ", roundedSize.y * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
-			LengthValue.text = string.Format("{0} ", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
-			WidthValue.text = string.Format("{0} ", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang();
+			HeightValue.TextRespectingRtl(string.Format("{0} ", roundedSize.y * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
+			LengthValue.TextRespectingRtl(string.Format("{0} ", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
+			WidthValue.TextRespectingRtl(string.Format("{0} ", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
 
-			WeightValue.text = string.Format("{0} ", Mathf.RoundToInt(totalWeight)) + "SceneInfoLayer.gram".Lang();
+			WeightValue.TextRespectingRtl(string.Format("{0} ", Mathf.RoundToInt(totalWeight)) + "SceneInfoLayer.gram".Lang());
 			TotalDetailsValue.text = details.Count.ToString();
 
 			CopyButton.SetActive(!Application.isMobilePlatform);

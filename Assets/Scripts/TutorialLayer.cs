@@ -58,13 +58,17 @@ public class TutorialLayer : MonoBehaviour
 
 	protected void OnEnable()
 	{
+        var text = string.Format("TutorialLayer.ZoomHint.Base".Lang(),
+			(Application.isMobilePlatform ? "TutorialLayer.ZoomHint.Pinch" : "TutorialLayer.ZoomHint.Wheel").Lang());
+
 		ActiveHint = 0;
 
 		_setColorButtonState = SetColorButton.activeSelf;
 		SetColorButton.SetActive(true);
 
-		ZoomText.text = string.Format("TutorialLayer.ZoomHint.Base".Lang(),
-			(Application.isMobilePlatform ? "TutorialLayer.ZoomHint.Pinch" : "TutorialLayer.ZoomHint.Wheel").Lang());
+	    ZoomText.transform.parent.gameObject.SetActive(true);
+		ZoomText.TextRespectingRtl(text);
+        ZoomText.transform.parent.gameObject.SetActive(false);
 	}
 
 	protected void OnDisable()

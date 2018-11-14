@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Scripts {
     public static class Extentions {
@@ -171,6 +174,53 @@ namespace Assets.Scripts {
 
         public static bool IsOdd(this int value) {
             return (value & 1) == 1;
+        }
+
+        // Чтобы RTL тексты отображались правильно, их нужно передавать только в активные текстовые компоненты
+        public static void TextRespectingRtl(this Text textComponent, string text)
+        {
+            var langIdx = UiLang.Lang;
+
+            textComponent.text = text;
+
+            if (text == "" || langIdx != 4 || Regex.IsMatch(text, "^[0-9a-zA-Z()\\s.,-]*$")) {
+                return;
+            }
+
+            Canvas.ForceUpdateCanvases();
+
+            var linesInfo = new List<UILineInfo>();
+            var result = "";
+
+            textComponent.cachedTextGenerator.GetLines(linesInfo);
+
+            for (var i = 0; i < linesInfo.Count; i++) {
+                var nextLineStartIdx = i + 1 < linesInfo.Count
+                    ? linesInfo[i + 1].startCharIdx
+                    : text.Length;
+                var linesSeparator = char.IsWhiteSpace(text[nextLineStartIdx - 1])
+                    ? text[nextLineStartIdx - 1].ToString()
+                    : "";
+                var line = text.Substring(linesInfo[i].startCharIdx, nextLineStartIdx - linesInfo[i].startCharIdx - (linesSeparator == "" ? 0 : 1));
+
+                result += ReverseString(line) + linesSeparator 
+                    + (linesSeparator != "\n" && nextLineStartIdx < text.Length ? "\n" : "");
+            }
+            textComponent.text = result;
+        }
+
+        private static string ReverseString(string text) 
+        {
+            var substingsWithoutReverse = Regex.Matches(text, "[0-9a-zA-Z()]+(\\s[0-9a-zA-Z()]+)*");
+            var result = text.ToCharArray();
+
+            Array.Reverse(result);
+
+            foreach (Match substing in substingsWithoutReverse) {
+                substing.Value.CopyTo(0, result, result.Length - substing.Index - substing.Length, substing.Length);
+            }
+
+            return new string(result);
         }
 
 	    public static string Lang(this string key)
