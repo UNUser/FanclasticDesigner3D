@@ -3,24 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.Scripts {
+namespace Assets.Scripts
+{
 
-//	public enum Languages
-//	{
-//		English,
-//		Russian,
-//	}
+    //	public enum Languages
+    //	{
+    //		English,
+    //		Russian,
+    //	}
 
-	public class UiLang : MonoBehaviour
-	{
+    public class UiLang : MonoBehaviour
+    {
 
-//		public static readonly Dictionary<int, SystemLanguage>[] Lang2SystemLang = {
-//			new Dictionary<Languages, SystemLanguage>
-//			{
-//				{"EditorLayer.ActiveColor", "Active color"},
-//			}
+        //		public static readonly Dictionary<int, SystemLanguage>[] Lang2SystemLang = {
+        //			new Dictionary<Languages, SystemLanguage>
+        //			{
+        //				{"EditorLayer.ActiveColor", "Active color"},
+        //			}
 
-		public static readonly Dictionary<string, string>[] Dictionaries = {
+        public static readonly Dictionary<string, string>[] Dictionaries = {
 			new Dictionary<string, string>
 			{
 				{"EditorLayer.ActiveColor", "Active color"},
@@ -47,6 +48,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.TotalDetails", "Total details:"},
 				{"SceneInfoLayer.cm", "cm"},
 				{"SceneInfoLayer.gram", "g"},
+
 				{"SceneInfoLayer.Black", "Black"},
 				{"SceneInfoLayer.Blue", "Blue"},
 				{"SceneInfoLayer.Brown", "Brown"},
@@ -55,6 +57,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Red"},
 				{"SceneInfoLayer.White", "White"},
 				{"SceneInfoLayer.Yellow", "Yellow"},
+
 				{"SceneInfoLayer.BraceLineX2", "Brace Line (2x1): "},
 				{"SceneInfoLayer.BraceLineX3", "Brace Line (3x1): "},
 				{"SceneInfoLayer.BraceSquareX2", "Brace Square (2x1): "},
@@ -63,6 +66,23 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Lego2x1", "Lego 2x1: "},
 				{"SceneInfoLayer.Roll", "Roll: "},
 				{"SceneInfoLayer.RailX2", "Rail: "},
+
+				{"SceneInfoLayer.Axle1.0", "Axle 1.0: "},
+				{"SceneInfoLayer.Axle2.0", "Axle 2.0: "},
+				{"SceneInfoLayer.Axle2.5", "Axle 2.5: "},
+				{"SceneInfoLayer.Axle3.0", "Axle 3.0: "},
+				{"SceneInfoLayer.Axle3.5", "Axle 3.5: "},
+				{"SceneInfoLayer.Axle8.0", "Axle 8.0: "},
+
+                {"SceneInfoLayer.AxleBevelGear", "Bevel Gear: "},
+                {"SceneInfoLayer.AxleCoupling", "Coupling: "},
+                {"SceneInfoLayer.AxleHub3x1", "Hub (3x1): "},
+                {"SceneInfoLayer.AxleHub5x1", "Hub (5x1): "},
+                {"SceneInfoLayer.AxleTip", "Axle Tip: "},
+                {"SceneInfoLayer.AxleWasher", "Washer: "},
+                {"SceneInfoLayer.AxleWasherToothed", "Toothed Washer: "},
+                {"SceneInfoLayer.AxleWheelBig", "Big Wheel: "},
+                {"SceneInfoLayer.AxleWheelSmall", "Small Wheel: "},
 
 				{"FileSelectionDialogLayer.SelectFile", "Select file..."},
 				{"FileSelectionDialogLayer.EnterName", "Enter name..."},
@@ -109,6 +129,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.TotalDetails", "Всего деталей:"},
 				{"SceneInfoLayer.cm", "см"},
 				{"SceneInfoLayer.gram", "г"},
+
 				{"SceneInfoLayer.Black", "Черный"},
 				{"SceneInfoLayer.Blue", "Синий"},
 				{"SceneInfoLayer.Brown", "Коричневый"},
@@ -117,6 +138,24 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Красный"},
 				{"SceneInfoLayer.White", "Белый"},
 				{"SceneInfoLayer.Yellow", "Желтый"},
+
+				{"SceneInfoLayer.Axle1.0", "Ось 1.0: "},
+				{"SceneInfoLayer.Axle2.0", "Ось 2.0: "},
+				{"SceneInfoLayer.Axle2.5", "Ось 2.5: "},
+				{"SceneInfoLayer.Axle3.0", "Ось 3.0: "},
+				{"SceneInfoLayer.Axle3.5", "Ось 3.5: "},
+				{"SceneInfoLayer.Axle8.0", "Ось 8.0: "},
+
+                {"SceneInfoLayer.AxleBevelGear", "Конусная шестеренка: "},
+                {"SceneInfoLayer.AxleCoupling", "Муфта: "},
+                {"SceneInfoLayer.AxleHub3x1", "Ступица (3x1): "},
+                {"SceneInfoLayer.AxleHub5x1", "Ступица (5x1): "},
+                {"SceneInfoLayer.AxleTip", "Осевой наконечник: "},
+                {"SceneInfoLayer.AxleWasher", "Шайба: "},
+                {"SceneInfoLayer.AxleWasherToothed", "Зубчатая шайба: "},
+                {"SceneInfoLayer.AxleWheelBig", "Большое колесо: "},
+                {"SceneInfoLayer.AxleWheelSmall", "Малое колесо: "},
+
 				{"SceneInfoLayer.BraceLineX2", "Скобка тонкая (2x1): "},
 				{"SceneInfoLayer.BraceLineX3", "Скобка тонкая (3x1): "},
 				{"SceneInfoLayer.BraceSquareX2", "Скобка квадратная (2x1): "},
@@ -171,6 +210,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.TotalDetails", "Gesamtzahl der Details"},
 				{"SceneInfoLayer.cm", "cm"},
 				{"SceneInfoLayer.gram", "g"},
+
 				{"SceneInfoLayer.Black", "Schwarz"},
 				{"SceneInfoLayer.Blue", "Blau"},
 				{"SceneInfoLayer.Brown", "Braun"},
@@ -179,6 +219,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Rot"},
 				{"SceneInfoLayer.White", "Weiß"},
 				{"SceneInfoLayer.Yellow", "Gelb"},
+
 				{"SceneInfoLayer.BraceLineX2", "Dünne Klammer (2x1): "},
 				{"SceneInfoLayer.BraceLineX3", "Dünne Klammer (3x1): "},
 				{"SceneInfoLayer.BraceSquareX2", "Quadratische Klammer (2x1): "},
@@ -187,6 +228,23 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Lego2x1", "Lego 2x1: "},
 				{"SceneInfoLayer.Roll", "Rolle: "},
 				{"SceneInfoLayer.RailX2", "Schiene: "},
+
+				{"SceneInfoLayer.Axle1.0", "Achse 1.0: "},
+				{"SceneInfoLayer.Axle2.0", "Achse 2.0: "},
+				{"SceneInfoLayer.Axle2.5", "Achse 2.5: "},
+				{"SceneInfoLayer.Axle3.0", "Achse 3.0: "},
+				{"SceneInfoLayer.Axle3.5", "Achse 3.5: "},
+				{"SceneInfoLayer.Axle8.0", "Achse 8.0: "},
+
+                {"SceneInfoLayer.AxleBevelGear", "Kegelradgetriebe: "},
+                {"SceneInfoLayer.AxleCoupling", "Kupplung: "},
+                {"SceneInfoLayer.AxleHub3x1", "Nabe (3x1): "},
+                {"SceneInfoLayer.AxleHub5x1", "Nabe (5x1): "},
+                {"SceneInfoLayer.AxleTip", "Spitze: "},
+                {"SceneInfoLayer.AxleWasher", "Scheibe: "},
+                {"SceneInfoLayer.AxleWasherToothed", "Zahnscheibe: "},
+                {"SceneInfoLayer.AxleWheelBig", "Großes Rad: "},
+                {"SceneInfoLayer.AxleWheelSmall", "Kleines Rad: "},
 
 				{"FileSelectionDialogLayer.SelectFile", "Datei auswählen..."},
 				{"FileSelectionDialogLayer.EnterName", "Namen eingeben..."},
@@ -233,6 +291,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.TotalDetails", "Wszystkich elementów:"},
 				{"SceneInfoLayer.cm", "cm"},
 				{"SceneInfoLayer.gram", "g"},
+
 				{"SceneInfoLayer.Black", "Czarny"},
 				{"SceneInfoLayer.Blue", "Niebieski"},
 				{"SceneInfoLayer.Brown", "Brązowy"},
@@ -241,6 +300,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "Czerwony"},
 				{"SceneInfoLayer.White", "Biały"},
 				{"SceneInfoLayer.Yellow", "Żółty"},
+
 				{"SceneInfoLayer.BraceLineX2", "Łacznik wewnętrzny (2x1): "},
 				{"SceneInfoLayer.BraceLineX3", "Łącznik wewnętrzny (3x1): "},
 				{"SceneInfoLayer.BraceSquareX2", "Łącznik zewnętrzny  (2x1): "},
@@ -249,6 +309,23 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Lego2x1", "Lego adapter 2x1: "},
 				{"SceneInfoLayer.Roll", "Zawias: "},
 				{"SceneInfoLayer.RailX2", "Szyna: "},
+
+				{"SceneInfoLayer.Axle1.0", "Oś 1.0: "},
+				{"SceneInfoLayer.Axle2.0", "Oś 2.0: "},
+				{"SceneInfoLayer.Axle2.5", "Oś 2.5: "},
+				{"SceneInfoLayer.Axle3.0", "Oś 3.0: "},
+				{"SceneInfoLayer.Axle3.5", "Oś 3.5: "},
+				{"SceneInfoLayer.Axle8.0", "Oś 8.0: "},
+
+                {"SceneInfoLayer.AxleBevelGear", "Przekładnia stożkowa: "},
+                {"SceneInfoLayer.AxleCoupling", "Sprzęganie: "},
+                {"SceneInfoLayer.AxleHub3x1", "Piasta (3x1): "},
+                {"SceneInfoLayer.AxleHub5x1", "Piasta (5x1): "},
+                {"SceneInfoLayer.AxleTip", "Wskazówka: "},
+                {"SceneInfoLayer.AxleWasher", "Podkładka: "},
+                {"SceneInfoLayer.AxleWasherToothed", "Podkładka zębata: "},
+                {"SceneInfoLayer.AxleWheelBig", "Wielkie koło: "},
+                {"SceneInfoLayer.AxleWheelSmall", "Małe koło: "},
 
 				{"FileSelectionDialogLayer.SelectFile", "Wybierz projekt..."},
 				{"FileSelectionDialogLayer.EnterName", "Nazwij projekt..."},
@@ -295,6 +372,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.TotalDetails", "סה\"כ רכיבים"},
 				{"SceneInfoLayer.cm", "ס\"מ"},
 				{"SceneInfoLayer.gram", "גרם"},
+
 				{"SceneInfoLayer.Black", "שחור"},
 				{"SceneInfoLayer.Blue", "כחול"},
 				{"SceneInfoLayer.Brown", "חום"},
@@ -303,6 +381,7 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Red", "אדום"},
 				{"SceneInfoLayer.White", "לבן"},
 				{"SceneInfoLayer.Yellow", "צהוב"},
+
 				{"SceneInfoLayer.BraceLineX2","סוגר מסולסל" + " (2x1) "},
 				{"SceneInfoLayer.BraceLineX3", "סוגר מסולסל" + " (3x1) "},
 				{"SceneInfoLayer.BraceSquareX2", "סוגר מלבני" + " (2x1) "},
@@ -311,6 +390,23 @@ namespace Assets.Scripts {
 				{"SceneInfoLayer.Lego2x1", "לגו" + " 2x1 "},
 				{"SceneInfoLayer.Roll", "רול "},
 				{"SceneInfoLayer.RailX2", "רכבת "},
+
+				{"SceneInfoLayer.Axle1.0", "סרן" + " 1.0 "},
+				{"SceneInfoLayer.Axle2.0", "סרן" + " 2.0 "},
+				{"SceneInfoLayer.Axle2.5", "סרן" + " 2.5 "},
+				{"SceneInfoLayer.Axle3.0", "סרן" + " 3.0 "},
+				{"SceneInfoLayer.Axle3.5", "סרן" + " 3.5 "},
+				{"SceneInfoLayer.Axle8.0", "סרן" + " 8.0 "},
+
+                {"SceneInfoLayer.AxleBevelGear", "ציוד שפוע "},
+                {"SceneInfoLayer.AxleCoupling", "מצמד "},
+                {"SceneInfoLayer.AxleHub3x1", "רכזת" + " (3x1) "},
+                {"SceneInfoLayer.AxleHub5x1", "רכזת" + " (5x1) "},
+                {"SceneInfoLayer.AxleTip", "חוֹד "},
+                {"SceneInfoLayer.AxleWasher", "דיסקוס "},
+                {"SceneInfoLayer.AxleWasherToothed", "דיסקוס מחורץ "},
+                {"SceneInfoLayer.AxleWheelBig", "גלגל גדול "},
+                {"SceneInfoLayer.AxleWheelSmall", "גלגל קטן "},
 
 				{"FileSelectionDialogLayer.SelectFile", "בחר קובץ..."},
 				{"FileSelectionDialogLayer.EnterName", "הזן שם..."},
@@ -334,105 +430,110 @@ namespace Assets.Scripts {
 			}
 		};
 
-		public static int Lang
-		{
-			get
-			{
-				if (_lang != -1) {
-					return _lang;
-				}
+        public static int Lang
+        {
+            get
+            {
+                if (_lang != -1)
+                {
+                    return _lang;
+                }
 
-				if (!PlayerPrefs.HasKey("Language"))
-				{
-					int defaultLang;
+                if (!PlayerPrefs.HasKey("Language"))
+                {
+                    int defaultLang;
 
-					switch (Application.systemLanguage)
-					{
-						case SystemLanguage.Russian:
-							defaultLang = 1;
-							break;
-						case SystemLanguage.German: 
-							defaultLang = 2;
-							break;
-						case SystemLanguage.Polish: 
-							defaultLang = 3;
-							break;
-                        case SystemLanguage.Hebrew: 
-							defaultLang = 4;
-							break;
-						default: 
-							defaultLang = 0;
-							break;
-					}
+                    switch (Application.systemLanguage)
+                    {
+                        case SystemLanguage.Russian:
+                            defaultLang = 1;
+                            break;
+                        case SystemLanguage.German:
+                            defaultLang = 2;
+                            break;
+                        case SystemLanguage.Polish:
+                            defaultLang = 3;
+                            break;
+                        case SystemLanguage.Hebrew:
+                            defaultLang = 4;
+                            break;
+                        default:
+                            defaultLang = 0;
+                            break;
+                    }
 
-					PlayerPrefs.SetInt("Language", defaultLang);
-				}
+                    PlayerPrefs.SetInt("Language", defaultLang);
+                }
 
-				_lang = PlayerPrefs.GetInt("Language");
+                _lang = PlayerPrefs.GetInt("Language");
 
-				return _lang;
-			}
+                return _lang;
+            }
 
-			set
-			{
-				_lang = value;
-				PlayerPrefs.SetInt("Language", value);
-			}
-		}
-		private static int _lang = -1;
+            set
+            {
+                _lang = value;
+                PlayerPrefs.SetInt("Language", value);
+            }
+        }
+        private static int _lang = -1;
 
-		public string TextKey;
+        public string TextKey;
 
-		private Text _text;
-	    private bool _updateOnEnable; // чтобы RTL тексты отображались правильно, 
-                                      // их нужно передавать только в активные текстовые компоненты
+        private Text _text;
+        private bool _updateOnEnable; // чтобы RTL тексты отображались правильно, 
+        // их нужно передавать только в активные текстовые компоненты
 
-		public void Awake()
-		{
-			AppController.Instance.LanguageChanged += SetLanguage;
-		}
+        public void Awake()
+        {
+            AppController.Instance.LanguageChanged += SetLanguage;
+        }
 
-	    public void Start()
-	    {
+        public void Start()
+        {
             SetLanguage(Lang);
-	    }
+        }
 
-	    protected void OnEnable()
-	    {
-	        if (!_updateOnEnable) {
-	            return;
-	        }
-
-            SetLanguage(Lang);
-	        _updateOnEnable = false;
-	    }
-
-		public void SetLanguage(int index)
-		{
-			if (_text == null) {
-
-				_text = GetComponent<Text>();
-
-				if (_text == null) {
-					Debug.LogError("Text component not found: " + gameObject.name);
-					return;
-				}
-			}
-
-		    if (!isActiveAndEnabled) {
-		        _updateOnEnable = true;
+        protected void OnEnable()
+        {
+            if (!_updateOnEnable)
+            {
                 return;
-		    }
+            }
 
-			string newText;
+            SetLanguage(Lang);
+            _updateOnEnable = false;
+        }
 
-			if (!Dictionaries[index].TryGetValue(TextKey, out newText))
-			{
-				Debug.LogError("Key " + TextKey + " not found in dictionary " + index);
-				return;
-			}
+        public void SetLanguage(int index)
+        {
+            if (_text == null)
+            {
+
+                _text = GetComponent<Text>();
+
+                if (_text == null)
+                {
+                    Debug.LogError("Text component not found: " + gameObject.name);
+                    return;
+                }
+            }
+
+            if (!isActiveAndEnabled)
+            {
+                _updateOnEnable = true;
+                return;
+            }
+
+            string newText;
+
+            if (!Dictionaries[index].TryGetValue(TextKey, out newText))
+            {
+                Debug.LogError("Key " + TextKey + " not found in dictionary " + index);
+                return;
+            }
 
             _text.TextRespectingRtl(newText);
-		}
-	}
+        }
+    }
 }

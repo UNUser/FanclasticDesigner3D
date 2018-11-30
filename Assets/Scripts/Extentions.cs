@@ -4,8 +4,10 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.Scripts {
-    public static class Extentions {
+namespace Assets.Scripts
+{
+    public static class Extentions
+    {
 
         public static Bounds Overlap(Bounds box1, Bounds box2)
         {
@@ -31,43 +33,48 @@ namespace Assets.Scripts {
             return Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
         }
 
-        public static bool Valid(this Bounds bounds) {
+        public static bool Valid(this Bounds bounds)
+        {
             return bounds.size.x > 0 && bounds.size.y > 0 && bounds.size.z > 0;
         }
 
-		public static void DrawGL(this Bounds bounds, Material axisMaterial) {
+        public static void DrawGL(this Bounds bounds, Material axisMaterial)
+        {
 
-			var ext = bounds.extents;
-			var center = bounds.center;
+            var ext = bounds.extents;
+            var center = bounds.center;
 
-			axisMaterial.SetPass(0);
+            axisMaterial.SetPass(0);
 
-			GL.PushMatrix();
-			GL.Begin(GL.LINES);
-			GL.Color(Color.green);
+            GL.PushMatrix();
+            GL.Begin(GL.LINES);
+            GL.Color(Color.green);
 
-			for (var i = 0; i < 4; i++) {
-				// - + +, + + -, - - -, + - +
-				var begin = new Vector3(ext.x * (i.IsOdd() ? 1 : -1), ext.y * (i / 2 < 1 ? 1 : -1), ext.z * (i % 3 == 0 ? 1 : -1));
-				var beginGL = begin + center;
-				for (var j = 0; j < 3; j++) {
-					GL.Vertex3(beginGL.x, beginGL.y, beginGL.z);
-					var end = begin;
-					end[j] *= -1;
-					var endGL = end + center;
-					GL.Vertex3(endGL.x, endGL.y, endGL.z);
-				}
-			}
-			GL.End();
-			GL.PopMatrix();
-		}
+            for (var i = 0; i < 4; i++)
+            {
+                // - + +, + + -, - - -, + - +
+                var begin = new Vector3(ext.x * (i.IsOdd() ? 1 : -1), ext.y * (i / 2 < 1 ? 1 : -1), ext.z * (i % 3 == 0 ? 1 : -1));
+                var beginGL = begin + center;
+                for (var j = 0; j < 3; j++)
+                {
+                    GL.Vertex3(beginGL.x, beginGL.y, beginGL.z);
+                    var end = begin;
+                    end[j] *= -1;
+                    var endGL = end + center;
+                    GL.Vertex3(endGL.x, endGL.y, endGL.z);
+                }
+            }
+            GL.End();
+            GL.PopMatrix();
+        }
 
-		public static void SafeInvoke <T> (this Action <T> action, T arg)
-	    {
-			if (action != null) {
-				action (arg);
-			}
-	    }
+        public static void SafeInvoke<T>(this Action<T> action, T arg)
+        {
+            if (action != null)
+            {
+                action(arg);
+            }
+        }
 
         /// <summary>
         /// Выравнивание координат вектора по сетке крестовых коннекторов (все координаты вектора должны быть целые и либо все четные, либо все нечетные)
@@ -84,8 +91,8 @@ namespace Assets.Scripts {
             var isFloor = Mathf.RoundToInt(vector.y) == 0;
             var isOddAlignment = !isFloor && sum > 1;
 
-            var v = new Vector3(AlignValue(isOddAlignment, vector.x), 
-                                AlignValue(isOddAlignment, vector.y), 
+            var v = new Vector3(AlignValue(isOddAlignment, vector.x),
+                                AlignValue(isOddAlignment, vector.y),
                                 AlignValue(isOddAlignment, vector.z));
 
             /*Debug.Log("Old: " + vector + ", new: " + v + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
@@ -94,27 +101,56 @@ namespace Assets.Scripts {
             return v;
         }
 
-		public static Vector3 AlignByCrossPoint(this Vector3 vector, Vector3 crossPoint) {
-			var oddSum = (Mathf.RoundToInt(crossPoint.x) & 1)
-					   + (Mathf.RoundToInt(crossPoint.y) & 1)
-				       + (Mathf.RoundToInt(crossPoint.z) & 1);
-			var isOddY = Mathf.RoundToInt(crossPoint.y).IsOdd();
-			var isFloor = Mathf.RoundToInt(vector.y) == 0;
-			var isOddAlignment = isFloor ? isOddY : (oddSum > 1);
+        public static Vector3 AlignByCrossPoint(this Vector3 vector, Vector3 alignmentPoint)
+        {
+            var oddSum = (Mathf.RoundToInt(alignmentPoint.x) & 1)
+                       + (Mathf.RoundToInt(alignmentPoint.y) & 1)
+                       + (Mathf.RoundToInt(alignmentPoint.z) & 1);
+            var isOddY = Mathf.RoundToInt(alignmentPoint.y).IsOdd();
+            var isFloor = Mathf.RoundToInt(vector.y) == 0;
+            var isOddAlignment = isFloor ? isOddY : (oddSum > 1);
 
-			var newCrossPoint = new Vector3(AlignValue(isOddAlignment, crossPoint.x),
-											AlignValue(isOddAlignment, crossPoint.y),
-											AlignValue(isOddAlignment, crossPoint.z));
+            var newAlignmentPoint = new Vector3(AlignValue(isOddAlignment, alignmentPoint.x),
+                                            AlignValue(isOddAlignment, alignmentPoint.y),
+                                            AlignValue(isOddAlignment, alignmentPoint.z));
 
-			var crossPointAlignment = newCrossPoint - crossPoint;
-			/*Debug.Log("Old: " + vector + ", crossPointAlignment: " + crossPointAlignment + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
-								+ (Mathf.RoundToInt(vector.y) & 1) + " "
-								+ (Mathf.RoundToInt(vector.z) & 1) + " " + oddSum
-								 + ", isOddY: " + isOddY
-								  + ", isFloor: " + isFloor
-								   + ", newCrossPoint: " + newCrossPoint);*/
-			return vector + crossPointAlignment;
-		}
+            var alignmentOffset = newAlignmentPoint - alignmentPoint;
+            /*Debug.Log("Old: " + vector + ", crossPointAlignment: " + crossPointAlignment + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
+                                + (Mathf.RoundToInt(vector.y) & 1) + " "
+                                + (Mathf.RoundToInt(vector.z) & 1) + " " + oddSum
+                                 + ", isOddY: " + isOddY
+                                  + ", isFloor: " + isFloor
+                                   + ", newCrossPoint: " + newCrossPoint);*/
+            return vector + alignmentOffset;
+        }
+
+        public static Vector3 AlignByAxleDirection(this Vector3 vector, Vector3 alignmentPoint, Vector3 direction)
+        {
+            var directionIndex = Mathf.Abs(direction.x) == 1 ? 0 : (Mathf.Abs(direction.y) == 1 ? 1 : 2);
+            var alignedIndex1 = directionIndex == 0 ? 1 : 0;
+            var alignedIndex2 = directionIndex == 2 ? 1 : 2;
+
+            var oddAlignment1 = AlignValue(true, alignmentPoint[alignedIndex1]);
+            var oddAlignment2 = AlignValue(true, alignmentPoint[alignedIndex2]);
+
+            var evenAlignment1 = AlignValue(false, alignmentPoint[alignedIndex1]);
+            var evenAlignment2 = AlignValue(false, alignmentPoint[alignedIndex2]);
+
+            var oddAlignmentDiff = Mathf.Abs(oddAlignment1 - alignmentPoint[alignedIndex1]) +
+                                   Mathf.Abs(oddAlignment2 - alignmentPoint[alignedIndex2]);
+            var evenAlignmentDiff = Mathf.Abs(evenAlignment1 - alignmentPoint[alignedIndex1]) +
+                                    Mathf.Abs(evenAlignment2 - alignmentPoint[alignedIndex2]);
+            var isOddAlignment = oddAlignmentDiff < evenAlignmentDiff;
+            var newAlignmentPoint = new Vector3();
+
+            newAlignmentPoint[directionIndex] = Mathf.RoundToInt(alignmentPoint[directionIndex]);
+            newAlignmentPoint[alignedIndex1] = isOddAlignment ? oddAlignment1 : evenAlignment1;
+            newAlignmentPoint[alignedIndex2] = isOddAlignment ? oddAlignment2 : evenAlignment2;
+
+            var alignmentOffset = newAlignmentPoint - alignmentPoint;
+
+            return vector + alignmentOffset;
+        }
 
         /// <summary>
         /// Выравнивание координат вектора по сетке квадратных дырок-коннекторов (все координаты вектора должны быть целые и четность одной координаты должна отличаться)
@@ -137,7 +173,7 @@ namespace Assets.Scripts {
             if (isFloor)
                 return new Vector3(AlignValue(true, vector.x), roundY, AlignValue(true, vector.z));
 
-            if (sum != 0 && sum != 3) 
+            if (sum != 0 && sum != 3)
                 return new Vector3(roundX, roundY, roundZ);
 
             var deltaX = Mathf.Abs(vector.x - roundX);
@@ -149,7 +185,7 @@ namespace Assets.Scripts {
                                     : deltaY > deltaZ ? 1 : 2;
 
             var newValue = AlignValue(!Mathf.RoundToInt(vector[maxDeltaIndex]).IsOdd(), vector[maxDeltaIndex]);
-            
+
             var v = new Vector3(maxDeltaIndex == 0 ? newValue : roundX,
                                 maxDeltaIndex == 1 ? newValue : roundY,
                                 maxDeltaIndex == 2 ? newValue : roundZ);
@@ -172,7 +208,8 @@ namespace Assets.Scripts {
             return roundValue;
         }
 
-        public static bool IsOdd(this int value) {
+        public static bool IsOdd(this int value)
+        {
             return (value & 1) == 1;
         }
 
@@ -183,7 +220,8 @@ namespace Assets.Scripts {
 
             textComponent.text = text;
 
-            if (text == "" || langIdx != 4 || Regex.IsMatch(text, "^[0-9a-zA-Z()\\s.,-]*$")) {
+            if (text == "" || langIdx != 4 || Regex.IsMatch(text, "^[0-9a-zA-Z()\\s.,-]*$"))
+            {
                 return;
             }
 
@@ -194,7 +232,8 @@ namespace Assets.Scripts {
 
             textComponent.cachedTextGenerator.GetLines(linesInfo);
 
-            for (var i = 0; i < linesInfo.Count; i++) {
+            for (var i = 0; i < linesInfo.Count; i++)
+            {
                 var nextLineStartIdx = i + 1 < linesInfo.Count
                     ? linesInfo[i + 1].startCharIdx
                     : text.Length;
@@ -203,99 +242,110 @@ namespace Assets.Scripts {
                     : "";
                 var line = text.Substring(linesInfo[i].startCharIdx, nextLineStartIdx - linesInfo[i].startCharIdx - (linesSeparator == "" ? 0 : 1));
 
-                result += ReverseString(line) + linesSeparator 
+                result += ReverseString(line) + linesSeparator
                     + (linesSeparator != "\n" && nextLineStartIdx < text.Length ? "\n" : "");
             }
             textComponent.text = result;
         }
 
-        private static string ReverseString(string text) 
+        private static string ReverseString(string text)
         {
             var substingsWithoutReverse = Regex.Matches(text, "[0-9a-zA-Z()]+(\\s[0-9a-zA-Z()]+)*");
             var result = text.ToCharArray();
 
             Array.Reverse(result);
 
-            foreach (Match substing in substingsWithoutReverse) {
+            foreach (Match substing in substingsWithoutReverse)
+            {
                 substing.Value.CopyTo(0, result, result.Length - substing.Index - substing.Length, substing.Length);
             }
 
             return new string(result);
         }
 
-	    public static string Lang(this string key)
-	    {
-		    var language = UiLang.Lang;
-		    string text;
+        public static string Lang(this string key)
+        {
+            var language = UiLang.Lang;
+            string text;
 
-		    if (UiLang.Dictionaries[language].TryGetValue(key, out text)) {
-			    return text;
-		    }
+            if (UiLang.Dictionaries[language].TryGetValue(key, out text))
+            {
+                return text;
+            }
 
-		    Debug.LogError("Key " + key + " not found in dictionary " + language);
-		    return null;
-	    }
+            Debug.LogError("Key " + key + " not found in dictionary " + language);
+            return null;
+        }
     }
 
     [Serializable]
-    public struct SerializableVector3Int {
+    public struct SerializableVector3Int
+    {
 
         public int x;
         public int y;
         public int z;
 
-        public SerializableVector3Int(float rX, float rY, float rZ) {
+        public SerializableVector3Int(float rX, float rY, float rZ)
+        {
             x = Mathf.RoundToInt(rX);
             y = Mathf.RoundToInt(rY);
             z = Mathf.RoundToInt(rZ);
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return string.Format("[{0}, {1}, {2}]", x, y, z);
         }
 
-        public static implicit operator Vector3(SerializableVector3Int rValue) {
+        public static implicit operator Vector3(SerializableVector3Int rValue)
+        {
             return new Vector3(rValue.x, rValue.y, rValue.z);
         }
 
-        public static implicit operator SerializableVector3Int(Vector3 rValue) {
+        public static implicit operator SerializableVector3Int(Vector3 rValue)
+        {
             return new SerializableVector3Int(rValue.x, rValue.y, rValue.z);
         }
     }
 
-	[Serializable]
-	public struct SerializableVector3 {
+    [Serializable]
+    public struct SerializableVector3
+    {
 
-		public float x;
-		public float y;
-		public float z;
+        public float x;
+        public float y;
+        public float z;
 
-		public SerializableVector3(float rX, float rY, float rZ)
-		{
-			// округляем дробную часть либо до ближайшего целого, либо до 0.5
-			var rXDecimal = rX - (float) Math.Truncate(rX);
-			var rYDecimal = rY - (float) Math.Truncate(rY);
-			var rZDecimal = rZ - (float) Math.Truncate(rZ);
+        public SerializableVector3(float rX, float rY, float rZ)
+        {
+            // округляем дробную часть либо до ближайшего целого, либо до 0.5
+            var rXDecimal = rX - (float) Math.Truncate(rX);
+            var rYDecimal = rY - (float) Math.Truncate(rY);
+            var rZDecimal = rZ - (float) Math.Truncate(rZ);
 
-			var rXDecimalRounded = Mathf.Abs(rXDecimal - 0.5f * Mathf.Sign(rX)) < 0.3 ? 0.5f * Mathf.Sign(rX) : Mathf.RoundToInt(rXDecimal);
-			var rYDecimalRounded = Mathf.Abs(rYDecimal - 0.5f * Mathf.Sign(rY)) < 0.3 ? 0.5f * Mathf.Sign(rY) : Mathf.RoundToInt(rYDecimal);
-			var rZDecimalRounded = Mathf.Abs(rZDecimal - 0.5f * Mathf.Sign(rZ)) < 0.3 ? 0.5f * Mathf.Sign(rZ) : Mathf.RoundToInt(rZDecimal);
+            var rXDecimalRounded = Mathf.Abs(rXDecimal - 0.5f * Mathf.Sign(rX)) < 0.3 ? 0.5f * Mathf.Sign(rX) : Mathf.RoundToInt(rXDecimal);
+            var rYDecimalRounded = Mathf.Abs(rYDecimal - 0.5f * Mathf.Sign(rY)) < 0.3 ? 0.5f * Mathf.Sign(rY) : Mathf.RoundToInt(rYDecimal);
+            var rZDecimalRounded = Mathf.Abs(rZDecimal - 0.5f * Mathf.Sign(rZ)) < 0.3 ? 0.5f * Mathf.Sign(rZ) : Mathf.RoundToInt(rZDecimal);
 
-			x = (float) Math.Truncate(rX) + rXDecimalRounded;
-			y = (float) Math.Truncate(rY) + rYDecimalRounded;
-			z = (float) Math.Truncate(rZ) + rZDecimalRounded;
-		}
+            x = (float) Math.Truncate(rX) + rXDecimalRounded;
+            y = (float) Math.Truncate(rY) + rYDecimalRounded;
+            z = (float) Math.Truncate(rZ) + rZDecimalRounded;
+        }
 
-		public override string ToString() {
-			return string.Format("[{0}, {1}, {2}]", x, y, z);
-		}
+        public override string ToString()
+        {
+            return string.Format("[{0}, {1}, {2}]", x, y, z);
+        }
 
-		public static implicit operator Vector3(SerializableVector3 rValue) {
-			return new Vector3(rValue.x, rValue.y, rValue.z);
-		}
+        public static implicit operator Vector3(SerializableVector3 rValue)
+        {
+            return new Vector3(rValue.x, rValue.y, rValue.z);
+        }
 
-		public static implicit operator SerializableVector3(Vector3 rValue) {
-			return new SerializableVector3(rValue.x, rValue.y, rValue.z);
-		}
-	}
+        public static implicit operator SerializableVector3(Vector3 rValue)
+        {
+            return new SerializableVector3(rValue.x, rValue.y, rValue.z);
+        }
+    }
 }

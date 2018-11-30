@@ -5,26 +5,27 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Assets.Scripts {
-	public class SceneInfoLayer : MonoBehaviour
-	{
-		public GameObject CopyButton;
+namespace Assets.Scripts
+{
+    public class SceneInfoLayer : MonoBehaviour
+    {
+        public GameObject CopyButton;
 
-		public GridLayoutGroup Grid;
-		public GameObject BaseCellPrefab;
+        public GridLayoutGroup Grid;
+        public GameObject BaseCellPrefab;
 
-		public Transform OtherDetailsCount;
-		public GameObject OthersCellPrefab;
+        public Transform OtherDetailsCount;
+        public GameObject OthersCellPrefab;
 
-		public Text HeightValue;
-		public Text LengthValue;
-		public Text WidthValue;
-		public Text WeightValue;
-		public Text TotalDetailsValue;
+        public Text HeightValue;
+        public Text LengthValue;
+        public Text WidthValue;
+        public Text WeightValue;
+        public Text TotalDetailsValue;
 
-		private const float UnitPhysicalSize = 0.8f; //cm
+        private const float UnitPhysicalSize = 0.8f; //cm
 
-		private readonly Dictionary<string, float> Weights = new Dictionary<string, float>
+        private readonly Dictionary<string, float> Weights = new Dictionary<string, float>
 		{
 			{"1x1", 0.983f},
 			{"2x1", 1.709f},
@@ -47,197 +48,230 @@ namespace Assets.Scripts {
 			{"Lego2x1", 2.42f},
 			{"RailX2", 0.85f},
 			{"Roll", 0.92f},
+
+			{"Axle1.0", 0.207f},
+			{"Axle2.0", 0.413f},
+			{"Axle2.5", 0.516f},
+			{"Axle3.0", 0.619f},
+			{"Axle3.5", 0.722f},
+			{"Axle8.0", 1.65f},
+
+            {"AxleBevelGear", 0.4f},
+            {"AxleCoupling", 0.7f},
+            {"AxleHub3x1", 2.6f},
+            {"AxleHub5x1", 4.2f},
+            {"AxleTip", 0.38f},
+            {"AxleWasher", 0.077f},
+            {"AxleWasherToothed", 0.078f},
+            {"AxleWheelBig", 12.3f},
+            {"AxleWheelSmall", 1.5f},
 		};
 
-		public void OnCopyButtonClicked()
-		{
-			var str = new StringBuilder();
-			var isPrefab = true;
+        public void OnCopyButtonClicked()
+        {
+            var str = new StringBuilder();
+            var isPrefab = true;
 
-			foreach (Transform child in Grid.transform)
-			{
-				if (isPrefab) {
-					isPrefab = false;
-					continue;
-				}
+            foreach (Transform child in Grid.transform)
+            {
+                if (isPrefab)
+                {
+                    isPrefab = false;
+                    continue;
+                }
 
-				var cellText = child.gameObject.GetComponent<Text>().text;
-				var isNewRow = !(child.GetSiblingIndex() % Grid.constraintCount > 0);
+                var cellText = child.gameObject.GetComponent<Text>().text;
+                var isNewRow = !(child.GetSiblingIndex() % Grid.constraintCount > 0);
 
-				str.Append(cellText);
-				str.Append(isNewRow ? "\n" : "\t");
-			}
+                str.Append(cellText);
+                str.Append(isNewRow ? "\n" : "\t");
+            }
 
-			str.Append("\n");
-			isPrefab = true;
+            str.Append("\n");
+            isPrefab = true;
 
-			foreach (Transform child in OtherDetailsCount)
-			{
-				if (isPrefab) {
-					isPrefab = false;
-					continue;
-				}
+            foreach (Transform child in OtherDetailsCount)
+            {
+                if (isPrefab)
+                {
+                    isPrefab = false;
+                    continue;
+                }
 
-				var cellText = child.gameObject.GetComponent<Text>().text;
-				var isNewRow = !child.GetSiblingIndex().IsOdd();
+                var cellText = child.gameObject.GetComponent<Text>().text;
+                var isNewRow = !child.GetSiblingIndex().IsOdd();
 
-				str.Append(cellText);
-				str.Append(isNewRow ? "\n" : "\t");
-			}
+                str.Append(cellText);
+                str.Append(isNewRow ? "\n" : "\t");
+            }
 
-			//Width, Height, Length, Weight - ???
+            //Width, Height, Length, Weight - ???
 
-			GUIUtility.systemCopyBuffer = str.ToString();
-		}
+            GUIUtility.systemCopyBuffer = str.ToString();
+        }
 
-		public void OnBackButtonClicked()
-		{
-			gameObject.SetActive(false);
-		}
+        public void OnBackButtonClicked()
+        {
+            gameObject.SetActive(false);
+        }
 
-		private void Start()
-		{
-			BaseCellPrefab.SetActive(false);
-			OthersCellPrefab.SetActive(false);
-		}
+        private void Start()
+        {
+            BaseCellPrefab.SetActive(false);
+            OthersCellPrefab.SetActive(false);
+        }
 
-		private void AddCell(GameObject prefab, string text, TextAnchor alignment = TextAnchor.MiddleCenter)
-		{
-			var cell = Instantiate(prefab).GetComponent<Text>();
+        private void AddCell(GameObject prefab, string text, TextAnchor alignment = TextAnchor.MiddleCenter)
+        {
+            var cell = Instantiate(prefab).GetComponent<Text>();
 
-			cell.transform.SetParent(prefab.transform.parent, false);
+            cell.transform.SetParent(prefab.transform.parent, false);
             cell.gameObject.SetActive(true);
 
             cell.TextRespectingRtl(text);
-			cell.alignment = alignment;
-		}
+            cell.alignment = alignment;
+        }
 
-		private void OnEnable()
-		{
-			var colors = AppController.Instance.Resources.Colors;
-			var types = AddDetailPanel.Details.Where(obj => char.IsDigit(obj.name[0])).Select(o => o.name).ToArray();
-			var counts = new Dictionary<Color, Dictionary<string, int>>();
+        private void OnEnable()
+        {
+            var colors = AppController.Instance.Resources.Colors;
+            var types = AddDetailPanel.Details.Where(obj => char.IsDigit(obj.name[0])).Select(o => o.name).ToArray();
+            var counts = new Dictionary<Color, Dictionary<string, int>>();
 
-			var details = GetAll();
-			var bounds = new Bounds(details.Any() ? details[0].Bounds.center : Vector3.zero, Vector3.zero);
+            var details = GetAll();
+            var bounds = new Bounds(details.Any() ? details[0].Bounds.center : Vector3.zero, Vector3.zero);
 
-			var otherTypes = AddDetailPanel.Details.Where(obj => !char.IsDigit(obj.name[0])).Select(o => o.name).ToArray();
-			var otherCounts = otherTypes.ToDictionary(s => s, s => 0);
+            var otherTypes = AddDetailPanel.Details.Where(obj => !char.IsDigit(obj.name[0])).Select(o => o.name).ToArray();
+            var otherCounts = otherTypes.ToDictionary(s => s, s => 0);
 
-			var totalWeight = 0f;
+            var totalWeight = 0f;
 
-			Clear();
+            Clear();
 
-			foreach (var material in colors) {
-				var color = material.Material.color;
+            foreach (var material in colors)
+            {
+                var color = material.Material.color;
 
-				counts.Add(color, new Dictionary<string, int>());
+                counts.Add(color, new Dictionary<string, int>());
 
-				foreach (var type in types) {
-					counts[color].Add(type, 0);
-				}
-			}
+                foreach (var type in types)
+                {
+                    counts[color].Add(type, 0);
+                }
+            }
 
-			foreach (var detail in details)
-			{
-				var name = detail.gameObject.name;
-				var type = name.Remove(name.Length - "(Clone)".Length);
+            foreach (var detail in details)
+            {
+                var name = detail.gameObject.name;
+                var type = name.Remove(name.Length - "(Clone)".Length);
 
-				if (char.IsDigit(name[0])) {
-					counts[detail.Color.Material.color][type] += 1;
-				} else {
-					otherCounts[type] += 1;
-				}
-				bounds.Encapsulate(detail.Bounds);
-			}
+                if (char.IsDigit(name[0]))
+                {
+                    counts[detail.Color.Material.color][type] += 1;
+                }
+                else
+                {
+                    otherCounts[type] += 1;
+                }
+                bounds.Encapsulate(detail.Bounds);
+            }
 
-			Grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-			Grid.constraintCount = types.Length + 1;
+            Grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            Grid.constraintCount = types.Length + 1;
 
-			AddCell(BaseCellPrefab, string.Empty);
+            AddCell(BaseCellPrefab, string.Empty);
 
-			foreach (var type in types)
-			{
-				AddCell(BaseCellPrefab, type);
-			}
+            foreach (var type in types)
+            {
+                AddCell(BaseCellPrefab, type);
+            }
 
-			foreach (var material in colors)
-			{
-				var materialName = material.Material.name;
-				AddCell(BaseCellPrefab, ("SceneInfoLayer." + materialName).Lang(), TextAnchor.MiddleRight);
+            foreach (var material in colors)
+            {
+                var materialName = material.Material.name;
+                AddCell(BaseCellPrefab, ("SceneInfoLayer." + materialName).Lang(), TextAnchor.MiddleRight);
 
-				foreach (var type in types)
-				{
-					AddCell(BaseCellPrefab, counts[material.Material.color][type].ToString());
+                foreach (var type in types)
+                {
+                    AddCell(BaseCellPrefab, counts[material.Material.color][type].ToString());
 
-					totalWeight += counts[material.Material.color][type] * Weights[type];
-				}
-			}
+                    totalWeight += counts[material.Material.color][type] * Weights[type];
+                }
+            }
 
-			foreach (var type in otherTypes)
-			{
-				AddCell(OthersCellPrefab, ("SceneInfoLayer." + type).Lang(), TextAnchor.MiddleRight);
-				AddCell(OthersCellPrefab, otherCounts[type].ToString(), TextAnchor.MiddleLeft);
+            foreach (var type in otherTypes)
+            {
+                if (otherCounts[type] == 0)
+                {
+                    continue;
+                }
 
-				totalWeight += otherCounts[type] * Weights[type];
-			}
+                AddCell(OthersCellPrefab, ("SceneInfoLayer." + type).Lang(), TextAnchor.MiddleRight);
+                AddCell(OthersCellPrefab, otherCounts[type].ToString(), TextAnchor.MiddleLeft);
 
-			var roundedSize = (SerializableVector3Int) bounds.size;
+                totalWeight += otherCounts[type] * Weights[type];
+            }
 
-			HeightValue.TextRespectingRtl(string.Format("{0} ", roundedSize.y * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
-			LengthValue.TextRespectingRtl(string.Format("{0} ", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
-			WidthValue.TextRespectingRtl(string.Format("{0} ", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
+            var roundedSize = (SerializableVector3Int) bounds.size;
 
-			WeightValue.TextRespectingRtl(string.Format("{0} ", Mathf.RoundToInt(totalWeight)) + "SceneInfoLayer.gram".Lang());
-			TotalDetailsValue.text = details.Count.ToString();
+            HeightValue.TextRespectingRtl(string.Format("{0} ", roundedSize.y * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
+            LengthValue.TextRespectingRtl(string.Format("{0} ", Mathf.Max(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
+            WidthValue.TextRespectingRtl(string.Format("{0} ", Mathf.Min(roundedSize.x, roundedSize.z) * UnitPhysicalSize) + "SceneInfoLayer.cm".Lang());
 
-			CopyButton.SetActive(!Application.isMobilePlatform);
-		}
+            WeightValue.TextRespectingRtl(string.Format("{0} ", Mathf.RoundToInt(totalWeight)) + "SceneInfoLayer.gram".Lang());
+            TotalDetailsValue.text = details.Count.ToString();
 
-		private void Clear()
-		{
-			for (var childIndex = Grid.transform.childCount - 1; childIndex > 0; childIndex--) {
-				var child = Grid.transform.GetChild(childIndex);
+            CopyButton.SetActive(!Application.isMobilePlatform);
+        }
 
-				child.SetParent(null);
-				Destroy(child.gameObject);
-			}
+        private void Clear()
+        {
+            for (var childIndex = Grid.transform.childCount - 1; childIndex > 0; childIndex--)
+            {
+                var child = Grid.transform.GetChild(childIndex);
 
-			for (var childIndex = OtherDetailsCount.transform.childCount - 1; childIndex > 0; childIndex--) {
-				var child = OtherDetailsCount.transform.GetChild(childIndex);
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
 
-				child.SetParent(null);
-				Destroy(child.gameObject);
-			}
-		}
+            for (var childIndex = OtherDetailsCount.transform.childCount - 1; childIndex > 0; childIndex--)
+            {
+                var child = OtherDetailsCount.transform.GetChild(childIndex);
 
-		private List<Detail> GetAll()
-		{
-			var roots = new List<GameObject>();
-			var details = new List<Detail>();
-			UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
+                child.SetParent(null);
+                Destroy(child.gameObject);
+            }
+        }
 
-			foreach (var root in roots)
-			{
-				if (!root.activeSelf) continue;
+        private List<Detail> GetAll()
+        {
+            var roots = new List<GameObject>();
+            var details = new List<Detail>();
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
 
-				var detail = root.GetComponent<Detail>();
+            foreach (var root in roots)
+            {
+                if (!root.activeSelf) continue;
 
-				if (detail != null) {
-					if (detail.gameObject.activeSelf)
-						details.Add(detail);
-					continue;
-				}
+                var detail = root.GetComponent<Detail>();
 
-				var group = root.GetComponent<DetailsGroup>();
+                if (detail != null)
+                {
+                    if (detail.gameObject.activeSelf)
+                        details.Add(detail);
+                    continue;
+                }
 
-				if (group != null) {
-					details.AddRange(group.Details);
-				}
-			}
+                var group = root.GetComponent<DetailsGroup>();
 
-			return details;
-		}
+                if (group != null)
+                {
+                    details.AddRange(group.Details);
+                }
+            }
 
-	}
+            return details;
+        }
+
+    }
 }

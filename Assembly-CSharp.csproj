@@ -106,23 +106,14 @@
      <Compile Include="Assets\Scripts\UiLangDropdown.cs" />
      <None Include="Assets\Fabric\NOTICE.txt" />
      <None Include="Assets\Packages\DOTween\DOTween46.xml" />
+     <None Include="Assets\FbxExporters\RELEASE_NOTES.txt" />
      <None Include="Assets\Packages\DOTween\DOTween50.xml" />
      <None Include="Assets\link.xml" />
+     <None Include="Assets\FbxExporters\README.txt" />
      <None Include="Assets\Packages\DOTween\DOTween43.xml" />
      <None Include="Assets\Packages\DOTween\readme.txt" />
+     <None Include="Assets\FbxExporters\LICENSE.txt" />
      <None Include="Assets\StreamingAssets\DemoModels\FilesList.txt" />
- <Reference Include="UnityEditor.StandardEvents">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
- </Reference>
- <Reference Include="Unity.TextMeshPro.Editor">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
- </Reference>
- <Reference Include="Unity.PackageManagerUI.Editor">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
- </Reference>
- <Reference Include="Unity.TextMeshPro">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
- </Reference>
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/Unity/Unity 2018.2.13f1/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
  </Reference>
@@ -326,6 +317,9 @@
  </Reference>
  <Reference Include="Validator">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/Fabric/Managed/Validator.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityFbxPrefab">
+ <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/FbxExporters/UnityFbxPrefab.dll</HintPath>
  </Reference>
  <Reference Include="DOTween">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/Packages/DOTween/DOTween.dll</HintPath>

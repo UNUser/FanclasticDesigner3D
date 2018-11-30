@@ -131,18 +131,8 @@
      <Compile Include="Assets\Fabric\Kits\Crashlytics\Editor\Postbuild\CrashlyticsPostBuildiOS.cs" />
      <Compile Include="Assets\Packages\UnityFBXExporter\Editor\ExporterMenu.cs" />
      <Compile Include="Assets\Packages\UnityFBXExporter\Editor\ProceduralTest.cs" />
- <Reference Include="UnityEditor.StandardEvents">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
- </Reference>
- <Reference Include="Unity.TextMeshPro.Editor">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
- </Reference>
- <Reference Include="Unity.PackageManagerUI.Editor">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
- </Reference>
- <Reference Include="Unity.TextMeshPro">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
- </Reference>
+     <None Include="Assets\FbxExporters\Editor\FbxSdk\LICENSE.txt" />
+     <None Include="Assets\FbxExporters\Editor\FbxSdk\README.txt" />
  <Reference Include="UnityEngine.AIModule">
  <HintPath>C:/Program Files/Unity/Unity 2018.2.13f1/Editor/Data/Managed/UnityEngine/UnityEngine.AIModule.dll</HintPath>
  </Reference>
@@ -391,6 +381,15 @@
  </Reference>
  <Reference Include="Validator">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/Fabric/Managed/Validator.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityFbxPrefab">
+ <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/FbxExporters/UnityFbxPrefab.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityFbxExporterEditor">
+ <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/FbxExporters/Editor/UnityFbxExporterEditor.dll</HintPath>
+ </Reference>
+ <Reference Include="UnityFbxSdk">
+ <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/FbxExporters/Editor/FbxSdk/Plugins/UnityFbxSdk.dll</HintPath>
  </Reference>
  <Reference Include="DOTween">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Assets/Packages/DOTween/DOTween.dll</HintPath>
