@@ -316,6 +316,21 @@ namespace Assets.Scripts
             LayerMask axisLayerMask = LayerMask.LayerToName(AxleSpaceBounds.gameObject.layer).Contains("Hub")
                                             ? 1 << LayerMask.NameToLayer("AxleItem")
                                             : 1 << LayerMask.NameToLayer("AxleHubItem");
+
+            if (name.Contains("Wheel"))
+            {
+                RaycastHit axisHitInfo;
+                var centerIndex = (_raysOrigins.Length - 1) / 2;
+
+                if (Physics.Raycast(_raysOrigins[centerIndex], direction, out axisHitInfo, Mathf.Infinity, axisLayerMask))
+                {
+                    minRayHitInfo = axisHitInfo;
+                    rayOriginIndex = centerIndex;
+
+                    return minRayHitInfo;
+                }
+            }
+
             if (Linkage != null)
             {
                 RaycastHit axleHitInfo;
@@ -332,33 +347,20 @@ namespace Assets.Scripts
             rayOriginIndex = -1;
             minRayHitInfo = null;
 
-            if (name.Contains("Wheel"))
+            for (var i = 0; i < _raysOrigins.Length; i++)
             {
                 RaycastHit axisHitInfo;
-                var centerIndex = (_raysOrigins.Length - 1) / 2;
 
-                if (Physics.Raycast(_raysOrigins[centerIndex], direction, out axisHitInfo, Mathf.Infinity, axisLayerMask))
+                if (Physics.Raycast(_raysOrigins[i], direction, out axisHitInfo, Mathf.Infinity, axisLayerMask))
                 {
-                    minRayHitInfo = axisHitInfo;
-                    rayOriginIndex = centerIndex;
-                }
-            }
-            else
-            {
-                for (var i = 0; i < _raysOrigins.Length; i++)
-                {
-                    RaycastHit axisHitInfo;
-
-                    if (Physics.Raycast(_raysOrigins[i], direction, out axisHitInfo, Mathf.Infinity, axisLayerMask))
+                    if (minRayHitInfo == null || axisHitInfo.distance < minRayHitInfo.Value.distance)
                     {
-                        if (minRayHitInfo == null || axisHitInfo.distance < minRayHitInfo.Value.distance)
-                        {
-                            minRayHitInfo = axisHitInfo;
-                            rayOriginIndex = i;
-                        }
+                        minRayHitInfo = axisHitInfo;
+                        rayOriginIndex = i;
                     }
                 }
             }
+
             return minRayHitInfo;
         }
 
@@ -367,10 +369,11 @@ namespace Assets.Scripts
             var bottomPointIndex = CorrectHeightAboveFloor(ref pos);
             var offsetFromCurrentPos = pos - transform.position;
             var bottomPoint = transform.TransformPoint(_connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
-            var alignmentPoint = transform.TransformPoint(AlignmentPoint) + offsetFromCurrentPos;
+            var group = Group;
+            var alignmentPoint = (group == null ? transform.TransformPoint(AlignmentPoint) : group.transform.position) + offsetFromCurrentPos;
             Vector3 alignedBottomPoint;
 
-            if (Linkage != null)
+            if (Linkage != null || group != null)
             {
                 alignedBottomPoint = bottomPoint.AlignByCrossPoint(alignmentPoint);
             }
