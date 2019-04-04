@@ -50,13 +50,8 @@ namespace Assets.Scripts {
             foreach (var detail in Details)
             {
                 var detailButton = Instantiate(DetailButtonPrefab).GetComponent<DetailButton>();
-                var detailName = detail.name;
 
-	            if (char.IsDigit(detailName[0])) {
-		            detailButton.SetDetail(detail, detailName);
-	            } else {
-					detailButton.SetDetail(detail, DetailsIcons[iconIndex++]);
-	            }
+				detailButton.SetDetail(detail, DetailsIcons[iconIndex++]);
                 detailButton.transform.SetParent(DetailsContent, false);
 
                 _name2Detail.Add(detail.name, detail);
