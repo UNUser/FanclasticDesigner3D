@@ -15,11 +15,22 @@ namespace Assets.Scripts {
 
 	    public Sprite[] DetailsIcons;
 
-        public DetailColor ActiveColor { get; private set; }
+	    public DetailColor ActiveColor
+	    {
+		    get { return _activeColor; }
+		    private set
+		    {
+			    _activeColor = value;
+			    foreach (var detailButton in DetailsContent.GetComponentsInChildren<DetailButton>())
+			    {
+				    detailButton.Icon.color = value.UiColor;
+			    }
+		    }
+	    }
+	    private DetailColor _activeColor;
 
 
-
-//        public static Material[] Materials;
+	    //        public static Material[] Materials;
         public static GameObject[] Details;
 
         private static readonly Dictionary<string, DetailColor> _name2Color = new Dictionary<string, DetailColor>();
@@ -42,7 +53,6 @@ namespace Assets.Scripts {
 
                 _name2Color.Add(colors[i].Material.name, colors[i]);
             }
-            ActiveColor = colors[0];
 
             Details = Resources.LoadAll<GameObject>("Prefabs/Details");
 	        var iconIndex = 0;
@@ -56,6 +66,8 @@ namespace Assets.Scripts {
 
                 _name2Detail.Add(detail.name, detail);
             }
+
+			ActiveColor = colors[0];
         }
 
         public static DetailColor GetColor(string name) {
