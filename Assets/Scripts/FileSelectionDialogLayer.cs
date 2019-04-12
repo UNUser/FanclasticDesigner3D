@@ -111,16 +111,15 @@ namespace Assets.Scripts {
                     newItem.transform.SetParent(ScrollRect.content, false);
                 }
 
-                if (i < neededItems) {
+				newItem.gameObject.SetActive(i < neededItems);
+
+                if (newItem.gameObject.activeSelf) {
 	                var isDirectory = i < directories.Length;
 					var source = isDirectory ? directories : files;
 					var sourceIndex = isDirectory ? i : i - directories.Length;
-					var itemName = source[sourceIndex].Remove(0, CurrentPath.Length).TrimStart('\\', '/');
+					var itemFullPath = source[sourceIndex];
 
-					newItem.Set(itemName, isDirectory);
-                    newItem.gameObject.SetActive(true);
-                } else {
-                    newItem.gameObject.SetActive(false);
+					newItem.Set(itemFullPath, isDirectory);
                 }
             }
 
@@ -138,8 +137,10 @@ namespace Assets.Scripts {
 				return;
 	        }
 
+	        var fullPath = string.Format("{0}/{1}", CurrentPath, fileName);
+
             gameObject.SetActive(false);
-            DoFileSelectedAction(fileName);
+			_fileSelectedAction.SafeInvoke(fullPath);
         }
 
         public void OnCancelButtonClicked() {
@@ -153,26 +154,26 @@ namespace Assets.Scripts {
 
         public void OnItemButtonClicked(DirectoryContentItem item)
         {
-	        var itemName = item.Name.text;
+	        var itemPath = item.ItemPath;
 
 	        if (item.IsDirectory) {
-		        CurrentPath = GetFullPath(itemName);
+		        CurrentPath = itemPath;
 				return;
 	        }
 
             if (_isSaveFileDialog) {
-                InputField.text = itemName;
+                InputField.text = item.ItemRawName;
                 return;
             }
 
             gameObject.SetActive(false);
 
-            DoFileSelectedAction(itemName);
+			_fileSelectedAction.SafeInvoke(itemPath);
         }
 
 		public void OnRemoveItemButtonClick(DirectoryContentItem item)
 		{
-			var fullPath = GetFullPath(item.Name.text);
+			var fullPath = item.ItemPath;
 
 			try {
 				if (item.IsDirectory) {
@@ -194,23 +195,5 @@ namespace Assets.Scripts {
 	    {
 		    return fileName.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) < 0;
 	    }
-
-        private void DoFileSelectedAction(string fileName)
-        {
-	        var path = GetFullPath(fileName);
-//			var directory = File.e
-//
-//	        if (!Directory.Exists(path)) {
-//		        Debug.LogError("Path doesn't exist: " + path);
-//				return;
-//	        }
-
-			_fileSelectedAction.SafeInvoke(path);
-        }
-
-        private string GetFullPath(string itemName)
-        {
-            return string.Format("{0}/{1}", CurrentPath, itemName);
-        }
     }
 }

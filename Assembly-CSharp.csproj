@@ -82,6 +82,7 @@
      <Compile Include="Assets\Scripts\AxisMover.cs" />
      <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\ColorSetter.cs" />
+     <Compile Include="Assets\Scripts\DemoModelsLayer.cs" />
      <Compile Include="Assets\Scripts\Detail.cs" />
      <Compile Include="Assets\Scripts\DetailBase.cs" />
      <Compile Include="Assets\Scripts\DetailButton.cs" />
@@ -120,11 +121,11 @@
  <Reference Include="Unity.PackageManagerUI.Editor">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.PackageManagerUI.Editor.dll</HintPath>
  </Reference>
- <Reference Include="Unity.TextMeshPro">
- <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
- </Reference>
  <Reference Include="Unity.CollabProxy.Editor">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+ </Reference>
+ <Reference Include="Unity.TextMeshPro">
+ <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
  </Reference>
  <Reference Include="Unity.Analytics.DataPrivacy">
  <HintPath>C:/UnityProjects/FanclasticDesigner3D/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>

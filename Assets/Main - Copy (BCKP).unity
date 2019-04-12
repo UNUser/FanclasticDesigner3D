@@ -1054,7 +1054,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.000000003588534}
+  m_AnchoredPosition: {x: 0, y: -0.0000056394347}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &73506544
@@ -2627,7 +2627,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -8767,7 +8767,7 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: Polski
       m_Image: {fileID: 0}
-    - m_Text: Hebrew
+    - m_Text: "\u05EA\u05D9\u05E8\u05D1\u05E2"
       m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
@@ -12543,7 +12543,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -15582,7 +15582,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -15860,7 +15860,7 @@ GameObject:
   - component: {fileID: 1413023187}
   - component: {fileID: 1413023186}
   m_Layer: 5
-  m_Name: RemoveButton
+  m_Name: DeleteButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -17616,6 +17616,7 @@ GameObject:
   - component: {fileID: 1558965554}
   - component: {fileID: 1558965553}
   - component: {fileID: 1558965552}
+  - component: {fileID: 1558965557}
   m_Layer: 5
   m_Name: DirectoryContentItem
   m_TagString: Untagged
@@ -17778,8 +17779,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Icon: {fileID: 2103474006}
   Name: {fileID: 474175153}
+  DeleteButton: {fileID: 1413023184}
   DirectoryIcon: {fileID: 21300000, guid: 4b7e90e31b6ed334da21c081ad207d9d, type: 3}
   FileIcon: {fileID: 21300000, guid: 43b9f6aca4837614691f848e75ba6090, type: 3}
+--- !u!114 &1558965557
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1558965550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: 50
+  m_PreferredWidth: -1
+  m_PreferredHeight: 50
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1 &1577294870
 GameObject:
   m_ObjectHideFlags: 0

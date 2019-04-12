@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 #if UNITY_STANDALONE_WIN
 using System.Windows.Forms;
 #endif
@@ -51,6 +52,8 @@ namespace Assets.Scripts
         public AppMode Mode { get; private set; }
 
         public AppResources Resources;
+
+		public static string DemoModelsPath { get { return Application.persistentDataPath + "/DemoModels"; } }
 
         private string LastPath
         {
@@ -342,7 +345,7 @@ namespace Assets.Scripts
 
         public void OnDemoButtonClicked()
         {
-            LoadCrossVer(Application.persistentDataPath + "/DemoModels/");
+			FileSelectionDialogLayer.ShowFileSelectionDialog(DemoModelsPath, Load, false);
         }
 
         private void Save(string fileName)
@@ -476,7 +479,7 @@ namespace Assets.Scripts
 
         private void CheckForDemoModelsUpdate()
         {
-            const int demoModelsVersion = 6;
+            const int demoModelsVersion = 7;
 
             var currentVersion = PlayerPrefs.GetInt("DemoModelsVersion", 0);
 
@@ -485,12 +488,29 @@ namespace Assets.Scripts
                 return;
             }
 
+#if UNITY_EDITOR
+	        UpdateDemoModelsList();
+#endif
             StartCoroutine(CopyDemoModels());
 
             PlayerPrefs.SetInt("DemoModelsVersion", demoModelsVersion);
         }
 
-        private IEnumerator UpdateDebugInfo()
+	    public static void UpdateDemoModelsList() 
+		{
+		    var streamingAssetsPath = Application.streamingAssetsPath;
+		    var demoModelsPath = Path.Combine(streamingAssetsPath, "DemoModels");
+		    var filesListPath = Path.Combine(demoModelsPath, "FilesList.txt");
+		    var filesList = Directory.GetFiles(demoModelsPath, "*.fcl", SearchOption.AllDirectories)
+			    .Select(s => s.Remove(0, streamingAssetsPath.Length + 1).Replace('\\', '/'))
+			    .ToArray();
+
+		    File.WriteAllLines(filesListPath, filesList);
+
+		    Debug.Log("List of demo models updated!");
+	    }
+
+	    private IEnumerator UpdateDebugInfo()
         {
             while (true)
             {
@@ -506,7 +526,7 @@ namespace Assets.Scripts
         private void DebugUpdateGroupsInfo()
         {
             var roots = new List<GameObject>();
-            UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects(roots);
+            SceneManager.GetActiveScene().GetRootGameObjects(roots);
 
             var groups = new List<Transform>();
             var details = new HashSet<Detail>();
