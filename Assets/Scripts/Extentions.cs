@@ -213,6 +213,17 @@ namespace Assets.Scripts
             return (value & 1) == 1;
         }
 
+	    public static string RespectingRtl(this string text)
+	    {
+			var langIdx = UiLang.Lang;
+
+			if (text == "" || langIdx != 4 || Regex.IsMatch(text, "^[0-9a-zA-Z()\\s.,-]*$")) {
+				return text;
+			}
+
+		    return ReverseString(text);
+	    }
+
         // Чтобы RTL тексты отображались правильно, их нужно передавать только в активные текстовые компоненты
         public static void TextRespectingRtl(this Text textComponent, string text)
         {

@@ -3,8 +3,8 @@ DemoModels/BigFigures/GiraffeGulliver.fcl
 DemoModels/F1001_Cosmoclastics/DeltaSpaceship.fcl
 DemoModels/F1001_Cosmoclastics/InfinitySpaceship.fcl
 DemoModels/F1001_Cosmoclastics/OmegaSpaceship.fcl
-DemoModels/F1002_Architectics/KingCastle.fcl
-DemoModels/F1002_Architectics/SkySpear.fcl
+DemoModels/F1002_Architectics/KingsCastle.fcl
+DemoModels/F1002_Architectics/SkySpearTower.fcl
 DemoModels/F1002_Architectics/SpaceLight.fcl
 DemoModels/F1003_Geometrics/Cube.fcl
 DemoModels/F1003_Geometrics/FlexibleStick.fcl
@@ -19,7 +19,7 @@ DemoModels/F1004_Blasterology/Miniblaster.fcl
 DemoModels/F1004_Blasterology/Parablaster.fcl
 DemoModels/F1005_Militarics/Fighter.fcl
 DemoModels/F1005_Militarics/Helicopter.fcl
-DemoModels/F1005_Militarics/Sbmarine.fcl
+DemoModels/F1005_Militarics/Submarine.fcl
 DemoModels/F1005_Militarics/Tank.fcl
 DemoModels/F1006_Zoosaurics/Dachshund.fcl
 DemoModels/F1006_Zoosaurics/Fawn.fcl
@@ -41,7 +41,7 @@ DemoModels/F1008_Robotology/Robot_3.fcl
 DemoModels/F1008_Robotology/Robot_4.fcl
 DemoModels/F1008_Robotology/RollerRobot.fcl
 DemoModels/F1101_Geometry/Crystal.fcl
-DemoModels/F1101_Geometry/Flexystick.fcl
+DemoModels/F1101_Geometry/FlexibleStick.fcl
 DemoModels/F1101_Geometry/Fractal.fcl
 DemoModels/F1101_Geometry/Globe.fcl
 DemoModels/F1101_Geometry/Hexanom.fcl
@@ -68,7 +68,7 @@ DemoModels/F1104_Playground/Slide.fcl
 DemoModels/F1104_Playground/Swing.fcl
 DemoModels/F1105_Dinosaurs/Frusaur.fcl
 DemoModels/F1105_Dinosaurs/SaurKing.fcl
-DemoModels/F1105_Dinosaurs/Truceratops.fcl
+DemoModels/F1105_Dinosaurs/Triceratops.fcl
 DemoModels/F1106_Marine/Catamaran.fcl
 DemoModels/F1106_Marine/FairWindShip.fcl
 DemoModels/F1106_Marine/SeaLightTower.fcl

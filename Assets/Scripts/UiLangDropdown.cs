@@ -37,10 +37,10 @@ namespace Assets.Scripts {
 					continue;
 				}
 
-				optionData.text = newText;
+				optionData.text = newText.RespectingRtl();
 
 				if (_dropdown.value == i) {
-					_dropdown.captionText.text = newText;
+					_dropdown.captionText.TextRespectingRtl(newText);
 				}
 			}
 

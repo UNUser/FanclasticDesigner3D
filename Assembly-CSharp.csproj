@@ -82,6 +82,7 @@
      <Compile Include="Assets\Scripts\AxisMover.cs" />
      <Compile Include="Assets\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\ColorSetter.cs" />
+     <Compile Include="Assets\Scripts\DemoModelsLayer.cs" />
      <Compile Include="Assets\Scripts\Detail.cs" />
      <Compile Include="Assets\Scripts\DetailBase.cs" />
      <Compile Include="Assets\Scripts\DetailButton.cs" />
