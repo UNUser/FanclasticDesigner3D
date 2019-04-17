@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Assets.Scripts {
@@ -207,7 +207,7 @@ namespace Assets.Scripts {
 
 		private void Load(string fileName) {
 			if (!File.Exists(fileName)) {
-				Debug.Log("File doesn't exist!");
+				Debug.Log("File " + fileName + " doesn't exist!");
 				return;
 			}
 

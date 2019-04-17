@@ -396,7 +396,7 @@ namespace Assets.Scripts
             _isLangInited = true;
 
             CheckForFirstLaunch();
-            CheckForDemoModelsUpdate();
+//            CheckForDemoModelsUpdate();
         }
 
         private bool _loadDemo;
@@ -405,7 +405,7 @@ namespace Assets.Scripts
         {
             if (_loadDemo)
             {
-                Load(Application.persistentDataPath + "/DemoModels/F.fcl");
+//                Load(Application.persistentDataPath + "/DemoModels/F.fcl");
                 _loadDemo = false;
             }
         }
@@ -479,7 +479,7 @@ namespace Assets.Scripts
 
         private void CheckForDemoModelsUpdate()
         {
-            const int demoModelsVersion = 7;
+            const int demoModelsVersion = 0;
 
             var currentVersion = PlayerPrefs.GetInt("DemoModelsVersion", 0);
 
