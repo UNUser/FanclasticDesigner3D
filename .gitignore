@@ -3,3 +3,4 @@ Library/
 Temp/
 ProjectBuilds/
 obj/
+Assets/StreamingAssets/crashlytics-build.properties
