@@ -1,0 +1,783 @@
+{
+  "Content": [
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "DeltaSpaceship"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "InfinitySpaceship"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "OmegaSpaceship"
+        }
+      ],
+      "Name": "F1001_Cosmoclastics"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KingsCastle_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SkySpearTower_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SpaceLight"
+        }
+      ],
+      "Name": "F1002_Architectics"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Cube"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "FlexibleStick_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Fractal_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Globe_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Pyramid"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Sphere_1"
+        }
+      ],
+      "Name": "F1003_Geometrics"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Hyperblaster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Megablaster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Miniblaster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Parablaster"
+        }
+      ],
+      "Name": "F1004_Blasterology"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Fighter"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Helicopter_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Submarine_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Tank"
+        }
+      ],
+      "Name": "F1005_Militarics"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Dachshund"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Fawn"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "GiraffeKid"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SaurKing"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Tortilla"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Triceratops"
+        }
+      ],
+      "Name": "F1006_Zoosaurics"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Bossmonster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Cyclops"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Monster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Radiomonster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Smartmonster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Stereomonster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Telemonster"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Threeclopes"
+        }
+      ],
+      "Name": "F1007_Monsterology"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "RobotAndroid"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "RobotFerreous"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "RobotQuadric"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "RobotTransformer"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "RollerRobot"
+        }
+      ],
+      "Name": "F1008_Robotology"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Crystal"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "FlexibleStick_2"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Fractal_2"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Globe_2"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Hexanom"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Neutron"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Prism"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Sphere_2"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Spring_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "VectorTower"
+        }
+      ],
+      "Name": "F1101_Geometry"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "ArrowTower"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "FortRoyal"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KingsCastle_2"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Skyscraper"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SkySpearTower_2"
+        }
+      ],
+      "Name": "F1102_Architecture"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Destroyer"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "GlitchSender"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SpaceIntruder"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SpacePike"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "TSpace"
+        }
+      ],
+      "Name": "F1103_Spaceships"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "CarouselTower"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "JumpingBalance"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "MerryGoRound"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Seesaw"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Slide"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Swing"
+        }
+      ],
+      "Name": "F1104_Playground"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Frusaur"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SaurKing"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Triceratops"
+        }
+      ],
+      "Name": "F1105_Dinosaurs"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Catamaran"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "FairWindShip"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SeaLightTower"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Submarine_2"
+        }
+      ],
+      "Name": "F1106_Marine"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Airplane"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "ControlTower"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Helicopter_2"
+        }
+      ],
+      "Name": "F1107_Aircraft"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "FieryRocket"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "GammaRayDestroyer"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "SpaceRadar"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "StrikeFighterVolcano"
+        }
+      ],
+      "Name": "F1108_Space"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Babycopter"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "DragonflyPlane"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Giraffe"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "HandBridge"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Plane_1"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Robot"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Spring_2"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Tower"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Umberflower"
+        }
+      ],
+      "Name": "F1109_Mix"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "BabyPanda"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Doggie"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lamb"
+        }
+      ],
+      "Name": "F1110_Animals"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Dandelion"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lily"
+        }
+      ],
+      "Name": "F1111_Flowers"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "BabyDeer"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "BabyGiraffe"
+        }
+      ],
+      "Name": "F1112_DeerGiraff"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Birdy"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lama"
+        }
+      ],
+      "Name": "F1113_BirdLama"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "LittleShip"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Plane_2"
+        }
+      ],
+      "Name": "F1114_PlaneShip"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Hawkmoth"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Swallowtail"
+        }
+      ],
+      "Name": "F1115_Butterflies"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Moustashed"
+        }
+      ],
+      "Name": "F1116_Masks"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "QuadBike"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "RaceCar"
+        }
+      ],
+      "Name": "F1117_Racing"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Buggy"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Motocycle"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Tricycle"
+        }
+      ],
+      "Name": "F1118_RallyRade"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsAirplane"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsChair"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsDragonfly"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsLodge"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsMan"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsPuppy"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsSpider"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTree"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTruck"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTruckCrane"
+        }
+      ],
+      "Name": "F1301_Kids200"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsAirplane"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsChair"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsDragonfly"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsLodge"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsMan"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTree"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTruck"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTruckCrane"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsVase"
+        }
+      ],
+      "Name": "F1302_Kids100"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsAirplane"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsBench"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsChair"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsDragonfly"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsLodge"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsMan"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsPuppy"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTable"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsTree"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "KidsVase"
+        }
+      ],
+      "Name": "F1303_Kids40"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice_3x3(1)"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice_3x3(2)"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice_6x2(1)"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice_6x2(2)"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice_6x2(3)"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice_6x2(4)"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Lattice_6x2(5)"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Tetrahedron"
+        },
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "Unbreakable"
+        }
+      ],
+      "Name": "Geometry"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeCategory, Assembly-CSharp",
+      "Content": [
+        {
+          "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+          "Name": "GiraffeGulliver"
+        }
+      ],
+      "Name": "KBigFigures"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "Logo"
+    }
+  ],
+  "Name": "ModelsSets"
+}

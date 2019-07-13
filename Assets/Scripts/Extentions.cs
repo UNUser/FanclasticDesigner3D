@@ -358,5 +358,10 @@ namespace Assets.Scripts
         {
             return new SerializableVector3(rValue.x, rValue.y, rValue.z);
         }
+
+		public static SerializableVector3 operator + (SerializableVector3 lValue, SerializableVector3 rValue)
+	    {
+		    return new SerializableVector3(lValue.x + rValue.x, lValue.y + rValue.y, lValue.z + rValue.z);
+	    }
     }
 }

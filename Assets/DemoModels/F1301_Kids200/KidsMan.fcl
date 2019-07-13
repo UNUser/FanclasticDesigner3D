@@ -1,0 +1,541 @@
+{
+  "Version": "1.2",
+  "SingleDetails": [],
+  "ConnectedGroups": [
+    {
+      "Details": [
+        {
+          "Id": -1286,
+          "Type": "3x3",
+          "Color": "Yellow",
+          "Position": {
+            "x": 1,
+            "y": 15,
+            "z": -3
+          },
+          "Rotation": {
+            "x": 270,
+            "y": 180,
+            "z": 0
+          },
+          "Connections": [
+            -1718,
+            -1788,
+            -1822,
+            -1874,
+            -1966
+          ]
+        },
+        {
+          "Id": -1516,
+          "Type": "6x2",
+          "Color": "Yellow",
+          "Position": {
+            "x": -8,
+            "y": 16,
+            "z": -3
+          },
+          "Rotation": {
+            "x": 270,
+            "y": 180,
+            "z": 0
+          },
+          "Connections": [
+            -1718
+          ]
+        },
+        {
+          "Id": -1718,
+          "Type": "BraceSquareX3",
+          "Color": "None",
+          "Position": {
+            "x": -3,
+            "y": 17,
+            "z": -2
+          },
+          "Rotation": {
+            "x": 270,
+            "y": 180,
+            "z": 0
+          },
+          "Connections": [
+            -1516,
+            -1286
+          ]
+        },
+        {
+          "Id": -1548,
+          "Type": "6x2",
+          "Color": "Yellow",
+          "Position": {
+            "x": 10,
+            "y": 16,
+            "z": -3
+          },
+          "Rotation": {
+            "x": 270,
+            "y": 180,
+            "z": 0
+          },
+          "Connections": [
+            -1788
+          ]
+        },
+        {
+          "Id": -1788,
+          "Type": "BraceSquareX3",
+          "Color": "None",
+          "Position": {
+            "x": 5,
+            "y": 17,
+            "z": -2
+          },
+          "Rotation": {
+            "x": 270,
+            "y": 180,
+            "z": 0
+          },
+          "Connections": [
+            -1286,
+            -1548
+          ]
+        },
+        {
+          "Id": -1612,
+          "Type": "6x2",
+          "Color": "Yellow",
+          "Position": {
+            "x": -2,
+            "y": 6,
+            "z": -3
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 270,
+            "z": 270
+          },
+          "Connections": [
+            -1822,
+            -1940
+          ]
+        },
+        {
+          "Id": -1822,
+          "Type": "BraceSquareX3",
+          "Color": "None",
+          "Position": {
+            "x": -1,
+            "y": 11,
+            "z": -2
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 270,
+            "z": 270
+          },
+          "Connections": [
+            -1612,
+            -1286
+          ]
+        },
+        {
+          "Id": -1586,
+          "Type": "6x2",
+          "Color": "Yellow",
+          "Position": {
+            "x": 4,
+            "y": 6,
+            "z": -3
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 270,
+            "z": 270
+          },
+          "Connections": [
+            -1874,
+            -1914
+          ]
+        },
+        {
+          "Id": -1874,
+          "Type": "BraceSquareX3",
+          "Color": "None",
+          "Position": {
+            "x": 3,
+            "y": 11,
+            "z": -2
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 270,
+            "z": 270
+          },
+          "Connections": [
+            -1286,
+            -1586
+          ]
+        },
+        {
+          "Id": -1914,
+          "Type": "3x3",
+          "Color": "Red",
+          "Position": {
+            "x": 4,
+            "y": 0,
+            "z": -2
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Connections": [
+            -1586
+          ]
+        },
+        {
+          "Id": -1940,
+          "Type": "3x3",
+          "Color": "Red",
+          "Position": {
+            "x": -2,
+            "y": 0,
+            "z": -2
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Connections": [
+            -1612
+          ]
+        },
+        {
+          "Id": -1966,
+          "Type": "BraceSquareX3",
+          "Color": "None",
+          "Position": {
+            "x": 1,
+            "y": 19,
+            "z": -4
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 90,
+            "z": 270
+          },
+          "Connections": [
+            -1674,
+            -1286
+          ]
+        },
+        {
+          "Id": -1674,
+          "Type": "3x3",
+          "Color": "Red",
+          "Position": {
+            "x": 1,
+            "y": 23,
+            "z": -3
+          },
+          "Rotation": {
+            "x": 90,
+            "y": 0,
+            "z": 0
+          },
+          "Connections": [
+            -1966
+          ]
+        }
+      ],
+      "Instructions": [
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": -4,
+            "y": 0,
+            "z": 0
+          },
+          "TargetDetails": [
+            -1286
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": 5,
+            "y": 0,
+            "z": 1
+          },
+          "TargetDetails": [
+            -1516
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": -13,
+            "y": 0,
+            "z": 1
+          },
+          "TargetDetails": [
+            -1548
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 90,
+            "z": 0
+          },
+          "Position": {
+            "x": -7,
+            "y": 0,
+            "z": -9
+          },
+          "TargetDetails": [
+            -1586
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 90,
+            "z": 0
+          },
+          "Position": {
+            "x": -1,
+            "y": 0,
+            "z": -9
+          },
+          "TargetDetails": [
+            -1612
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": 0,
+            "y": 1,
+            "z": 2
+          },
+          "TargetDetails": [
+            -1718
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": -8,
+            "y": 1,
+            "z": 2
+          },
+          "TargetDetails": [
+            -1788
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 90,
+            "z": 0
+          },
+          "Position": {
+            "x": -2,
+            "y": 1,
+            "z": -4
+          },
+          "TargetDetails": [
+            -1822
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 90,
+            "z": 0
+          },
+          "Position": {
+            "x": -6,
+            "y": 1,
+            "z": -4
+          },
+          "TargetDetails": [
+            -1874
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionMoveAndRotate, Assembly-CSharp",
+          "Pivot": {
+            "x": -4.0,
+            "y": 0.0,
+            "z": -6.0
+          },
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 180
+          },
+          "Offset": {
+            "x": 0.0,
+            "y": 14.0,
+            "z": 0.0
+          },
+          "TargetDetails": [
+            -1286,
+            -1516,
+            -1718,
+            -1548,
+            -1788,
+            -1612,
+            -1822,
+            -1586,
+            -1874
+          ],
+          "Action": "MoveAndRotate"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 90,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": -1,
+            "y": 13,
+            "z": -15
+          },
+          "TargetDetails": [
+            -1914
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 90,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": -7,
+            "y": 13,
+            "z": -15
+          },
+          "TargetDetails": [
+            -1940
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 90,
+            "z": 0
+          },
+          "Position": {
+            "x": -4,
+            "y": 15,
+            "z": 4
+          },
+          "TargetDetails": [
+            -1966
+          ],
+          "Action": "Add"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionMoveAndRotate, Assembly-CSharp",
+          "Pivot": {
+            "x": -4.0,
+            "y": 13.0,
+            "z": -4.5
+          },
+          "Rotation": {
+            "x": 270,
+            "y": 0,
+            "z": 0
+          },
+          "Offset": {
+            "x": 5.0,
+            "y": -2.5,
+            "z": 2.5
+          },
+          "TargetDetails": [
+            -1286,
+            -1516,
+            -1718,
+            -1548,
+            -1788,
+            -1612,
+            -1822,
+            -1586,
+            -1874,
+            -1914,
+            -1940,
+            -1966
+          ],
+          "Action": "MoveAndRotate"
+        },
+        {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 90,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": 1,
+            "y": 23,
+            "z": -3
+          },
+          "TargetDetails": [
+            -1674
+          ],
+          "Action": "Add"
+        }
+      ]
+    }
+  ]
+}

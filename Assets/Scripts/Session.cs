@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Assets.Scripts {
@@ -15,6 +15,7 @@ namespace Assets.Scripts {
 		private readonly Dictionary<int, Detail> _id2Detail = new Dictionary<int, Detail>();
 		private List<InstructionBase> _sourceInstructions;
 		private string _fileName;
+		private string _jsonString;
 
 		public Detail GetDetail(int id)
 		{
@@ -29,10 +30,16 @@ namespace Assets.Scripts {
 			SceneData = null;
 		}
 
-		public Session(string fileName)
+		public Session(FileInfo fileInfo)
 		{
 			AppController.Instance.ActionsLog.Clear();
-			Load(fileName);
+			LoadFile(fileInfo);
+		}
+
+		public Session(string modelName)
+		{
+			AppController.Instance.ActionsLog.Clear();
+			LoadModelsSetsFile(modelName);
 		}
 
 		//TODO убрать после фикса файлов
@@ -63,7 +70,7 @@ namespace Assets.Scripts {
 		{
 			//TODO тут сделать сброс деталей в последнее сохраненное состояние вместо повторной загрузки файла
 			AppController.Instance.ActionsLog.Clear();
-			Load(_fileName);
+			LoadFromJson(_jsonString);
 		}
 
 		public void Save(string fileName)  //TODO добавить заголовок, чтобы определять свои файлы
@@ -119,13 +126,14 @@ namespace Assets.Scripts {
 				connectedGroup.Instructions = group2Instructions[group];
 			}
 
+			var checkedFileName = fileName.EndsWith(".fcl") ? fileName : (fileName + ".fcl");
 			var settings = new JsonSerializerSettings {
 				TypeNameHandling = TypeNameHandling.Auto
 			};
-			var json = JsonConvert.SerializeObject(SceneData, Formatting.Indented, settings);
-			var checkedFileName = fileName.EndsWith(".fcl") ? fileName : (fileName + ".fcl");
+			
+			_jsonString = JsonConvert.SerializeObject(SceneData, Formatting.Indented, settings);
 
-			File.WriteAllText(checkedFileName, json);
+			File.WriteAllText(checkedFileName, _jsonString);
 			_fileName = checkedFileName;
 
 			Debug.Log("Saved: " + checkedFileName);
@@ -205,27 +213,46 @@ namespace Assets.Scripts {
 			return group2Instructions;
 		}
 
-		private void Load(string fileName) {
-			if (!File.Exists(fileName)) {
+		private void LoadFile(FileSystemInfo fileInfo)
+		{
+			if (!fileInfo.Exists) {
 				Debug.Log("File doesn't exist!");
 				return;
 			}
 
-			_fileName = fileName;
+			_fileName = fileInfo.FullName;
+
+			var jsonString = File.ReadAllText(_fileName);
+
+			LoadFromJson(jsonString);
+
+			Debug.Log("Loaded: " + _fileName);
+		}
+
+		private void LoadModelsSetsFile(string modelName)
+		{
+			var modelsPath = AppController.Instance.ModelsSetsLayer.ModelsFilesPath;
+			var filePath = Path.Combine(modelsPath, modelName);
+			var jsonString = Resources.Load<TextAsset>(filePath).text;
+
+			_fileName = "";
+
+			LoadFromJson(jsonString);
+
+			Debug.Log("Loaded model from sets: " + modelName);
+		}
+
+		private void LoadFromJson(string jsonString) {
 
 			RemoveAll();
 
 			var settings = new JsonSerializerSettings {
 				TypeNameHandling = TypeNameHandling.Auto
 			};
-			var jsonString = File.ReadAllText(_fileName);
 			SceneData = JsonConvert.DeserializeObject<SceneData>(jsonString, settings);
 
 			CreateObjects(SceneData);
-
-
-
-			Debug.Log("Loaded: " + _fileName);
+			_jsonString = jsonString;
 		}
 
 		private void RemoveAll() {
