@@ -247,7 +247,6 @@ namespace Assets.Scripts
 		[DllImport("User32.dll")]
 		public static extern bool ShowWindow(IntPtr handle, int nCmdShow);
 
-		private const int SW_RESTORE = 9;
 		private IntPtr _appWindowHandle;
 
         public void ShowSaveFileDialog(string path)
@@ -266,7 +265,7 @@ namespace Assets.Scripts
                 Save(saveFileDialog.FileName);
             }
 
-			ShowWindow(_appWindowHandle, SW_RESTORE);
+			RestoreWindow();
         }
 
         public void ShowOpenFileDialog(string path)
@@ -285,7 +284,7 @@ namespace Assets.Scripts
                 LoadFile(openFileDialog.FileName);
             }
 
-			ShowWindow(_appWindowHandle, SW_RESTORE);
+			RestoreWindow();
         }
 
         public void OnExportButtonClicked()
@@ -300,8 +299,17 @@ namespace Assets.Scripts
                 ExportScene(openFileDialog.FileName + ".fbx");
             }
 
-			ShowWindow(_appWindowHandle, SW_RESTORE);
+			RestoreWindow();
         }
+
+	    private void RestoreWindow()
+	    {
+#if !UNITY_EDITOR
+			const int SW_RESTORE = 9;
+
+			ShowWindow(_appWindowHandle, SW_RESTORE);
+#endif
+		}
 
         private void ExportScene(string path)
         {
@@ -658,7 +666,26 @@ namespace Assets.Scripts
             AnimationContainer = new GameObject("Container");
             var container = AnimationContainer.transform;
 
-            if (Rotation == Vector3.zero) Pivot = GetBounds().center - Offset;
+	        if (Rotation == Vector3.zero)
+	        {
+		        Pivot = GetBounds().center - Offset;
+	        }
+
+	        SerializableVector3Int simplifiedRotation;
+	        var simplificationKey = new SerializableVector3Int(Math.Abs(Rotation.x), 
+															   Math.Abs(Rotation.y),
+															   Math.Abs(Rotation.z));
+			var rotationSimplification = new Dictionary<SerializableVector3Int, SerializableVector3Int>
+	        {
+				{new SerializableVector3Int(0, 180, 180), new SerializableVector3Int(180, 0, 0)},
+				{new SerializableVector3Int(180, 0, 180), new SerializableVector3Int(0, 180, 0)},
+				{new SerializableVector3Int(180, 180, 0), new SerializableVector3Int(0, 0, 180)},
+	        };
+
+	        if (rotationSimplification.TryGetValue(simplificationKey, out simplifiedRotation))
+	        {
+		        Rotation = simplifiedRotation;
+	        }
 
             container.position = Pivot + Offset;
 
