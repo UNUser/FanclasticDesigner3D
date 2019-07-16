@@ -331,8 +331,8 @@ namespace Assets.Scripts
 			var selected = AppController.Instance.SelectedDetails.Detach();
 
 			AxisMover.Correction = Vector3.zero;
-			selected.UpdateLinks();
 			AppController.Instance.ActionsLog.RegisterAction(new MoveAction(selected.Bounds.center - _sourcePos));
+			selected.UpdateLinks();
 		}
 
 
