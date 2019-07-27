@@ -46,8 +46,11 @@ namespace Assets.Scripts
         public GameObject TutorialLayer;
 	    public ModelsSetsLayer ModelsSetsLayer;
 
+	    public ToggleGroup ToolsToggleGroup;
         public Toggle MovementMode;
         public AxisMover AxisMover;
+	    public GameObject MovementController;
+	    public GameObject RotationController;
 
         public Session Session { get; private set; }
         public AppMode Mode { get; private set; }
@@ -84,8 +87,15 @@ namespace Assets.Scripts
 
         public void OnMovementModeChanged(bool value)
         {
-            AxisMover.gameObject.SetActive(value);
+	        MovementController.SetActive(value);
+			AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
         }
+
+		public void OnRotationModeChanged(bool value) 
+		{
+			RotationController.SetActive(value);
+			AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
+		}
 
         public SelectedDetails SelectedDetails;
 
@@ -265,7 +275,7 @@ namespace Assets.Scripts
                 Save(saveFileDialog.FileName);
             }
 
-			RestoreWindow();
+			RestoreMainWindow();
         }
 
         public void ShowOpenFileDialog(string path)
@@ -284,7 +294,7 @@ namespace Assets.Scripts
                 LoadFile(openFileDialog.FileName);
             }
 
-			RestoreWindow();
+			RestoreMainWindow();
         }
 
         public void OnExportButtonClicked()
@@ -299,10 +309,10 @@ namespace Assets.Scripts
                 ExportScene(openFileDialog.FileName + ".fbx");
             }
 
-			RestoreWindow();
+			RestoreMainWindow();
         }
 
-	    private void RestoreWindow()
+	    private void RestoreMainWindow()
 	    {
 #if !UNITY_EDITOR
 			const int SW_RESTORE = 9;
@@ -680,6 +690,11 @@ namespace Assets.Scripts
 				{new SerializableVector3Int(0, 180, 180), new SerializableVector3Int(180, 0, 0)},
 				{new SerializableVector3Int(180, 0, 180), new SerializableVector3Int(0, 180, 0)},
 				{new SerializableVector3Int(180, 180, 0), new SerializableVector3Int(0, 0, 180)},
+
+//				{new SerializableVector3Int(x, 180, 180), new SerializableVector3Int(-x, 0, 0)},???
+
+//				{new SerializableVector3Int(90, x, x), new SerializableVector3Int(90, 0, 0)},
+//				{new SerializableVector3Int(-90, x, x), new SerializableVector3Int(-90, 0, 0)},
 	        };
 
 	        if (rotationSimplification.TryGetValue(simplificationKey, out simplifiedRotation))
