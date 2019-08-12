@@ -909,6 +909,23 @@
           "Action": "Add"
         },
         {
+          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
+          "Rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "Position": {
+            "x": -4,
+            "y": 3,
+            "z": 4
+          },
+          "TargetDetails": [
+            -6964
+          ],
+          "Action": "Add"
+        },
+        {
           "$type": "Assets.Scripts.InstructionMoveAndRotate, Assembly-CSharp",
           "Pivot": {
             "x": 13.0,
@@ -921,9 +938,9 @@
             "z": 0
           },
           "Offset": {
-            "x": -12.0,
+            "x": -14.0,
             "y": 2.5,
-            "z": 2.0
+            "z": 1.5
           },
           "TargetDetails": [
             -6860,
@@ -945,23 +962,6 @@
           },
           "TargetDetails": [
             -6930
-          ],
-          "Action": "Add"
-        },
-        {
-          "$type": "Assets.Scripts.InstructionAdd, Assembly-CSharp",
-          "Rotation": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "Position": {
-            "x": -4,
-            "y": 3,
-            "z": 4
-          },
-          "TargetDetails": [
-            -6964
           ],
           "Action": "Add"
         },
@@ -1069,9 +1069,9 @@
             "z": 0
           },
           "Offset": {
-            "x": 10.5,
+            "x": 10.0,
             "y": 2.5,
-            "z": -20.0
+            "z": -19.5
           },
           "TargetDetails": [
             -7182,
@@ -1126,9 +1126,9 @@
             "z": 0
           },
           "Offset": {
-            "x": 8.5,
+            "x": 8.0,
             "y": 2.5,
-            "z": -8.0
+            "z": -8.5
           },
           "TargetDetails": [
             -7264,
@@ -1166,9 +1166,9 @@
             "z": 0
           },
           "Offset": {
-            "x": 7.5,
+            "x": 10.0,
             "y": 0.0,
-            "z": 25.0
+            "z": 18.0
           },
           "TargetDetails": [
             -6990,
