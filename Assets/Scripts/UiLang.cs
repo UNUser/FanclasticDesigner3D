@@ -33,7 +33,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Load..."},
 				{"Menu.Export", "Export..."},
 				{"Menu.SceneInfo", "Scene Info"},
-				{"Menu.ModelsSets", "Models sets"},
+				{"Menu.ModelsSets", "Models"},
 				{"Menu.Help", "Help"},
 				{"Menu.Exit", "Exit"},
 
@@ -268,7 +268,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Загрузить..."},
 				{"Menu.Export", "Экспорт..."},
 				{"Menu.SceneInfo", "Инфо сцены"},
-				{"Menu.ModelsSets", "Наборы моделей"},
+				{"Menu.ModelsSets", "Модели"},
 				{"Menu.Help", "Помощь"},
 				{"Menu.Exit", "Выход"},
 
@@ -472,7 +472,7 @@ namespace Assets.Scripts
 				{"ModelsSetsLayer.ModelsNames.KidsChair", "Стул"},
 				{"ModelsSetsLayer.ModelsNames.KidsDragonfly", "Стрекоза"},
 				{"ModelsSetsLayer.ModelsNames.KidsLodge", "Домик"},
-				{"ModelsSetsLayer.ModelsNames.KidsMan", "Человечик"},
+				{"ModelsSetsLayer.ModelsNames.KidsMan", "Человечек"},
 				{"ModelsSetsLayer.ModelsNames.KidsPuppy", "Щенок"},
 				{"ModelsSetsLayer.ModelsNames.KidsSpider", "Паук"},
 				{"ModelsSetsLayer.ModelsNames.KidsTree", "Дерево"},
@@ -503,7 +503,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Herunterladen..."},
 				{"Menu.Export", "Export..."},
 				{"Menu.SceneInfo", "Szenen info"},
-				{"Menu.ModelsSets", "Demo"},
+				{"Menu.ModelsSets", "Modelle"},
 				{"Menu.Help", "Hilfe"},
 				{"Menu.Exit", "Beenden"},
 
@@ -738,7 +738,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Wczytaj..."},
 				{"Menu.Export", "Eksportuj..."},
 				{"Menu.SceneInfo", "Szczegóły projektu"},
-				{"Menu.ModelsSets", "Demo"},
+				{"Menu.ModelsSets", "Modele"},
 				{"Menu.Help", "Pomoc"},
 				{"Menu.Exit", "Wyjście"},
 
@@ -973,7 +973,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "פתיחת קובץ..."},
 				{"Menu.Export", "ייצוא..."},
 				{"Menu.SceneInfo", "מידת הזירה"},
-				{"Menu.ModelsSets", "מודלים לדוגמה"},
+				{"Menu.ModelsSets", "דגמים"},
 				{"Menu.Help", "עזרה"},
 				{"Menu.Exit", "יציאה"},
 
