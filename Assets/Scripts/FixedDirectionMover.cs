@@ -9,7 +9,7 @@ namespace Assets.Scripts
 	{
 		public Vector3 Direction;
 
-		private AxisMover AxisMover { get { return _axisMover ?? (_axisMover = transform.parent.parent.GetComponent<AxisMover>()); } }
+		private AxisMover AxisMover { get { return _axisMover ?? (_axisMover = transform.parent.parent.parent.GetComponent<AxisMover>()); } }
 		private AxisMover _axisMover;
 //		private Vector3 _offset;
 //		private Transform _target;
@@ -331,8 +331,8 @@ namespace Assets.Scripts
 			var selected = AppController.Instance.SelectedDetails.Detach();
 
 			AxisMover.Correction = Vector3.zero;
-			selected.UpdateLinks();
 			AppController.Instance.ActionsLog.RegisterAction(new MoveAction(selected.Bounds.center - _sourcePos));
+			selected.UpdateLinks();
 		}
 
 

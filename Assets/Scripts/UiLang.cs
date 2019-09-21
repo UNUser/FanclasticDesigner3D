@@ -33,7 +33,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Load..."},
 				{"Menu.Export", "Export..."},
 				{"Menu.SceneInfo", "Scene Info"},
-				{"Menu.Demo", "Demo"},
+				{"Menu.ModelsSets", "Models"},
 				{"Menu.Help", "Help"},
 				{"Menu.Exit", "Exit"},
 
@@ -92,7 +92,7 @@ namespace Assets.Scripts
 				{"FileSelectionDialogLayer.Cancel", "Cancel"},
 
 				{"TutorialLayer.Next", "Next"},
-				{"TutorialLayer.Welcome", "Welcome to\nFanclastic Kids!\n\nThis program helps you to build Fanclastic models, view assembly instructions and create your own."},
+				{"TutorialLayer.Welcome", "Welcome to\nFanclastic 3D Puzzle!\n\nThis program helps you to build Fanclastic models, view assembly instructions and create your own."},
 				{"TutorialLayer.DetailsHint", "To add an element to the scene drag a corresponding icon from the elements' panel to the scene."},
 				{"TutorialLayer.SetFocusHint", "To change camera anchor point click on the focus setting button and then on any element or spot on the scene."},
 				{"TutorialLayer.ChangeColorHint", "Use the color select button to set a color for selected elements."},
@@ -102,6 +102,8 @@ namespace Assets.Scripts
 				{"TutorialLayer.ZoomHint.Wheel", "mouse wheel"},
 				{"TutorialLayer.ZoomHint.Pinch", "pinch"},
 				{"TutorialLayer.LinkedSelection", "Click on an element and hold to select all linked parts."},
+
+				{"ModelsSetsLayer.SetsNames.ModelsSets", "Models"},
 			}, 
 			new Dictionary<string, string>
 			{
@@ -114,7 +116,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Загрузить..."},
 				{"Menu.Export", "Экспорт..."},
 				{"Menu.SceneInfo", "Инфо сцены"},
-				{"Menu.Demo", "Демо"},
+				{"Menu.ModelsSets", "Модели"},
 				{"Menu.Help", "Помощь"},
 				{"Menu.Exit", "Выход"},
 
@@ -173,7 +175,7 @@ namespace Assets.Scripts
 				{"FileSelectionDialogLayer.Cancel", "Отмена"},
 
 				{"TutorialLayer.Next", "Далее"},
-				{"TutorialLayer.Welcome", "Добро пожаловать в\nFanclastic Kids!\n\nВ этой программе вы можете строить модели из конструктора Fanclastic, просматривать инструкции по сборке и создавать свои собственные!"},
+				{"TutorialLayer.Welcome", "Добро пожаловать в\nFanclastic 3D Puzzle!\n\nВ этой программе вы можете строить модели из конструктора Fanclastic, просматривать инструкции по сборке и создавать свои собственные!"},
 				{"TutorialLayer.DetailsHint", "Чтобы добавить на сцену новую деталь, перетащите соответствующую иконку с панели деталей на сцену."},
 				{"TutorialLayer.SetFocusHint", "Чтобы изменить точку привязки камеры, нажмите на кнопку установки фокуса, а затем на любую деталь или точку на сцене."},
 				{"TutorialLayer.ChangeColorHint", "Используйте кнопку выбора цвета, чтобы задать цвет выделенным деталям."},
@@ -183,6 +185,8 @@ namespace Assets.Scripts
 				{"TutorialLayer.ZoomHint.Wheel", "колесо мыши"},
 				{"TutorialLayer.ZoomHint.Pinch", "жест двумя пальцами"},
 				{"TutorialLayer.LinkedSelection", "Нажмите на деталь и удерживайте, чтобы выделить одновременно все связанные с ней детали."},
+				
+				{"ModelsSetsLayer.SetsNames.ModelsSets", "Модели"},
 			},
 			new Dictionary<string, string>
 			{
@@ -195,7 +199,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Herunterladen..."},
 				{"Menu.Export", "Export..."},
 				{"Menu.SceneInfo", "Szenen info"},
-				{"Menu.Demo", "Demo"},
+				{"Menu.ModelsSets", "Modelle"},
 				{"Menu.Help", "Hilfe"},
 				{"Menu.Exit", "Beenden"},
 
@@ -254,7 +258,7 @@ namespace Assets.Scripts
 				{"FileSelectionDialogLayer.Cancel", "Abbrechen"},
 
 				{"TutorialLayer.Next", "Nächster"},
-				{"TutorialLayer.Welcome", "Willkommen bei\nFanclastic Kids!\n\nIn diesem Programm können Sie Modelle aus dem Fanclastic-Baukasten erstellen, Bauanleitungen ansehen und eigene erstellen!"},
+				{"TutorialLayer.Welcome", "Willkommen bei\nFanclastic 3D Puzzle!\n\nIn diesem Programm können Sie Modelle aus dem Fanclastic-Baukasten erstellen, Bauanleitungen ansehen und eigene erstellen!"},
 				{"TutorialLayer.DetailsHint", "Um der Szene ein neues Detail hinzuzufügen, ziehen Sie das entsprechende Symbol aus der Detail-Palette in die Szene"},
 				{"TutorialLayer.SetFocusHint", "Um den Fangpunkt der Kamera zu ändern, klicken Sie auf die Schaltfläche für die Fokuseinstellung und dann auf jeden Punkt oder jedes Detail auf der Bühne.."},
 				{"TutorialLayer.ChangeColorHint", "Verwenden Sie die Farbauswahltaste, um die Farbe für die markierten Elemente festzulegen."},
@@ -264,6 +268,8 @@ namespace Assets.Scripts
 				{"TutorialLayer.ZoomHint.Wheel", "Mausrad"},
 				{"TutorialLayer.ZoomHint.Pinch", "Zwei-Finger-Geste"},
 				{"TutorialLayer.LinkedSelection", "Klicken Sie auf das Detail und halten Sie es gedrückt, um alle zugehörigen Details gleichzeitig auszuwählen."},
+				
+				{"ModelsSetsLayer.SetsNames.ModelsSets", "Models"},
 			},
 			new Dictionary<string, string>
 			{
@@ -276,7 +282,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "Wczytaj..."},
 				{"Menu.Export", "Eksportuj..."},
 				{"Menu.SceneInfo", "Szczegóły projektu"},
-				{"Menu.Demo", "Demo"},
+				{"Menu.ModelsSets", "Modele"},
 				{"Menu.Help", "Pomoc"},
 				{"Menu.Exit", "Wyjście"},
 
@@ -335,7 +341,7 @@ namespace Assets.Scripts
 				{"FileSelectionDialogLayer.Cancel", "Anuluj"},
 
 				{"TutorialLayer.Next", "Dalej"},
-				{"TutorialLayer.Welcome", "Witaj w\nFanclastic Kids™!\n\nTen program umożliwi Ci projektowanie własnych budowli Fanclastic i generowanie do nich animowanych instrukcji oraz przeglądanie już istniejących projektów. \n\nwww.fanclastic.pl"},
+				{"TutorialLayer.Welcome", "Witaj w\nFanclastic 3D Puzzle™!\n\nTen program umożliwi Ci projektowanie własnych budowli Fanclastic i generowanie do nich animowanych instrukcji oraz przeglądanie już istniejących projektów. \n\nwww.fanclastic.pl"},
 				{"TutorialLayer.DetailsHint", "Aby dodać element do obecnego projektu, przeciągnij odpowiednią ikonę z panelu elementów na wybrane miejsce na planie."},
 				{"TutorialLayer.SetFocusHint", "Aby zmienić punkt widzenia kamery, kliknij przycisk ustawienia ostrości, a następnie na dowolny element lub punkt na planie."},
 				{"TutorialLayer.ChangeColorHint", "Użyj przycisku wyboru koloru, aby zmienić barwę dla użytych elementów."},
@@ -345,6 +351,8 @@ namespace Assets.Scripts
 				{"TutorialLayer.ZoomHint.Wheel", "kółka w myszce"},
 				{"TutorialLayer.ZoomHint.Pinch", "uszczypnięcia"},
 				{"TutorialLayer.LinkedSelection", "Kliknij i przytrzymaj element, aby zobaczyć wszystkie połączone części i obrócić budowlę przyciskami obrotu."},
+
+				{"ModelsSetsLayer.SetsNames.ModelsSets", "Models"},
 			},
 			new Dictionary<string, string>
 			{
@@ -357,7 +365,7 @@ namespace Assets.Scripts
 				{"Menu.Load", "פתיחת קובץ..."},
 				{"Menu.Export", "ייצוא..."},
 				{"Menu.SceneInfo", "מידת הזירה"},
-				{"Menu.Demo", "מודלים לדוגמה"},
+				{"Menu.ModelsSets", "דגמים"},
 				{"Menu.Help", "עזרה"},
 				{"Menu.Exit", "יציאה"},
 
@@ -416,7 +424,7 @@ namespace Assets.Scripts
 				{"FileSelectionDialogLayer.Cancel", "ביטול"},
 
 				{"TutorialLayer.Next", "הבא"},
-				{"TutorialLayer.Welcome", "ברוכים הבאים ל\nFanclastic Kids!\n\nתוכנית זו מסייעת לך לבנות מודלים ,להציג הוראות הרכבה וליצור מודלים משלך."},
+				{"TutorialLayer.Welcome", "ברוכים הבאים ל\nFanclastic 3D Puzzle!\n\nתוכנית זו מסייעת לך לבנות מודלים ,להציג הוראות הרכבה וליצור מודלים משלך."},
 				{"TutorialLayer.DetailsHint", "כדי לזירה, גרור את הסמל המתאים מהלוח רכיבים לזירה."},
 				{"TutorialLayer.SetFocusHint", "לשינוי נקודת עיגון המצלמה לחצו על לחצן הגדרת המוקד ולאחר מכן על כל רכיב או מקום בזירה."},
 				{"TutorialLayer.ChangeColorHint", "השתמש בלחצן בחירת צבע על מנת להגדיר צבע עבור הרכיבים שנבחרו."},
@@ -427,6 +435,8 @@ namespace Assets.Scripts
                 {"TutorialLayer.ZoomHint.Wheel", "השתמש בגלגל של עכבר"},
 				{"TutorialLayer.ZoomHint.Pinch", "באצבעות"},
 				{"TutorialLayer.LinkedSelection", "הלחץ על רכיב והחזק כדי לבחור את כל החלקים הקשורים אליו."},
+
+				{"ModelsSetsLayer.SetsNames.ModelsSets", "Models"},
 			}
 		};
 

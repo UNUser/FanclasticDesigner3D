@@ -379,6 +379,24 @@ namespace Assets.Scripts
             targetDetail.transform.Translate(offset, Space.World);
         }
 
+	    public Quaternion Rotation
+	    {
+		    get
+		    {
+				var targetDetail = Detach();
+
+			    return targetDetail.transform.rotation;
+		    }
+		    set
+		    {
+				var targetDetail = Detach();
+
+				targetDetail.transform.rotation = value;
+		    }
+	    }
+
+    
+
         public void SetColor(DetailColor color)
         {
             AppController.Instance.ActionsLog.RegisterAction(new SetColorAction(Selected, color));

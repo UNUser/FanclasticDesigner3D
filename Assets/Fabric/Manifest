@@ -216,6 +216,8 @@
 ./Fabric/Managed/Certificates/FabricPublic.XML.meta
 ./Fabric/Managed/Certificates/GeoTrustGlobalCA
 ./Fabric/Managed/Certificates/GeoTrustGlobalCA.meta
+./Fabric/Managed/Certificates/GlobalSignRootCAR2
+./Fabric/Managed/Certificates/GlobalSignRootCAR2.meta
 ./Fabric/Managed/Certificates.meta
 ./Fabric/Managed/Validator.dll
 ./Fabric/Managed/Validator.dll.meta

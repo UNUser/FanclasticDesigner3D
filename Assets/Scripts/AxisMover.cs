@@ -8,6 +8,9 @@ namespace Assets.Scripts
 		public GameObject Root;
 		public Canvas Canvas;
 
+		public int PointsCount;
+		public FixedAxisRotator[] FixedAxisRotators;
+
 		private SelectedDetails Selected { get { return _selected ?? (_selected = AppController.Instance.SelectedDetails); } }
 		private SelectedDetails _selected;
 		private readonly Vector3 _screenOriginOffset = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
@@ -45,9 +48,27 @@ namespace Assets.Scripts
 			rootLocalPos.z = 0;
 
 			Root.transform.localPosition = rootLocalPos;
-			Root.transform.rotation = Quaternion.identity;
+			Root.transform.rotation = Selected.First.transform.rotation;//Quaternion.identity;
 
 			Root.SetActive(true);
 		}
+
+#if UNITY_EDITOR
+
+		private int _prevPointsCount;
+
+		protected void OnValidate() {
+			if (_prevPointsCount == PointsCount) {
+				return;
+			}
+
+			foreach (var fixedAxisRotator in FixedAxisRotators) {
+				fixedAxisRotator.DrawArc(PointsCount);
+			}
+
+			_prevPointsCount = PointsCount;
+		}
+
+#endif
 	}
 }

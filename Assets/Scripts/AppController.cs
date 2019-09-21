@@ -44,9 +44,13 @@ namespace Assets.Scripts
         public Dropdown LanguageSwitcher;
         public InstructionsLayer InstructionsLayer;
         public GameObject TutorialLayer;
+	    public ModelsSetsLayer ModelsSetsLayer;
 
+	    public ToggleGroup ToolsToggleGroup;
         public Toggle MovementMode;
         public AxisMover AxisMover;
+	    public GameObject MovementController;
+	    public GameObject RotationController;
 
         public Session Session { get; private set; }
         public AppMode Mode { get; private set; }
@@ -83,8 +87,15 @@ namespace Assets.Scripts
 
         public void OnMovementModeChanged(bool value)
         {
-            AxisMover.gameObject.SetActive(value);
+	        MovementController.SetActive(value);
+			AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
         }
+
+		public void OnRotationModeChanged(bool value) 
+		{
+			RotationController.SetActive(value);
+			AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
+		}
 
         public SelectedDetails SelectedDetails;
 
@@ -241,9 +252,15 @@ namespace Assets.Scripts
         [DllImport("user32.dll")]
         private static extern void OpenFileDialog();
 
+	    [DllImport("user32.dll")]
+	    public static extern IntPtr GetActiveWindow();
+		[DllImport("User32.dll")]
+		public static extern bool ShowWindow(IntPtr handle, int nCmdShow);
+
+		private IntPtr _appWindowHandle;
+
         public void ShowSaveFileDialog(string path)
         {
-
             var saveFileDialog = new SaveFileDialog
             {
                 InitialDirectory = path,
@@ -253,11 +270,12 @@ namespace Assets.Scripts
                 Filter = "(*.fcl)|*.fcl"
             };
 
-
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
                 Save(saveFileDialog.FileName);
             }
+
+			RestoreMainWindow();
         }
 
         public void ShowOpenFileDialog(string path)
@@ -271,11 +289,12 @@ namespace Assets.Scripts
                 Filter = "*.fcl|*.fcl|*.*|*.*"
             };
 
-
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                Load(openFileDialog.FileName);
+                LoadFile(openFileDialog.FileName);
             }
+
+			RestoreMainWindow();
         }
 
         public void OnExportButtonClicked()
@@ -285,12 +304,22 @@ namespace Assets.Scripts
                 InitialDirectory = LastPath
             };
 
-
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 ExportScene(openFileDialog.FileName + ".fbx");
             }
+
+			RestoreMainWindow();
         }
+
+	    private void RestoreMainWindow()
+	    {
+#if !UNITY_EDITOR
+			const int SW_RESTORE = 9;
+
+			ShowWindow(_appWindowHandle, SW_RESTORE);
+#endif
+		}
 
         private void ExportScene(string path)
         {
@@ -338,14 +367,14 @@ namespace Assets.Scripts
 
             ShowOpenFileDialog(path);
 #else
-            FileSelectionDialogLayer.ShowFileSelectionDialog(path, Load, false);
+            FileSelectionDialogLayer.ShowFileSelectionDialog(path, LoadFile, false);
 #endif
 
         }
 
-        public void OnDemoButtonClicked()
+        public void OnModelsSetsButtonClicked()
         {
-			FileSelectionDialogLayer.ShowFileSelectionDialog(DemoModelsPath, Load, false);
+			ModelsSetsLayer.gameObject.SetActive(true);
         }
 
         private void Save(string fileName)
@@ -355,11 +384,22 @@ namespace Assets.Scripts
             LastPath = Path.GetDirectoryName(fileName);
         }
 
-        private void Load(string fileName)
+	    public void LoadFile(string filePath)
+	    {
+			Session = new Session(new FileInfo(filePath));
+			LastPath = Path.GetDirectoryName(filePath);
+			OnLoad();
+	    }
+
+	    public void LoadModel(string modelName)
+	    {
+			Session = new Session(modelName);
+			OnLoad();
+	    }
+
+        private void OnLoad()
         {
-            Session = new Session(fileName);
             ModeSwitcher.interactable = Session.SceneData.ConnectedGroups.Count > 0;
-            LastPath = Path.GetDirectoryName(fileName);
 
             if (Session.SceneData.ConnectedGroups.Count == 0)
             {
@@ -396,7 +436,10 @@ namespace Assets.Scripts
             _isLangInited = true;
 
             CheckForFirstLaunch();
-//            CheckForDemoModelsUpdate();
+
+#if UNITY_STANDALONE_WIN
+			_appWindowHandle = GetActiveWindow();
+#endif
         }
 
         private bool _loadDemo;
@@ -405,7 +448,7 @@ namespace Assets.Scripts
         {
             if (_loadDemo)
             {
-//                Load(Application.persistentDataPath + "/DemoModels/F.fcl");
+                LoadModel("Logo");
                 _loadDemo = false;
             }
         }
@@ -424,91 +467,6 @@ namespace Assets.Scripts
             PlayerPrefs.SetInt("WasLaunched", 1);
             TutorialLayer.SetActive(true);
         }
-
-
-
-        private IEnumerator CopyDemoModels()
-        {
-            var filesListPath = Path.Combine(Application.streamingAssetsPath, Path.Combine("DemoModels", "FilesList.txt"));
-#if PLATFORM_IOS
-            filesListPath = "file://" + filesListPath;
-#endif
-            var filesListRequest = new UnityWebRequest(filesListPath) { downloadHandler = new DownloadHandlerBuffer() };
-
-            yield return filesListRequest.SendWebRequest();
-
-            if (filesListRequest.isNetworkError || filesListRequest.isHttpError)
-            {
-                Debug.LogError("Can't get files list: " + filesListRequest.error + " " + filesListRequest.url);
-                yield break;
-            }
-
-            var filesListRequestResult = filesListRequest.downloadHandler.text;
-            var filesRelativePaths = filesListRequestResult.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var fileRelativePath in filesRelativePaths)
-            {
-
-                var destination = Path.Combine(Application.persistentDataPath, fileRelativePath);
-                var directory = Path.GetDirectoryName(destination) ?? string.Empty;
-
-                var source = Path.Combine(Application.streamingAssetsPath, fileRelativePath);
-#if PLATFORM_IOS
-                source = "file://" + source;
-#endif
-                var fileRequest = new UnityWebRequest(source) { downloadHandler = new DownloadHandlerBuffer() };
-
-                yield return fileRequest.SendWebRequest();
-
-                if (fileRequest.isNetworkError || fileRequest.isHttpError)
-                {
-                    Debug.LogError("Can't get demo model's file: " + fileRequest.error + fileRequest.url);
-                    continue;
-                }
-
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                File.WriteAllBytes(destination, fileRequest.downloadHandler.data);
-            }
-
-            Debug.Log("Demo models successfully updated!");
-        }
-
-        private void CheckForDemoModelsUpdate()
-        {
-            const int demoModelsVersion = 0;
-
-            var currentVersion = PlayerPrefs.GetInt("DemoModelsVersion", 0);
-
-            if (currentVersion == demoModelsVersion)
-            {
-                return;
-            }
-
-#if UNITY_EDITOR
-	        UpdateDemoModelsList();
-#endif
-            StartCoroutine(CopyDemoModels());
-
-            PlayerPrefs.SetInt("DemoModelsVersion", demoModelsVersion);
-        }
-
-	    public static void UpdateDemoModelsList() 
-		{
-		    var streamingAssetsPath = Application.streamingAssetsPath;
-		    var demoModelsPath = Path.Combine(streamingAssetsPath, "DemoModels");
-		    var filesListPath = Path.Combine(demoModelsPath, "FilesList.txt");
-		    var filesList = Directory.GetFiles(demoModelsPath, "*.fcl", SearchOption.AllDirectories)
-			    .Select(s => s.Remove(0, streamingAssetsPath.Length + 1).Replace('\\', '/'))
-			    .ToArray();
-
-		    File.WriteAllLines(filesListPath, filesList);
-
-		    Debug.Log("List of demo models updated!");
-	    }
 
 	    private IEnumerator UpdateDebugInfo()
         {
@@ -718,30 +676,90 @@ namespace Assets.Scripts
             AnimationContainer = new GameObject("Container");
             var container = AnimationContainer.transform;
 
-            if (Rotation == Vector3.zero) Pivot = GetBounds().center - Offset;
+	        if (Rotation == Vector3.zero)
+	        {
+		        Pivot = GetBounds().center - Offset;
+	        }
 
-            container.position = /*Rotation == Vector3.zero ? GetBounds().center : */((Vector3) Pivot + Offset);
+	        SerializableVector3Int simplifiedRotation;
+	        var simplificationKey = new SerializableVector3Int(Math.Abs(Rotation.x), 
+															   Math.Abs(Rotation.y),
+															   Math.Abs(Rotation.z));
+			var rotationSimplification = new Dictionary<SerializableVector3Int, SerializableVector3Int>
+	        {
+				{new SerializableVector3Int(0, 180, 180), new SerializableVector3Int(180, 0, 0)},
+				{new SerializableVector3Int(180, 0, 180), new SerializableVector3Int(0, 180, 0)},
+				{new SerializableVector3Int(180, 180, 0), new SerializableVector3Int(0, 0, 180)},
 
+//				{new SerializableVector3Int(x, 180, 180), new SerializableVector3Int(-x, 0, 0)},???
+
+//				{new SerializableVector3Int(90, x, x), new SerializableVector3Int(90, 0, 0)},
+//				{new SerializableVector3Int(-90, x, x), new SerializableVector3Int(-90, 0, 0)},
+	        };
+
+	        if (rotationSimplification.TryGetValue(simplificationKey, out simplifiedRotation))
+	        {
+		        Rotation = simplifiedRotation;
+	        }
+
+            container.position = Pivot + Offset;
+
+			//backwards
             if (Offset != Vector3.zero)
             {
                 animation.Append(container.DOMove(Pivot, BackwardsAnimationTime));
             }
+			
+	        var rotationX = new Vector3(GetMinRotationAngle(Rotation.x), 0, 0);
+			var rotationY = new Vector3(0, GetMinRotationAngle(Rotation.y), 0);
+			var rotationZ = new Vector3(0, 0, GetMinRotationAngle(Rotation.z));
 
-            if (Rotation != Vector3.zero)
-            {
-                animation.Append(container.DORotate(-(Vector3) Rotation, BackwardsAnimationTime, RotateMode.WorldAxisAdd))
-                    .Append(container.DORotate(Rotation, 1f, RotateMode.WorldAxisAdd))
-                    .AppendInterval(1f);
-            }
+	        if (rotationY != Vector3.zero) {
+		        animation.Append(container.DORotate( - rotationY, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
+	        }
 
+			if (rotationX != Vector3.zero) {
+				animation.Append(container.DORotate( - rotationX, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
+			}
+
+			if (rotationZ != Vector3.zero) {
+				animation.Append(container.DORotate( - rotationZ, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
+			}
+
+			//forward
+	        animation.AppendInterval(0.5f);
+
+			if (rotationZ != Vector3.zero) {
+				animation.Append(container.DORotate(rotationZ, 1f, RotateMode.WorldAxisAdd));
+			}
+
+			if (rotationX != Vector3.zero) {
+				animation.Append(container.DORotate(rotationX, 1f, RotateMode.WorldAxisAdd));
+			}
+
+			if (rotationY != Vector3.zero) {
+				animation.Append(container.DORotate(rotationY, 1f, RotateMode.WorldAxisAdd));
+			}
+
+            animation.AppendInterval(0.5f);
+			
             if (Offset != Vector3.zero)
             {
-                animation.Append(container.DOMove((Vector3) Pivot + Offset, 1f))
+                animation.Append(container.DOMove(Pivot + Offset, 1f))
                     .AppendInterval(1f);
             }
 
             return animation;
         }
+
+	    private int GetMinRotationAngle(int angle)
+	    {
+			var normalized = angle % 360;
+
+			return Mathf.Abs(normalized) > 180 
+				? (normalized - Math.Sign(normalized) * 360)
+				: normalized; 
+	    }
 
         private Bounds GetBounds()
         {
