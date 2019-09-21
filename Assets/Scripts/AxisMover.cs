@@ -48,7 +48,7 @@ namespace Assets.Scripts
 			rootLocalPos.z = 0;
 
 			Root.transform.localPosition = rootLocalPos;
-			Root.transform.rotation = Selected.First.transform.rotation;//Quaternion.identity;
+			Root.transform.rotation = Quaternion.identity;
 
 			Root.SetActive(true);
 		}

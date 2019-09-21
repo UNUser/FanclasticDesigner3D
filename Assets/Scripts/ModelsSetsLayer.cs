@@ -198,7 +198,7 @@ namespace Assets.Scripts
 				var setsTreeItem = items[i];
 				var isCategory = setsTreeItem is SetsTreeCategory;
 				var itemName = setsTreeItem.Name;
-				var itemText = setsTreeItem.GetLocalizedText();
+				var itemText = string.Empty;//setsTreeItem.GetLocalizedText();
 				Sprite itemIcon;
 
 				_itemNameToIcon.TryGetValue(itemName, out itemIcon);

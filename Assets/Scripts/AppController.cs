@@ -448,7 +448,7 @@ namespace Assets.Scripts
         {
             if (_loadDemo)
             {
-                LoadModel("Logo");
+//                LoadModel("Logo");
                 _loadDemo = false;
             }
         }

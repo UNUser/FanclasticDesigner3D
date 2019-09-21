@@ -1,0 +1,45 @@
+{
+  "Content": [
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "FigureRG"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "FigureYB"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "PuzzleRG"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "PuzzleYB"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "TowerRG"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "TowerYB"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "UnbreakableCubeRG"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "UnbreakableCubeYB"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "UnbreakableRG"
+    },
+    {
+      "$type": "Assets.Scripts.SetsTreeModel, Assembly-CSharp",
+      "Name": "UnbreakableYB"
+    }
+  ],
+  "Name": "ModelsSets"
+}
