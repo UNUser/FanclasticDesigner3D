@@ -154,7 +154,7 @@ PlayerSettings:
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
     Android: ru.fanclastic.Fanclastic3DPuzzle
-    Standalone: unity.Fanclastic.Fanclastic 3D Designer
+    Standalone: unity.Fanclastic.Fanclastic3DPuzzle
     Tizen: ru.fanclastic.Fanclastic3DDesigner
     iOS: ru.fanclastic.Fanclastic3DDesigner
     tvOS: ru.fanclastic.Fanclastic3DDesigner
@@ -245,7 +245,7 @@ PlayerSettings:
   clonedFromGUID: 00000000000000000000000000000000
   templatePackageId: 
   templateDefaultScene: 
-  AndroidTargetArchitectures: 7
+  AndroidTargetArchitectures: 3
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
   AndroidKeystoreName: C:/UnityProjects/FanclasticDesigner3D/fanclastic.keystore
@@ -615,7 +615,7 @@ PlayerSettings:
   additionalIl2CppArgs: 
   scriptingRuntimeVersion: 1
   apiCompatibilityLevelPerPlatform:
-    Android: 6
+    Android: 3
     Standalone: 3
   m_RenderingPath: 1
   m_MobileRenderingPath: 1

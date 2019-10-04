@@ -73,17 +73,37 @@ namespace Assets.Scripts
 
         //        public Material[] DetailColors;
 
-        //
-        //      private static int N;
-        //      protected void Update()
-        //      {
-        //          if (Input.GetKeyDown(KeyCode.P))
-        //          {
-        //              var fileName = "C:\\" + Camera.main.pixelWidth + "x" + Camera.main.pixelHeight + "(" + N++ + ").png";
-        //
-        //              ScreenCapture.CaptureScreenshot(fileName);
-        //          }
-        //      }
+
+//		private static int _screenshotNumber;
+//        protected void Update()
+//        {
+//            if (!Input.GetKeyDown(KeyCode.P))
+//            {
+//				return;
+//            }
+//
+//
+//			var directoryPath = Path.Combine(Application.persistentDataPath, "Screenshots");
+//			var langPrefix = UiLang.Lang == 1 ? "Ru" : "En";
+//			var mainCamera = Camera.main;
+//			string filePath;
+//
+//			if (!Directory.Exists(directoryPath)) {
+//				Directory.CreateDirectory(directoryPath);
+//			}
+//
+//			do {
+//				var fileName = string.Format("{0}_{1}x{2}({3}).png",
+//					langPrefix, mainCamera.pixelWidth, mainCamera.pixelHeight, ++_screenshotNumber);
+//
+//				filePath = Path.Combine(directoryPath, fileName);
+//
+//			} while (File.Exists(filePath));
+//
+//			ScreenCapture.CaptureScreenshot(filePath);
+//
+//			Debug.Log("Saved: " + filePath);
+//        }
 
         public void OnMovementModeChanged(bool value)
         {
