@@ -9,7 +9,7 @@ using UnityEngine.EventSystems;
 namespace Assets.Scripts
 {
     /// <summary>
-    ///   
+    ///
     ///   Z
     ///   ^
     ///   |
@@ -17,8 +17,8 @@ namespace Assets.Scripts
     ///   |    o o
     ///   |   + + +
     ///   +-------------- > X
-    ///                  
-    /// 
+    ///
+    ///
     /// </summary>
     [RequireComponent(typeof(BoxCollider))]
     public class Detail : DetailBase, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerUpHandler, IPointerDownHandler
@@ -194,7 +194,7 @@ namespace Assets.Scripts
                 _sourcePosition = transform.position;
             }
 
-            //			AppController.Instance.SelectedDetails.Detach();
+            //          AppController.Instance.SelectedDetails.Detach();
         }
 
 
@@ -243,7 +243,7 @@ namespace Assets.Scripts
                              raycaster.transform.TransformPoint(raycaster._connectorsLocalPos[rayOriginIndex]);
             var newPos = raycaster.transform.position + curroffset; //hitPoint + centerOffset;
 
-            //            _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
+//                        _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
 
             raycaster.AlignPosition(ref newPos);
 
@@ -407,16 +407,17 @@ namespace Assets.Scripts
         }
 
         // Update is called once per frame
-        //        private void Update()
-        //        {
-        //            for (var i = 0; i < _raysOrigins.Length; i++) {
-        //                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], Color.red, 0.1f);
-        //            }
-        //            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, Color.red, 1);
-        //            if (IsSelected)
-        //                Debug.Log(HasConnection());
-        //            Debug.DrawRay(_debugRay.origin, _debugRay.direction, Color.red, 0.1f);
-        //        }
+//        private Ray _debugRay;
+//        private void Update()
+//        {
+//            for (var i = 0; i < _raysOrigins.Length; i++) {
+//                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], UnityEngine.Color.red, 0.1f);
+//            }
+//            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, UnityEngine.Color.red, 1);
+//            if (IsSelected)
+//                Debug.Log(_links.HasConnections);
+//            Debug.DrawRay(_debugRay.origin, _debugRay.direction, UnityEngine.Color.red, 0.1f);
+//        }
 
         public void OnPointerUp(PointerEventData eventData)
         {
@@ -606,7 +607,7 @@ namespace Assets.Scripts
                 var overlap = Extentions.Overlap(overlapArea, neighbor.bounds);
                 var size = overlap.size;
 
-                // все координаты больше 1.1 
+                // все координаты больше 1.1
                 var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) >= 3.6;
 
                 if (invalidTest)
@@ -641,9 +642,9 @@ namespace Assets.Scripts
                         continue;
                     }
 
-                    // common & "Axle"
-                    if (isNeighbourAxleOrBevel && isThisCommon ||
-                        isNeighbourCommon && isThisAxleOrBevel)
+                    // (common | "BraceSquare") & "Axle"
+                    if (isNeighbourAxleOrBevel && (isThisCommon || name.StartsWith("BraceSquare")) ||
+                       (isNeighbourCommon || neighborDetail.name.StartsWith("BraceSquare")) && isThisAxleOrBevel)
                     {
                         // проверяем относительное расположение плоскостей деталей
                         var dot = Vector3.Dot(neighborDetail.transform.up.normalized, transform.forward.normalized);
