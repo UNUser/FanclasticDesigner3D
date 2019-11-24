@@ -87,13 +87,14 @@ namespace Assets.Scripts
         public LinksBase Links { get { return _links; } }
         public HashSet<Detail> Connections { get { return _links.Connections; } }
 
-        private int _sizeX;
-        private int _sizeZ;
+//        private int _sizeX;
+//        private int _sizeZ;
         private Vector3[] _raysOrigins;
-        private Vector3[] _connectorsLocalPos;
+//        private Vector3[] _connectorsLocalPos;
+        private BoxCollider[] _boundsColliders;
         private BoxCollider[] _linkageColliders;
         private BoxCollider[] _axisLinkageColliders;
-        private int _holdingConnector;
+        private Vector3 _holdingPointLocal;
         private Vector3 _prevPointerPos;
         private bool _isClick;
         private bool _isLongClick;
@@ -108,29 +109,32 @@ namespace Assets.Scripts
             _links = new DetailLinks(this);
 
             // Определяем по размерам коллайдера тип детали и локальные координаты всех ее коннекторов
-            var colliderSize = GetComponent<Collider>().bounds.size;
-            var swapZY = colliderSize.y > colliderSize.z;
+//            var colliderSize = GetComponent<Collider>().bounds.size;
+//            var swapZY = colliderSize.y > colliderSize.z;
+//
+//            var xInt = (int) colliderSize.x;
+//            var zInt = (int) (swapZY ? colliderSize.y : colliderSize.z);
+//
+//            _sizeX = xInt.IsOdd() ? xInt : (xInt - 1);
+//            _sizeZ = zInt.IsOdd() ? zInt : (zInt - 1);
+//
+//            var totalConnectors = _sizeX * _sizeZ;
+//
+//            _raysOrigins = new Vector3[totalConnectors];
+//            _connectorsLocalPos = new Vector3[totalConnectors];
+//
+//            for (var i = 0; i < _connectorsLocalPos.Length; i++)
+//            {
+//                var valueZ = -i / _sizeX + _sizeZ / 2;
+//
+//                _connectorsLocalPos[i] = new Vector3(i % _sizeX - _sizeX / 2,
+//                                                    swapZY ? valueZ : 0,
+//                                                    swapZY ? 0 : valueZ);
+//
+//            }
 
-            var xInt = (int) colliderSize.x;
-            var zInt = (int) (swapZY ? colliderSize.y : colliderSize.z);
-
-            _sizeX = xInt.IsOdd() ? xInt : (xInt - 1);
-            _sizeZ = zInt.IsOdd() ? zInt : (zInt - 1);
-
-            var totalConnectors = _sizeX * _sizeZ;
-
-            _raysOrigins = new Vector3[totalConnectors];
-            _connectorsLocalPos = new Vector3[totalConnectors];
-
-            for (var i = 0; i < _connectorsLocalPos.Length; i++)
-            {
-                var valueZ = -i / _sizeX + _sizeZ / 2;
-
-                _connectorsLocalPos[i] = new Vector3(i % _sizeX - _sizeX / 2,
-                                                    swapZY ? valueZ : 0,
-                                                    swapZY ? 0 : valueZ);
-
-            }
+            _boundsColliders = GetComponents<BoxCollider>();
+            _raysOrigins = new Vector3[_boundsColliders.Length];
 
             if (Linkage != null)
             {
@@ -166,28 +170,28 @@ namespace Assets.Scripts
 
             // 2. Переводим точку попадания луча в нашу деталь в локальные координаты детали
             //    и ищем перебором ближайший к этой точке коннектор
-            var localHitPoint = transform.InverseTransformPoint(hitInfo.point);
-            var minDistance = float.MaxValue;
-
-            for (var i = 0; i < _connectorsLocalPos.Length; i++)
-            {
-                var distance = Vector3.Distance(_connectorsLocalPos[i], localHitPoint);
-
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    _holdingConnector = i;
-                }
-            }
+            _holdingPointLocal = transform.InverseTransformPoint(hitInfo.point);
+//            var minDistance = float.MaxValue;
+//
+//            for (var i = 0; i < _connectorsLocalPos.Length; i++)
+//            {
+//                var distance = Vector3.Distance(_connectorsLocalPos[i], localHitPoint);
+//
+//                if (distance < minDistance)
+//                {
+//                    minDistance = distance;
+//                    _holdingConnector = i;
+//                }
+//            }
 
             _prevPointerPos = Input.mousePosition;
 
             // Затем пересчитываем положения начала лучей, которые будем бросать от камеры через коннекторы детали
             // (при этом луч, исходящий из камеры должен попадать в тот коннектор, за который мы "держим" деталь)
-            var cameraOffset = Camera.main.transform.position - transform.position;
-            var holdingConnectorOffset = cameraOffset - transform.TransformDirection(_connectorsLocalPos[_holdingConnector]);
+//            var cameraOffset = Camera.main.transform.position - transform.position;
+            var holdingPointOffset = Camera.main.transform.position - hitInfo.point;
 
-            AppController.Instance.SelectedDetails.SetRaycastOrigins(holdingConnectorOffset);
+            AppController.Instance.SelectedDetails.SetRaycastOrigins(holdingPointOffset);
 
             if (eventData != null)
             {
@@ -202,8 +206,16 @@ namespace Assets.Scripts
         {
             for (var i = 0; i < _raysOrigins.Length; i++)
             {
-                _raysOrigins[i] = transform.TransformPoint(_connectorsLocalPos[i]) + offset;
+                _raysOrigins[i] = _boundsColliders[i].center + offset;
             }
+        }
+
+        private void DrawWireBox(BoxCollider box)
+        {
+            var xyz = box.transform.TransformPoint(box.center + box.size);
+
+            Debug.DrawLine(box.transform.TransformPoint(box.center + box.size),
+                box.transform.TransformPoint(box.center + new Vector3(box.size.x, box.size.y, box.size.z)));
         }
 
 
@@ -227,10 +239,9 @@ namespace Assets.Scripts
             // Определяем новое направление, которое указывает пользователь
             var newDirection = Camera.main.ScreenPointToRay(newPointerPos).direction;
             Detail raycaster;
-            int rayOriginIndex;
 
             var minRayHitInfo = AppController.Instance.SelectedDetails
-                .CastDetailAndGetClosestHit(newDirection, out raycaster, out rayOriginIndex);
+                .CastDetailAndGetClosestHit(newDirection, out raycaster);
 
             // Этот луч указывает новое положение соответствующего коннектора
             if (minRayHitInfo == null)
@@ -239,13 +250,18 @@ namespace Assets.Scripts
             // Округляем координаты точки, вычисляем вектор переноса и перемещаем деталь
             var hitPoint = minRayHitInfo.Value.point;
             //            var centerOffset = sender.transform.position - sourcePoint;
-            var curroffset = hitPoint -
-                             raycaster.transform.TransformPoint(raycaster._connectorsLocalPos[rayOriginIndex]);
-            var newPos = raycaster.transform.position + curroffset; //hitPoint + centerOffset;
+            var curroffset = /*hitPoint - */minRayHitInfo.Value.distance * newDirection;
+                             //raycaster.transform.TransformPoint(raycaster._connectorsLocalPos[rayOriginIndex]);
+            var newPos = raycaster.transform.position + curroffset;
 
-//                        _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
+                        _debugRay = new Ray(hitPoint - curroffset, curroffset);
+                        _debugRay1 = new Ray(Camera.main.transform.position, hitPoint - Camera.main.transform.position);
+                        Debug.Log(minRayHitInfo.Value.collider.name + " " + hitPoint);
 
-            raycaster.AlignPosition(ref newPos);
+            AppController.Instance.SelectedDetails.Detach().transform.Translate(curroffset, Space.World);
+            return;
+
+//            raycaster.AlignPosition(ref newPos);
 
             if (newPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
 
@@ -277,7 +293,7 @@ namespace Assets.Scripts
             }
         }
 
-        public RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster, out int rayOriginIndex)
+        public RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster)
         {
             // Кидаем лучи, идущие  в новом направлении параллельно через все коннекторы детали и определяем самый короткий из них
             RaycastHit? minRayHitInfo = null;
@@ -285,18 +301,16 @@ namespace Assets.Scripts
                                   1 << LayerMask.NameToLayer("Workspace");
 
             raycaster = this;
-            rayOriginIndex = -1;
 
             for (var i = 0; i < _raysOrigins.Length; i++)
             {
                 RaycastHit hitInfo;
 
-                if (Physics.Raycast(_raysOrigins[i], direction, out hitInfo, Mathf.Infinity, layerMask))
+                if (Physics.BoxCast(_raysOrigins[i], _boundsColliders[i].size / 2, direction, out hitInfo, transform.rotation, Mathf.Infinity, layerMask))
                 {
                     if (minRayHitInfo == null || hitInfo.distance < minRayHitInfo.Value.distance)
                     {
                         minRayHitInfo = hitInfo;
-                        rayOriginIndex = i;
                     }
                 }
             }
@@ -325,26 +339,24 @@ namespace Assets.Scripts
                 if (Physics.Raycast(_raysOrigins[centerIndex], direction, out axisHitInfo, Mathf.Infinity, axisLayerMask))
                 {
                     minRayHitInfo = axisHitInfo;
-                    rayOriginIndex = centerIndex;
 
                     return minRayHitInfo;
                 }
             }
 
-            if (Linkage != null)
-            {
-                RaycastHit axleHitInfo;
-                var maxDistance = minRayHitInfo.Value.distance + 0.5f;
+//            if (Linkage != null)
+//            {
+//                RaycastHit axleHitInfo;
+//                var maxDistance = minRayHitInfo.Value.distance + 0.5f;
+//
+//                if (Physics.Raycast(_raysOrigins[rayOriginIndex], direction, out axleHitInfo, maxDistance, axisLayerMask))
+//                {
+//                    return axleHitInfo;
+//                }
+//
+//                return minRayHitInfo;
+//            }
 
-                if (Physics.Raycast(_raysOrigins[rayOriginIndex], direction, out axleHitInfo, maxDistance, axisLayerMask))
-                {
-                    return axleHitInfo;
-                }
-
-                return minRayHitInfo;
-            }
-
-            rayOriginIndex = -1;
             minRayHitInfo = null;
 
             for (var i = 0; i < _raysOrigins.Length; i++)
@@ -356,7 +368,6 @@ namespace Assets.Scripts
                     if (minRayHitInfo == null || axisHitInfo.distance < minRayHitInfo.Value.distance)
                     {
                         minRayHitInfo = axisHitInfo;
-                        rayOriginIndex = i;
                     }
                 }
             }
@@ -364,60 +375,64 @@ namespace Assets.Scripts
             return minRayHitInfo;
         }
 
-        public void AlignPosition(ref Vector3 pos)
-        {
-            var bottomPointIndex = CorrectHeightAboveFloor(ref pos);
-            var offsetFromCurrentPos = pos - transform.position;
-            var bottomPoint = transform.TransformPoint(_connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
-            var group = Group;
-            var alignmentPoint = (group == null ? transform.TransformPoint(AlignmentPoint) : group.transform.position) + offsetFromCurrentPos;
-            Vector3 alignedBottomPoint;
-
-            if (Linkage != null || group != null)
-            {
-                alignedBottomPoint = bottomPoint.AlignByCrossPoint(alignmentPoint);
-            }
-            else
-            {
-                SerializableVector3 axleDirection = transform.forward.normalized;
-                alignedBottomPoint = bottomPoint.AlignByAxleDirection(alignmentPoint, axleDirection);
-            }
-
-            var alignment = alignedBottomPoint - bottomPoint;
-
-            pos += alignment;
-        }
-
-        private int CorrectHeightAboveFloor(ref Vector3 pos)
-        {
-            var offsetFromCurrentPos = pos - transform.position;
-            var heightFirst = transform.TransformPoint(_connectorsLocalPos[0]).y + offsetFromCurrentPos.y;
-            var heightLast = transform.TransformPoint(_connectorsLocalPos[_connectorsLocalPos.Length - 1]).y +
-                             offsetFromCurrentPos.y;
-
-            var bottomPointIndex = heightLast < heightFirst ? _connectorsLocalPos.Length - 1 : 0;
-            var heightMin = Mathf.Min(heightFirst, heightLast);
-
-            if (heightMin < 0)
-            {
-                pos.y += Mathf.Abs(heightMin);
-            }
-
-            return bottomPointIndex;
-        }
+//        public void AlignPosition(ref Vector3 pos)
+//        {
+//            var bottomPointIndex = CorrectHeightAboveFloor(ref pos);
+//            var offsetFromCurrentPos = pos - transform.position;
+//            var bottomPoint = transform.TransformPoint(_connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
+//            var group = Group;
+//            var alignmentPoint = (group == null ? transform.TransformPoint(AlignmentPoint) : group.transform.position) + offsetFromCurrentPos;
+//            Vector3 alignedBottomPoint;
+//
+//            if (Linkage != null || group != null)
+//            {
+//                alignedBottomPoint = bottomPoint.AlignByCrossPoint(alignmentPoint);
+//            }
+//            else
+//            {
+//                SerializableVector3 axleDirection = transform.forward.normalized;
+//                alignedBottomPoint = bottomPoint.AlignByAxleDirection(alignmentPoint, axleDirection);
+//            }
+//
+//            var alignment = alignedBottomPoint - bottomPoint;
+//
+//            pos += alignment;
+//        }
+//
+//        private int CorrectHeightAboveFloor(ref Vector3 pos)
+//        {
+//            var offsetFromCurrentPos = pos - transform.position;
+//            var heightFirst = transform.TransformPoint(_connectorsLocalPos[0]).y + offsetFromCurrentPos.y;
+//            var heightLast = transform.TransformPoint(_connectorsLocalPos[_connectorsLocalPos.Length - 1]).y +
+//                             offsetFromCurrentPos.y;
+//
+//            var bottomPointIndex = heightLast < heightFirst ? _connectorsLocalPos.Length - 1 : 0;
+//            var heightMin = Mathf.Min(heightFirst, heightLast);
+//
+//            if (heightMin < 0)
+//            {
+//                pos.y += Mathf.Abs(heightMin);
+//            }
+//
+//            return bottomPointIndex;
+//        }
 
         // Update is called once per frame
-//        private Ray _debugRay;
-//        private void Update()
-//        {
+        private Ray _debugRay;
+        private Ray _debugRay1;
+        private void Update()
+        {
 //            for (var i = 0; i < _raysOrigins.Length; i++) {
-//                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], UnityEngine.Color.red, 0.1f);
+//
+//                Debug.DrawRay(_raysOrigins[i] + _boundsColliders[i].size/2, _debugRay.direction, UnityEngine.Color.red, 0.1f);
+//                Debug.DrawRay(_raysOrigins[i] - _boundsColliders[i].size/2, _debugRay.direction, UnityEngine.Color.red, 0.1f);
 //            }
 //            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, UnityEngine.Color.red, 1);
 //            if (IsSelected)
 //                Debug.Log(_links.HasConnections);
-//            Debug.DrawRay(_debugRay.origin, _debugRay.direction, UnityEngine.Color.red, 0.1f);
-//        }
+            Debug.DrawRay(_debugRay.origin, _debugRay.direction, UnityEngine.Color.red, 0.1f);
+            Debug.DrawRay(_debugRay1.origin, _debugRay1.direction, UnityEngine.Color.blue, 0.1f);
+        }
 
         public void OnPointerUp(PointerEventData eventData)
         {
@@ -535,6 +550,11 @@ namespace Assets.Scripts
             }
 
             return links;
+        }
+
+        private void GetConnections_1()
+        {
+
         }
 
         private void GetConnections(BoxCollider[] linkageColliders, Vector3 offsetValue, LinksMode linksMode, DetailLinks links, string layerPrefix = "")

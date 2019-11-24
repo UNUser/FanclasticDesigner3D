@@ -122,20 +122,20 @@ namespace Assets.Scripts
         }
 
         //TODO этот код нигде не используется
-        //	    public void Remove(Detail detail)
-        //	    {
-        //		    _details.Remove(detail);
-        //			detail.gameObject.layer = LayerMask.NameToLayer("Item");
-        //			detail.Linkage.layer = LayerMask.NameToLayer("Linkage");
+        //      public void Remove(Detail detail)
+        //      {
+        //          _details.Remove(detail);
+        //          detail.gameObject.layer = LayerMask.NameToLayer("Item");
+        //          detail.Linkage.layer = LayerMask.NameToLayer("Linkage");
         //
-        //		    if (!_details.Any()) {
-        //				AppController.Instance.ColorSetter.gameObject.SetActive(false);
-        //		    }
-        //		    if (_details.Count == 1) {
-        //			    AppController.Instance.ColorSetter.CurrentColor.enabled = true;
-        //			    AppController.Instance.ColorSetter.ActiveColor.Material = First.GetComponent<Renderer>().material;
-        //		    }
-        //	    }
+        //          if (!_details.Any()) {
+        //              AppController.Instance.ColorSetter.gameObject.SetActive(false);
+        //          }
+        //          if (_details.Count == 1) {
+        //              AppController.Instance.ColorSetter.CurrentColor.enabled = true;
+        //              AppController.Instance.ColorSetter.ActiveColor.Material = First.GetComponent<Renderer>().material;
+        //          }
+        //      }
 
         public void Clear()
         {
@@ -224,7 +224,7 @@ namespace Assets.Scripts
             var bottomDetail = GetBottomDetail();
             var newPos = bottomDetail.transform.position;
 
-            bottomDetail.AlignPosition(ref newPos);
+//            bottomDetail.AlignPosition(ref newPos);
 
             alignment = newPos - bottomDetail.transform.position;
             targetDetail.transform.Translate(alignment, Space.World);
@@ -287,7 +287,7 @@ namespace Assets.Scripts
             {
                 var detailLinks = (DetailLinks) detail.GetLinks(linksMode, offset);
 
-                //				Debug.Log(detailLinks.Data + " " + linksMode + " " + offset);
+                //              Debug.Log(detailLinks.Data + " " + linksMode + " " + offset);
 
                 if (!detailLinks.IsValid)
                 {
@@ -312,26 +312,23 @@ namespace Assets.Scripts
             }
         }
 
-        public RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster, out int rayOriginIndex)
+        public RaycastHit? CastDetailAndGetClosestHit(Vector3 direction, out Detail raycaster)
         {
             RaycastHit? minRayHitInfo = null;
 
-            rayOriginIndex = -1;
             raycaster = null;
 
             foreach (var detail in _details)
             {
                 Detail childRaycaster;
-                int childRayOriginIndex;
 
-                var childHitInfo = detail.CastDetailAndGetClosestHit(direction, out childRaycaster, out childRayOriginIndex);
+                var childHitInfo = detail.CastDetailAndGetClosestHit(direction, out childRaycaster);
 
                 if (childHitInfo == null) continue;
                 if (minRayHitInfo != null && minRayHitInfo.Value.distance <= childHitInfo.Value.distance) continue;
 
                 minRayHitInfo = childHitInfo;
                 raycaster = childRaycaster;
-                rayOriginIndex = childRayOriginIndex;
             }
 
             return minRayHitInfo;
@@ -369,7 +366,7 @@ namespace Assets.Scripts
             AppController.Instance.ActionsLog.RegisterAction(new DeleteAction(targetDetail));
             Hide();
             Clear();
-            //			Destroy(targetDetail.gameObject);
+            //          Destroy(targetDetail.gameObject);
         }
 
         public void Move(Vector3 offset)
@@ -379,23 +376,23 @@ namespace Assets.Scripts
             targetDetail.transform.Translate(offset, Space.World);
         }
 
-	    public Quaternion Rotation
-	    {
-		    get
-		    {
-				var targetDetail = Detach();
+        public Quaternion Rotation
+        {
+            get
+            {
+                var targetDetail = Detach();
 
-			    return targetDetail.transform.rotation;
-		    }
-		    set
-		    {
-				var targetDetail = Detach();
+                return targetDetail.transform.rotation;
+            }
+            set
+            {
+                var targetDetail = Detach();
 
-				targetDetail.transform.rotation = value;
-		    }
-	    }
+                targetDetail.transform.rotation = value;
+            }
+        }
 
-    
+
 
         public void SetColor(DetailColor color)
         {
