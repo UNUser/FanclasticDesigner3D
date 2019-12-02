@@ -659,20 +659,20 @@ namespace Assets.Scripts
                 return links;
             }
 
-            GetConnections(_linkageColliders, offset, linksMode, links);
+            GetConnections(_linkageColliders, offset, rotation, linksMode, links);
             if (_axisLinkageColliders != null)
             {
                 var layerPrefix = LayerMask.LayerToName(AxleLinkage.layer).Contains("Hub")
                     ? "Axle"
                     : "AxleHub";
 
-                GetConnections(_axisLinkageColliders, offset, linksMode, links, layerPrefix);
+                GetConnections(_axisLinkageColliders, offset, rotation, linksMode, links, layerPrefix);
             }
 
             return links;
         }
 
-        private void GetConnections(BoxCollider[] linkageColliders, Vector3 offsetValue, LinksMode linksMode, DetailLinks links, string layerPrefix = "")
+        private void GetConnections(BoxCollider[] linkageColliders, Vector3 offset, Quaternion rotation, LinksMode linksMode, DetailLinks links, string layerPrefix = "")
         {
             if (linkageColliders == null)
             {
@@ -681,9 +681,8 @@ namespace Assets.Scripts
 
             foreach (var linkageCollider in linkageColliders)
             {
-                var overlapArea = linkageCollider.bounds;
-
-                overlapArea.center += offsetValue;
+                var overlapArea = linkageCollider;
+                var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center) + offset;
                 LayerMask layerMask;
 
                 if (linksMode == LinksMode.SelectedOnly)
@@ -699,7 +698,7 @@ namespace Assets.Scripts
                     layerMask = 1 << LayerMask.NameToLayer(layerPrefix + "Linkage") | selectedMask;
                 }
 
-                var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
+                var neighbors = Physics.OverlapBox(overlapAreaCenter, overlapArea.size / 2, rotation, layerMask);
                 //TODO если будет жрать память, то можно заменить на NonAlloc версию
 
                 foreach (var neighbor in neighbors)
