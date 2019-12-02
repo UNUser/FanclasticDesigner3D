@@ -122,20 +122,20 @@ namespace Assets.Scripts
         }
 
         //TODO этот код нигде не используется
-        //	    public void Remove(Detail detail)
-        //	    {
-        //		    _details.Remove(detail);
-        //			detail.gameObject.layer = LayerMask.NameToLayer("Item");
-        //			detail.Linkage.layer = LayerMask.NameToLayer("Linkage");
+        //      public void Remove(Detail detail)
+        //      {
+        //          _details.Remove(detail);
+        //          detail.gameObject.layer = LayerMask.NameToLayer("Item");
+        //          detail.Linkage.layer = LayerMask.NameToLayer("Linkage");
         //
-        //		    if (!_details.Any()) {
-        //				AppController.Instance.ColorSetter.gameObject.SetActive(false);
-        //		    }
-        //		    if (_details.Count == 1) {
-        //			    AppController.Instance.ColorSetter.CurrentColor.enabled = true;
-        //			    AppController.Instance.ColorSetter.ActiveColor.Material = First.GetComponent<Renderer>().material;
-        //		    }
-        //	    }
+        //          if (!_details.Any()) {
+        //              AppController.Instance.ColorSetter.gameObject.SetActive(false);
+        //          }
+        //          if (_details.Count == 1) {
+        //              AppController.Instance.ColorSetter.CurrentColor.enabled = true;
+        //              AppController.Instance.ColorSetter.ActiveColor.Material = First.GetComponent<Renderer>().material;
+        //          }
+        //      }
 
         public void Clear()
         {
@@ -224,7 +224,7 @@ namespace Assets.Scripts
             var bottomDetail = GetBottomDetail();
             var newPos = bottomDetail.transform.position;
 
-            bottomDetail.AlignPosition(ref newPos);
+            bottomDetail.AlignPosition(bottomDetail.Lattice, bottomDetail.Lattice.rotation, ref newPos);
 
             alignment = newPos - bottomDetail.transform.position;
             targetDetail.transform.Translate(alignment, Space.World);
@@ -272,12 +272,12 @@ namespace Assets.Scripts
 
 
 
-        public LinksBase GetLinks(LinksMode linksMode, Vector3? offset)
+        public LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode)
         {
             if (_details.Count < 2)
             {
                 return _details.Any()
-                    ? _details.First().GetLinks(linksMode, offset)
+                    ? _details.First().GetLinks(offset, rotation, linksMode)
                     : null;
             }
 
@@ -285,9 +285,9 @@ namespace Assets.Scripts
 
             foreach (var detail in _details)
             {
-                var detailLinks = (DetailLinks) detail.GetLinks(linksMode, offset);
+                var detailLinks = (DetailLinks) detail.GetLinks(offset, rotation, linksMode);
 
-                //				Debug.Log(detailLinks.Data + " " + linksMode + " " + offset);
+                //              Debug.Log(detailLinks.Data + " " + linksMode + " " + offset);
 
                 if (!detailLinks.IsValid)
                 {
@@ -369,7 +369,7 @@ namespace Assets.Scripts
             AppController.Instance.ActionsLog.RegisterAction(new DeleteAction(targetDetail));
             Hide();
             Clear();
-            //			Destroy(targetDetail.gameObject);
+            //          Destroy(targetDetail.gameObject);
         }
 
         public void Move(Vector3 offset)
@@ -379,23 +379,23 @@ namespace Assets.Scripts
             targetDetail.transform.Translate(offset, Space.World);
         }
 
-	    public Quaternion Rotation
-	    {
-		    get
-		    {
-				var targetDetail = Detach();
+        public Quaternion Rotation
+        {
+            get
+            {
+                var targetDetail = Detach();
 
-			    return targetDetail.transform.rotation;
-		    }
-		    set
-		    {
-				var targetDetail = Detach();
+                return targetDetail.transform.rotation;
+            }
+            set
+            {
+                var targetDetail = Detach();
 
-				targetDetail.transform.rotation = value;
-		    }
-	    }
+                targetDetail.transform.rotation = value;
+            }
+        }
 
-    
+
 
         public void SetColor(DetailColor color)
         {

@@ -5,43 +5,49 @@ namespace Assets.Scripts {
 
     public abstract class DetailBase : MonoBehaviour
     {
-		public abstract bool IsSelected { get; }
+        public abstract bool IsSelected { get; }
 
         public abstract Bounds Bounds { get; }
+        public abstract Transform Lattice { get; }
 
-		public abstract LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected, Vector3? offset = null);
+        public abstract LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode = LinksMode.ExceptSelected);
 
-	    protected abstract void UpdateConnections(LinksBase newLinks);
+        public virtual LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected)
+        {
+            return GetLinks(Vector3.zero, Quaternion.identity, linksMode);
+        }
 
-	    public virtual void UpdateLinks(LinksMode linksMode = LinksMode.ExceptSelected, LinksBase newLinks = null)
-	    {
-		    if (newLinks == null) {
-			    newLinks = GetLinks(linksMode);
-			} else if (newLinks.LinksMode != linksMode) {
-				Debug.LogError("Inconsistent links mode in parameters!");
-				newLinks = GetLinks(linksMode);
-			}
+        protected abstract void UpdateConnections(LinksBase newLinks);
 
-		    AppController.Instance.SelectedDetails.IsValid = newLinks.IsValid;
+        public virtual void UpdateLinks(LinksMode linksMode = LinksMode.ExceptSelected, LinksBase newLinks = null)
+        {
+            if (newLinks == null) {
+                newLinks = GetLinks(linksMode);
+            } else if (newLinks.LinksMode != linksMode) {
+                Debug.LogError("Inconsistent links mode in parameters!");
+                newLinks = GetLinks(linksMode);
+            }
 
-		    if (!newLinks.IsValid) {
-			    return;
-		    }
+            AppController.Instance.SelectedDetails.IsValid = newLinks.IsValid;
 
-			UpdateConnections(newLinks);
+            if (!newLinks.IsValid) {
+                return;
+            }
 
-			if (!newLinks.HasConnections) {
-				return;
-			}
+            UpdateConnections(newLinks);
 
-		    var asDetail = this as Detail;
+            if (!newLinks.HasConnections) {
+                return;
+            }
 
-		    if (asDetail != null && asDetail.Group != null) {
-			    return;
-		    }
+            var asDetail = this as Detail;
 
-			DetailsGroup.Merge(newLinks);
-	    }
+            if (asDetail != null && asDetail.Group != null) {
+                return;
+            }
+
+            DetailsGroup.Merge(newLinks);
+        }
 
     }
 }

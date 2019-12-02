@@ -28,6 +28,41 @@ namespace Assets.Scripts
             return intersection;
         }
 
+        public static Bounds RelativeBounds(Transform space, BoxCollider collider)
+        {
+            var extents = collider.size / 2;
+
+            var corners = new []
+            {
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x,  extents.y,  extents.z))),
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x,  extents.y, -extents.z))),
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x, -extents.y,  extents.z))),
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x,  extents.y,  extents.z))),
+
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x, -extents.y, -extents.z))),
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x, -extents.y,  extents.z))),
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x,  extents.y, -extents.z))),
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x, -extents.y, -extents.z)))
+            };
+
+            var transformedCorners = Array.ConvertAll(corners, space.InverseTransformPoint);
+
+            var min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            var max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+            foreach (var corner in transformedCorners)
+            {
+                min = Vector3.Min(min, corner);
+                max = Vector3.Max(max, corner);
+            }
+
+            var result = new Bounds();
+
+            result.SetMinMax(min, max);
+
+            return result;
+        }
+
         public static float MaxSize(this Bounds bounds)
         {
             return Mathf.Max(Mathf.Max(bounds.size.x, bounds.size.y), bounds.size.z);
@@ -101,26 +136,28 @@ namespace Assets.Scripts
             return v;
         }
 
-        public static Vector3 AlignByCrossPoint(this Vector3 vector, Vector3 alignmentPoint)
+        public static Vector3 AlignByCrossPoint(this Vector3 vector, Transform lattice, Vector3 alignmentPoint)
         {
-            var oddSum = (Mathf.RoundToInt(alignmentPoint.x) & 1)
-                       + (Mathf.RoundToInt(alignmentPoint.y) & 1)
-                       + (Mathf.RoundToInt(alignmentPoint.z) & 1);
-            var isOddY = Mathf.RoundToInt(alignmentPoint.y).IsOdd();
-            var isFloor = Mathf.RoundToInt(vector.y) == 0;
-            var isOddAlignment = isFloor ? isOddY : (oddSum > 1);
+            var alignmentPointLocal = lattice.InverseTransformPoint(alignmentPoint);
+            var oddSum = (Mathf.RoundToInt(alignmentPointLocal.x) & 1)
+                       + (Mathf.RoundToInt(alignmentPointLocal.y) & 1)
+                       + (Mathf.RoundToInt(alignmentPointLocal.z) & 1);
+//            var isOddY = Mathf.RoundToInt(alignmentPoint.y).IsOdd();
+//            var isFloor = Mathf.RoundToInt(vector.y) == 0;
+            var isOddAlignment = /*isFloor ? isOddY : */(oddSum > 1);
 
-            var newAlignmentPoint = new Vector3(AlignValue(isOddAlignment, alignmentPoint.x),
-                                            AlignValue(isOddAlignment, alignmentPoint.y),
-                                            AlignValue(isOddAlignment, alignmentPoint.z));
+            var newAlignmentPointLocal = new Vector3(AlignValue(isOddAlignment, alignmentPointLocal.x),
+                                                AlignValue(isOddAlignment, alignmentPointLocal.y),
+                                                AlignValue(isOddAlignment, alignmentPointLocal.z));
 
-            var alignmentOffset = newAlignmentPoint - alignmentPoint;
+            var alignmentOffset = lattice.TransformDirection(newAlignmentPointLocal - alignmentPointLocal);
             /*Debug.Log("Old: " + vector + ", crossPointAlignment: " + crossPointAlignment + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
                                 + (Mathf.RoundToInt(vector.y) & 1) + " "
                                 + (Mathf.RoundToInt(vector.z) & 1) + " " + oddSum
                                  + ", isOddY: " + isOddY
                                   + ", isFloor: " + isFloor
                                    + ", newCrossPoint: " + newCrossPoint);*/
+//            Debug.Log("vector " + vector + " aligned " + (vector + alignmentOffset) + " alignmentOffset " + alignmentOffset + " alignmentPointLocal " + alignmentPointLocal + " newAlignmentPointLocal " + newAlignmentPointLocal);
             return vector + alignmentOffset;
         }
 
@@ -213,16 +250,16 @@ namespace Assets.Scripts
             return (value & 1) == 1;
         }
 
-	    public static string RespectingRtl(this string text)
-	    {
-			var langIdx = UiLang.Lang;
+        public static string RespectingRtl(this string text)
+        {
+            var langIdx = UiLang.Lang;
 
-			if (text == "" || langIdx != 4 || Regex.IsMatch(text, "^[0-9a-zA-Z()\\s.,-]*$")) {
-				return text;
-			}
+            if (text == "" || langIdx != 4 || Regex.IsMatch(text, "^[0-9a-zA-Z()\\s.,-]*$")) {
+                return text;
+            }
 
-		    return ReverseString(text);
-	    }
+            return ReverseString(text);
+        }
 
         // Чтобы RTL тексты отображались правильно, их нужно передавать только в активные текстовые компоненты
         public static void TextRespectingRtl(this Text textComponent, string text)
@@ -359,9 +396,9 @@ namespace Assets.Scripts
             return new SerializableVector3(rValue.x, rValue.y, rValue.z);
         }
 
-		public static SerializableVector3 operator + (SerializableVector3 lValue, SerializableVector3 rValue)
-	    {
-		    return new SerializableVector3(lValue.x + rValue.x, lValue.y + rValue.y, lValue.z + rValue.z);
-	    }
+        public static SerializableVector3 operator + (SerializableVector3 lValue, SerializableVector3 rValue)
+        {
+            return new SerializableVector3(lValue.x + rValue.x, lValue.y + rValue.y, lValue.z + rValue.z);
+        }
     }
 }

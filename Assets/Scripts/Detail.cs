@@ -49,6 +49,11 @@ namespace Assets.Scripts
             }
         }
 
+        public override Transform Lattice
+        {
+            get { return Group == null ? GetComponent<Transform>() : Group.Lattice; }
+        }
+
         public DetailColor Color
         {
             get { return _color; }
@@ -245,13 +250,32 @@ namespace Assets.Scripts
 
 //                        _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
 
-            raycaster.AlignPosition(ref newPos);
+            var lattice = minRayHitInfo.Value.collider.transform;
+            var latticeRotation = lattice.rotation;
+            var newRotation = transform.rotation;
+
+            raycaster.AlignRotation(lattice, hitPoint, ref newRotation, ref newPos);
+//            var oldPos = newPos;
+            raycaster.AlignPosition(lattice, newRotation, ref newPos);
+//            Debug.Log(oldPos + " " + newPos);
 
             if (newPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
 
-
             var offset = newPos - raycaster.transform.position;
-            var links = AppController.Instance.SelectedDetails.GetLinks(LinksMode.ExceptSelected, offset);
+            var detached1 = AppController.Instance.SelectedDetails.Detach();
+
+            var links = AppController.Instance.SelectedDetails.GetLinks(offset, newRotation, LinksMode.ExceptSelected);
+
+            //
+            Debug.Log("valid " + links.IsValid + " connections " + links.HasConnections);
+//                detached1.UpdateLinks(links.LinksMode, links);
+            //
+
+            detached1.transform.Translate(offset, Space.World);
+            detached1.transform.rotation = newRotation;
+
+            return;
+
             //Debug.Log(links.IsValid + " " + (hitPoint.y > 0) + " " + links.HasConnections);
             if (!links.IsValid || (hitPoint.y > 0 && !links.HasConnections))
             {
@@ -364,18 +388,128 @@ namespace Assets.Scripts
             return minRayHitInfo;
         }
 
-        public void AlignPosition(ref Vector3 pos)
+        public void AlignRotation(Transform lattice, Vector3 pivot, ref Quaternion rotation, ref Vector3 position)
         {
-            var bottomPointIndex = CorrectHeightAboveFloor(ref pos);
+            var dummy = Vector3.zero;
+
+            rotation = GetAligningRotation(rotation, lattice.rotation, out dummy) * rotation;
+//            Debug.Log(dummy);
+        }
+
+        private Quaternion GetAligningRotation(Quaternion from, Quaternion to, out Vector3 diff)
+        {
+            var toDirections = new HashSet<Vector3> { to * Vector3.right,
+                                                      to * Vector3.up,
+                                                      to * Vector3.forward };
+            var currentFrom = from;
+            var resultRotation = Quaternion.identity;
+
+            diff = Vector3.zero;
+
+            for (var j = 0; j < 3; j++)
+            {
+                var i = (j + 2) % 3;
+                var fromDirection = currentFrom * (new Vector3(i == 0 ? 1 : 0,
+                                                               i == 1 ? 1 : 0,
+                                                               i == 2 ? 1 : 0));
+                var minAngle = float.PositiveInfinity;
+                var minAngleOriginDirection = Vector3.zero;
+                var targetDirection = Vector3.zero;
+
+                foreach (var toDirection in toDirections)
+                {
+                    var possibleTargetDirection = toDirection;
+                    var angle = Vector3.Angle(fromDirection, possibleTargetDirection);//Debug.Log("!!! " + angle + " " + fromDirection + " " + possibleTargetDirection);
+
+                    if (angle > 90)
+                    {
+                        angle = 180 - angle;
+                        possibleTargetDirection = - toDirection;
+                    }
+
+                    if (angle >= minAngle)
+                    {
+                        continue;
+                    }
+
+                    minAngle = angle;
+                    minAngleOriginDirection = toDirection;
+                    targetDirection = possibleTargetDirection;
+                }
+
+                toDirections.Remove(minAngleOriginDirection);
+
+                resultRotation = Quaternion.FromToRotation(fromDirection, targetDirection) * resultRotation;
+                currentFrom = resultRotation * from;
+
+                diff[i] = minAngle;
+
+//                Debug.Log(i
+//                        + ") target: " + to.eulerAngles
+//                        + ", source: " + from.eulerAngles
+//                        + ", min: " + minAngle
+//                        + ", direction: " + fromDirection
+//                        + ", targetDirection: " + targetDirection);
+            }
+
+//            rotation = rot * rotation;
+
+            return resultRotation;
+
+//            return;
+//
+//            var relativeRotaion = fr * Quaternion.Inverse(lattice.rotation);
+//
+//            var latticeRotation = lattice.rotation;
+//            var rotationDelta = - relativeRotaion.eulerAngles;//latticeRotation.eulerAngles - rotation.eulerAngles;
+//            var normalizedRotationDelta = new Vector3(rotationDelta.x % 90, rotationDelta.y % 90, rotationDelta.z % 90);
+//
+//            var minRotationX = Math.Abs(normalizedRotationDelta.x) > 45
+//                ? normalizedRotationDelta.x - 90 * Math.Sign(normalizedRotationDelta.x)
+//                : normalizedRotationDelta.x;
+//            var minRotationY = Math.Abs(normalizedRotationDelta.y) > 45
+//                ? normalizedRotationDelta.y - 90 * Math.Sign(normalizedRotationDelta.y)
+//                : normalizedRotationDelta.y;
+//            var minRotationZ = Math.Abs(normalizedRotationDelta.z) > 45
+//                ? normalizedRotationDelta.z - 90 * Math.Sign(normalizedRotationDelta.z)
+//                : normalizedRotationDelta.z;
+//
+//            var minRotation = Quaternion.Euler(minRotationX, minRotationY, minRotationZ);/*Quaternion.AngleAxis(minRotationY, Vector3.up)
+//                            * Quaternion.AngleAxis(minRotationX, Vector3.right)
+//                            * Quaternion.AngleAxis(minRotationZ, Vector3.forward);*/
+//
+//            var relativePosition = position - pivot;
+//            var newRelativePosition = minRotation * relativePosition;
+//
+//            position = pivot + newRelativePosition;
+//            Debug.Log((Quaternion.Euler(35.9f, 127.5f, 52.5f) * Quaternion.Euler(310.0f, 0.0f, 0.0f)).eulerAngles);// = Quaternion.Euler(0.0f, 90.0f, 40.0f),
+//
+//            var resultRotation = minRotation * /*relativeRotaion * latticeRotation;//*/fr;
+//
+//            Debug.Log("target: " + latticeRotation.eulerAngles
+//                    + ", source: " + fr.eulerAngles
+//                    + ", rotationDelta: " + rotationDelta
+//                    + ", min: " + new Vector3(minRotationX, minRotationY, minRotationZ)
+//                    + ", minQ: " + minRotation.eulerAngles
+//                    + ", result: " + resultRotation.eulerAngles);
+//
+//            fr = resultRotation;
+        }
+
+        public void AlignPosition(Transform lattice, Quaternion rotation, ref Vector3 pos)
+        {
+            var rotationDelta = rotation * Quaternion.Inverse(transform.rotation);//Debug.Log("floorCorrection before " + pos);
+            var bottomPointIndex = CorrectHeightAboveFloor(rotationDelta, ref pos); //Debug.Log("floorCorrection after " + pos);
             var offsetFromCurrentPos = pos - transform.position;
-            var bottomPoint = transform.TransformPoint(_connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
+            var bottomPoint = transform.TransformPoint(rotationDelta * _connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
             var group = Group;
-            var alignmentPoint = (group == null ? transform.TransformPoint(AlignmentPoint) : group.transform.position) + offsetFromCurrentPos;
+            var alignmentPoint = (group == null ? transform.TransformPoint(rotationDelta * AlignmentPoint) : group.transform.position) + offsetFromCurrentPos;
             Vector3 alignedBottomPoint;
 
             if (Linkage != null || group != null)
             {
-                alignedBottomPoint = bottomPoint.AlignByCrossPoint(alignmentPoint);
+                alignedBottomPoint = bottomPoint.AlignByCrossPoint(lattice, alignmentPoint);
+//                Debug.Log("bottom: " + bottomPoint + ", aligned: " + alignedBottomPoint);
             }
             else
             {
@@ -384,15 +518,15 @@ namespace Assets.Scripts
             }
 
             var alignment = alignedBottomPoint - bottomPoint;
-
+//            Debug.Log("alignment: " + alignment);
             pos += alignment;
         }
 
-        private int CorrectHeightAboveFloor(ref Vector3 pos)
+        private int CorrectHeightAboveFloor(Quaternion rotationDelta, ref Vector3 pos)
         {
             var offsetFromCurrentPos = pos - transform.position;
-            var heightFirst = transform.TransformPoint(_connectorsLocalPos[0]).y + offsetFromCurrentPos.y;
-            var heightLast = transform.TransformPoint(_connectorsLocalPos[_connectorsLocalPos.Length - 1]).y +
+            var heightFirst = transform.TransformPoint(rotationDelta * _connectorsLocalPos[0]).y + offsetFromCurrentPos.y;
+            var heightLast = transform.TransformPoint(rotationDelta * _connectorsLocalPos[_connectorsLocalPos.Length - 1]).y +
                              offsetFromCurrentPos.y;
 
             var bottomPointIndex = heightLast < heightFirst ? _connectorsLocalPos.Length - 1 : 0;
@@ -408,16 +542,18 @@ namespace Assets.Scripts
 
         // Update is called once per frame
 //        private Ray _debugRay;
-//        private void Update()
-//        {
-//            for (var i = 0; i < _raysOrigins.Length; i++) {
-//                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], UnityEngine.Color.red, 0.1f);
-//            }
-//            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, UnityEngine.Color.red, 1);
+        private void Update()
+        {
+            for (var i = 0; i < _raysOrigins.Length; i++) {
+                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], UnityEngine.Color.red, 0.1f);
+            }
+            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, UnityEngine.Color.red, 1);
 //            if (IsSelected)
-//                Debug.Log(_links.HasConnections);
+//            {
+//                Debug.Log("valid " + _links.IsValid + " connections " + _links.HasConnections);
+//            }
 //            Debug.DrawRay(_debugRay.origin, _debugRay.direction, UnityEngine.Color.red, 0.1f);
-//        }
+        }
 
         public void OnPointerUp(PointerEventData eventData)
         {
@@ -512,26 +648,25 @@ namespace Assets.Scripts
         /// Имеет ли эта деталь соединения с другими деталями когда находится в позиции pos.
         /// Если pos == null, то берется текущая позиция детали.
         /// </summary>
-        public override LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected, Vector3? offset = null)
+        public override LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode = LinksMode.ExceptSelected)
         {
-            var offsetValue = offset ?? Vector3.zero;
             var links = new DetailLinks(this, linksMode);
 
-            links.IsValid = CheckOverlapping(linksMode, offsetValue);
+            links.IsValid = CheckOverlapping(linksMode, offset, rotation);
 
             if (!links.IsValid)
             {
                 return links;
             }
 
-            GetConnections(_linkageColliders, offsetValue, linksMode, links);
+            GetConnections(_linkageColliders, offset, linksMode, links);
             if (_axisLinkageColliders != null)
             {
                 var layerPrefix = LayerMask.LayerToName(AxleLinkage.layer).Contains("Hub")
                     ? "Axle"
                     : "AxleHub";
 
-                GetConnections(_axisLinkageColliders, offsetValue, linksMode, links, layerPrefix);
+                GetConnections(_axisLinkageColliders, offset, linksMode, links, layerPrefix);
             }
 
             return links;
@@ -578,12 +713,12 @@ namespace Assets.Scripts
             }
         }
 
-        private bool CheckOverlapping(LinksMode linksMode, Vector3 offset)
+        private bool CheckOverlapping(LinksMode linksMode, Vector3 offset, Quaternion rotation)
         {
-            var overlapArea = SpaceBounds.bounds;
-            LayerMask layerMask;
+            var overlapArea = SpaceBounds;
+            var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center) + offset;
 
-            overlapArea.center += offset;
+            LayerMask layerMask;
 
             if (linksMode == LinksMode.SelectedOnly)
             {
@@ -598,17 +733,27 @@ namespace Assets.Scripts
                 layerMask = 1 << LayerMask.NameToLayer("Item") | selectedMask;
             }
 
-            var neighbors = Physics.OverlapBox(overlapArea.center, overlapArea.extents, Quaternion.identity, layerMask);
+            var neighbors = Physics.OverlapBox(overlapAreaCenter, overlapArea.size / 2, rotation, layerMask);
 
             foreach (var neighbor in neighbors)
             {
                 if (neighbor == SpaceBounds) continue;
 
-                var overlap = Extentions.Overlap(overlapArea, neighbor.bounds);
+                var overlapAreaRelativeBounds = new Bounds(overlapArea.transform.InverseTransformPoint(overlapAreaCenter), overlapArea.size);
+                var neighborBoxCollider = neighbor.GetComponent<BoxCollider>();
+                //TODO тут неявно считается, что overlapArea.transform.Rotatin == rotation, что не всегда верно (поправить)
+                var neighborAreaRelativeBounds = Extentions.RelativeBounds(overlapArea.transform, neighborBoxCollider);
+
+                var overlap = Extentions.Overlap(overlapAreaRelativeBounds, neighborAreaRelativeBounds);
                 var size = overlap.size;
 
                 // все координаты больше 1.1
                 var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) >= 3.6;
+
+                Debug.Log(invalidTest + " " + offset + " " + overlap + " " + overlapAreaRelativeBounds + " " + neighborAreaRelativeBounds);
+
+                // TODO тут надо добавить получение и анализ двух параметров: вращение деталей относительно друг друга
+                // TODO и их смещение относительно друг друга (насколько оно соответствует узлам решетки)
 
                 if (invalidTest)
                 {
@@ -661,7 +806,7 @@ namespace Assets.Scripts
                         var axleDirection = (SerializableVector3) axleDetail.transform.forward.normalized;
 
 
-                        if (!Mathf.RoundToInt(axleDirection.x == 0 ? relativePos.x : relativePos.y).IsOdd())
+                        if (!Mathf.RoundToInt(axleDirection.x == 0 ? relativePos.x : relativePos.y).IsOdd()) // TODO ???
                         {
                             return false;
                         }

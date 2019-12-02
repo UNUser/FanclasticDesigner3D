@@ -7,15 +7,20 @@ using UnityEngine;
 namespace Assets.Scripts {
     public class DetailsGroup : DetailBase {
 
-		public override bool IsSelected {
-			get {
-				return _details.All(detail => detail.IsSelected);
-			}
-		}
+        public override bool IsSelected {
+            get {
+                return _details.All(detail => detail.IsSelected);
+            }
+        }
 
-		public Detail[] Details { get { return _details.ToArray(); } }
+        public override Transform Lattice
+        {
+            get { return GetComponent<Transform>(); }
+        }
 
-		private readonly HashSet<Detail> _details = new HashSet<Detail>(); 
+        public Detail[] Details { get { return _details.ToArray(); } }
+
+        private readonly HashSet<Detail> _details = new HashSet<Detail>();
 
         public int DetailsCount
         {
@@ -24,14 +29,14 @@ namespace Assets.Scripts {
 
         public void Add (Detail detail)
         {
-			if (detail.Group == this) return;
+            if (detail.Group == this) return;
 
-			if (detail.Group != null) {
-				detail.Group.Remove(detail);
-			}
+            if (detail.Group != null) {
+                detail.Group.Remove(detail);
+            }
 
-			_details.Add(detail);
-			detail.transform.SetParent(transform);
+            _details.Add(detail);
+            detail.transform.SetParent(transform);
         }
 
         public static DetailsGroup CreateNewGroup(Vector3? position = null)
@@ -44,7 +49,7 @@ namespace Assets.Scripts {
 
         private List<HashSet<Detail>> InitLastAdded(LinksBase lostLinks, List<HashSet<Detail>> subgroups)
         {
-			var directlyAdded = new List<HashSet<Detail>>();
+            var directlyAdded = new List<HashSet<Detail>>();
 
             // Подгруппы, порожденные прямыми связями
             foreach (var lostConnection in lostLinks.Connections)
@@ -111,7 +116,7 @@ namespace Assets.Scripts {
                         str.Append(", ");
                     else
                         commaNeeded = true;
-                    
+
                     str.Append(detail.gameObject.name);
                 }
 
@@ -138,11 +143,11 @@ namespace Assets.Scripts {
                 var newGroup = subgroups[i].Count > 1 ? CreateNewGroup(Vector3.zero) : null;
 
                 foreach (var detail in subgroups[i]) {
-	                if (newGroup != null) {
-		                newGroup.Add(detail);
-	                } else {
-		                Remove(detail);
-	                }
+                    if (newGroup != null) {
+                        newGroup.Add(detail);
+                    } else {
+                        Remove(detail);
+                    }
                 }
             }
         }
@@ -165,7 +170,7 @@ namespace Assets.Scripts {
 //            DebugPrint(sub, last);
 
             // Объединяем подгруппы, которые пересеклись по прямым связям.
-            // Поскольку на каждой итерации от каждой новой добавленной детали происходит добавление сразу всех деталей по всем возможным связям, 
+            // Поскольку на каждой итерации от каждой новой добавленной детали происходит добавление сразу всех деталей по всем возможным связям,
             // то появление пересечений подгрупп (т.е. деталий, общих для несокольких подгрупп) возможно только среди новых добавленных деталей
             // и искать пересечения нужно только среди них, не затрагивая детали, добавленные в подгруппы до этого
             for (var i = 0; i < lastAdded.Count; i++) {
@@ -183,7 +188,7 @@ namespace Assets.Scripts {
 
 
         /// <summary>
-        /// Объединяет две подгруппы с индексами firstIndex и secondIndex в множество, у которого число эелементов больше, и 
+        /// Объединяет две подгруппы с индексами firstIndex и secondIndex в множество, у которого число эелементов больше, и
         /// располагает его в списке под индексом firstIndex. Из списка удаляется подгруппа с индексом secondIndex.
         /// </summary>
         private void MergeSubgroups(List<HashSet<Detail>> subgroups, int firstIndex, int secondIndex, List<HashSet<Detail>> lastAdded)
@@ -208,25 +213,25 @@ namespace Assets.Scripts {
 
         public static void Merge(LinksBase newLinks)
         {
-			var groups = new HashSet<DetailsGroup>();
-			var details = new HashSet<Detail>();
+            var groups = new HashSet<DetailsGroup>();
+            var details = new HashSet<Detail>();
 
-			foreach (var detail in newLinks.Connections) {
-				if (detail.Group == null) {
-					details.Add(detail);
-				} else {
-					groups.Add(detail.Group);
-				}
-			}
-			
-			if (newLinks is DetailLinks) {
-				details.Add(((DetailLinks) newLinks).Holder);
-			} else {
-				var groupLinks = (DetailsGroupLinks) newLinks;
-				var group = groupLinks.DetailsLinks.First().Holder.Group;
+            foreach (var detail in newLinks.Connections) {
+                if (detail.Group == null) {
+                    details.Add(detail);
+                } else {
+                    groups.Add(detail.Group);
+                }
+            }
 
-				groups.Add(group);
-			}
+            if (newLinks is DetailLinks) {
+                details.Add(((DetailLinks) newLinks).Holder);
+            } else {
+                var groupLinks = (DetailsGroupLinks) newLinks;
+                var group = groupLinks.DetailsLinks.First().Holder.Group;
+
+                groups.Add(group);
+            }
 
             DetailsGroup targetGroup = null;
 
@@ -249,20 +254,20 @@ namespace Assets.Scripts {
             {
                 if (detailsGroup == targetGroup) continue;
 
-				foreach (var detail in detailsGroup.Details) {
-					targetGroup.Add(detail);
-				}
+                foreach (var detail in detailsGroup.Details) {
+                    targetGroup.Add(detail);
+                }
                 Destroy(detailsGroup.gameObject);
             }
 
             foreach (var detail in details) {
-				targetGroup.Add(detail);
+                targetGroup.Add(detail);
             }
         }
 
         public void Remove(Detail detail)
         {
-	        _details.Remove(detail);
+            _details.Remove(detail);
             detail.transform.SetParent(null);
 
             if (DetailsCount == 1) {
@@ -276,17 +281,17 @@ namespace Assets.Scripts {
 
         protected override void UpdateConnections(LinksBase newLinks)
         {
-	        var groupLinks = newLinks as DetailsGroupLinks;
+            var groupLinks = newLinks as DetailsGroupLinks;
 
-	        if (groupLinks == null) {
-		        Debug.LogError("Invalid links type: expected DetailsGroupLinks!");
-				return;
-	        }
+            if (groupLinks == null) {
+                Debug.LogError("Invalid links type: expected DetailsGroupLinks!");
+                return;
+            }
 
             foreach (var detailLinks in groupLinks.DetailsLinks) {
-	            var detail = detailLinks.Holder;
+                var detail = detailLinks.Holder;
 
-				detail.UpdateLinks(detailLinks.LinksMode, detailLinks);
+                detail.UpdateLinks(detailLinks.LinksMode, detailLinks);
             }
         }
 
@@ -307,56 +312,56 @@ namespace Assets.Scripts {
 
         public DetailBase Detach(HashSet<Detail> detailsToDetach)
         {
-			// если выделена вся группа целиком, то ничего отсоединять не надо
-	        if (_details.Count == detailsToDetach.Count) {
-		        return this;
-	        }
+            // если выделена вся группа целиком, то ничего отсоединять не надо
+            if (_details.Count == detailsToDetach.Count) {
+                return this;
+            }
 
-	        if (_details.Count < detailsToDetach.Count)
-	        {
-				Debug.LogError("Multiple groups selection unsupported!");
-				return null;
-	        }
+            if (_details.Count < detailsToDetach.Count)
+            {
+                Debug.LogError("Multiple groups selection unsupported!");
+                return null;
+            }
 
-	        DetailBase targetDetail;
-	        LinksBase emptyLinks;
+            DetailBase targetDetail;
+            LinksBase emptyLinks;
 
-		    if (detailsToDetach.Count > 1)
-		    {
-				var newGroup = CreateNewGroup();
-				var emptyGroupLinks = new DetailsGroupLinks(LinksMode.ExceptSelected);
+            if (detailsToDetach.Count > 1)
+            {
+                var newGroup = CreateNewGroup();
+                var emptyGroupLinks = new DetailsGroupLinks(LinksMode.ExceptSelected);
 
-				targetDetail = newGroup;
+                targetDetail = newGroup;
 
-				foreach (var detail in detailsToDetach) {
-					if (detail.Group != this) {
-						Debug.LogError("Multiple groups selection unsupported!");
-						continue;
-					}
-					newGroup.Add(detail);
-					emptyGroupLinks += new DetailLinks(detail, emptyGroupLinks.LinksMode);
-				}
+                foreach (var detail in detailsToDetach) {
+                    if (detail.Group != this) {
+                        Debug.LogError("Multiple groups selection unsupported!");
+                        continue;
+                    }
+                    newGroup.Add(detail);
+                    emptyGroupLinks += new DetailLinks(detail, emptyGroupLinks.LinksMode);
+                }
 
-			    emptyLinks = emptyGroupLinks;
-		    } else {
-			    var first = detailsToDetach.First();
+                emptyLinks = emptyGroupLinks;
+            } else {
+                var first = detailsToDetach.First();
 
-				targetDetail = first;
-			    Remove(first);
-				emptyLinks = new DetailLinks(first);
-		    }
-			
-	        var lostLinks = targetDetail.GetLinks();
+                targetDetail = first;
+                Remove(first);
+                emptyLinks = new DetailLinks(first);
+            }
 
-			targetDetail.UpdateLinks(LinksMode.ExceptSelected, emptyLinks);
-			UpdateContinuity(lostLinks);
+            var lostLinks = targetDetail.GetLinks();
 
-	        return targetDetail;
+            targetDetail.UpdateLinks(LinksMode.ExceptSelected, emptyLinks);
+            UpdateContinuity(lostLinks);
+
+            return targetDetail;
         }
 
-        public override LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected, Vector3? offset = null)
+        public override LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode = LinksMode.ExceptSelected)
         {
-	        return AppController.Instance.SelectedDetails.GetLinks(linksMode, offset);
+            return AppController.Instance.SelectedDetails.GetLinks(offset, rotation, linksMode);
         }
 
 
@@ -376,7 +381,7 @@ namespace Assets.Scripts {
 //                meshFilter = gameObject.AddComponent<MeshFilter>();
 //
 //            Debug.Log(meshFilter);
-//             
+//
 //            meshFilter.mesh = new Mesh();
 //            meshFilter.mesh.CombineMeshes(combine);
 //            transform.gameObject.SetActive(true);
