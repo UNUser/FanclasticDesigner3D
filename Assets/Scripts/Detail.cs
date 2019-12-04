@@ -254,10 +254,12 @@ namespace Assets.Scripts
 //                        _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
 
             var hitLattice = minRayHitInfo.Value.collider.GetComponent<Lattice>();
-            var alignedRelativeSourceRotation = raycaster._sourceRotation;
+            var alignedRelativeSourceRotation1 = raycaster._sourceRotation;
+            var rotationDelta = raycaster.GetAligningRotation(hitLattice, raycaster._sourceRotation);
+//            var rotationDeltaRelativeCurrent =
 
-            raycaster.AlignRotation(hitLattice, hitPoint, ref alignedRelativeSourceRotation, ref newPos);
-            raycaster.AlignPosition(hitLattice, alignedRelativeSourceRotation, ref newPos);
+//            raycaster.AlignRotation(hitLattice, hitPoint, ref alignedRelativeSourceRotation, ref newPos);
+            raycaster.AlignPosition(hitLattice, rotationDelta, ref newPos);
 
             if (newPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
 
@@ -268,7 +270,7 @@ namespace Assets.Scripts
 //                + " " + newPos
 //                + " " + offset);
 
-            var links = AppController.Instance.SelectedDetails.GetLinks(offset, alignedRelativeSourceRotation, LinksMode.ExceptSelected);
+            var links = AppController.Instance.SelectedDetails.GetLinks(offset, rotationDelta, LinksMode.ExceptSelected);
 
 //            Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
             if (!links.IsValid || (hitPoint.y > 0 && !links.HasConnections))
@@ -280,7 +282,7 @@ namespace Assets.Scripts
 
             AppController.Instance.SelectedDetails.IsValid = links.IsValid;
             detached.transform.Translate(offset, Space.World);
-            detached.transform.rotation = alignedRelativeSourceRotation;
+            detached.transform.rotation = rotationDelta * detached.transform.rotation;
             detached.UpdateLinks(links.LinksMode, links); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
@@ -383,12 +385,13 @@ namespace Assets.Scripts
             return minRayHitInfo;
         }
 
-        public void AlignRotation(Lattice lattice, Vector3 pivot, ref Quaternion rotation, ref Vector3 position)
+        private Quaternion GetAligningRotation(Lattice lattice, Quaternion sourceRotation)
         {
             var dummy = Vector3.zero;
+            var fromSourceToTarget = GetAligningRotation(sourceRotation, lattice.transform.rotation, out dummy);
+            var fromCurrentToTarget = fromSourceToTarget * sourceRotation * Quaternion.Inverse(transform.rotation);
 
-            rotation = GetAligningRotation(rotation, lattice.transform.rotation, out dummy) * rotation;
-//            Debug.Log(dummy);
+            return fromCurrentToTarget;
         }
 
         private Quaternion GetAligningRotation(Quaternion from, Quaternion to, out Vector3 diff)
@@ -491,9 +494,8 @@ namespace Assets.Scripts
 //            fr = resultRotation;
         }
 
-        public void AlignPosition(Lattice lattice, Quaternion rotation, ref Vector3 pos)
+        public void AlignPosition(Lattice lattice, Quaternion rotationDelta, ref Vector3 pos)
         {
-            var rotationDelta = rotation * Quaternion.Inverse(transform.rotation);//Debug.Log("floorCorrection before " + pos);
             var bottomPointIndex = CorrectHeightAboveFloor(rotationDelta, ref pos); //Debug.Log("floorCorrection after " + pos);
             var offsetFromCurrentPos = pos - transform.position;
             var bottomPoint = transform.TransformPoint(rotationDelta * _connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
@@ -643,31 +645,32 @@ namespace Assets.Scripts
         /// Имеет ли эта деталь соединения с другими деталями когда находится в позиции pos.
         /// Если pos == null, то берется текущая позиция детали.
         /// </summary>
-        public override LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode = LinksMode.ExceptSelected)
+        public override LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, LinksMode linksMode = LinksMode.ExceptSelected)
         {
             var links = new DetailLinks(this, linksMode);
 
-            links.IsValid = CheckOverlapping(linksMode, offset, rotation);
+            links.IsValid = CheckOverlapping(linksMode, offset, rotationDelta);
 
             if (!links.IsValid)
             {
                 return links;
             }
 
-            GetConnections(_linkageColliders, offset, rotation, linksMode, links);
+            GetConnections(_linkageColliders, offset, rotationDelta, linksMode, links);
+            Debug.Log("GetConnections " + offset + " " + rotationDelta.eulerAngles + " " + links.Data);
             if (_axisLinkageColliders != null)
             {
                 var layerPrefix = LayerMask.LayerToName(AxleLinkage.layer).Contains("Hub")
                     ? "Axle"
                     : "AxleHub";
 
-                GetConnections(_axisLinkageColliders, offset, rotation, linksMode, links, layerPrefix);
+                GetConnections(_axisLinkageColliders, offset, rotationDelta, linksMode, links, layerPrefix);
             }
 
             return links;
         }
 
-        private void GetConnections(BoxCollider[] linkageColliders, Vector3 offset, Quaternion rotation, LinksMode linksMode, DetailLinks links, string layerPrefix = "")
+        private void GetConnections(BoxCollider[] linkageColliders, Vector3 offset, Quaternion rotationDelta, LinksMode linksMode, DetailLinks links, string layerPrefix = "")
         {
             if (linkageColliders == null)
             {
@@ -678,6 +681,7 @@ namespace Assets.Scripts
             {
                 var overlapArea = linkageCollider;
                 var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center) + offset;
+                var rotation = rotationDelta * overlapArea.transform.rotation;
                 LayerMask layerMask;
 
                 if (linksMode == LinksMode.SelectedOnly)
@@ -707,10 +711,11 @@ namespace Assets.Scripts
             }
         }
 
-        private bool CheckOverlapping(LinksMode linksMode, Vector3 offset, Quaternion rotation)
+        private bool CheckOverlapping(LinksMode linksMode, Vector3 offset, Quaternion rotationDelta)
         {
             var overlapArea = SpaceBounds;
             var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center) + offset;
+            var rotation = rotationDelta * overlapArea.transform.rotation;
 
             LayerMask layerMask;
 

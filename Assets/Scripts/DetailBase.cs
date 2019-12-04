@@ -10,7 +10,7 @@ namespace Assets.Scripts {
         public abstract Bounds Bounds { get; }
         public abstract Quaternion Orientation { get; }
 
-        public abstract LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode = LinksMode.ExceptSelected);
+        public abstract LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, LinksMode linksMode = LinksMode.ExceptSelected);
 
         public virtual LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected)
         {
@@ -46,7 +46,7 @@ namespace Assets.Scripts {
             if (asDetail != null && asDetail.Group != null) {
                 return;
             }
-            Debug.Log("Merge!");
+
             DetailsGroup.Merge(newLinks);
         }
 

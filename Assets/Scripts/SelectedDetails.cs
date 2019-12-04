@@ -272,12 +272,12 @@ namespace Assets.Scripts
 
 
 
-        public LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode)
+        public LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, LinksMode linksMode)
         {
             if (_details.Count < 2)
             {
                 return _details.Any()
-                    ? _details.First().GetLinks(offset, rotation, linksMode)
+                    ? _details.First().GetLinks(offset, rotationDelta, linksMode)
                     : null;
             }
 
@@ -285,7 +285,7 @@ namespace Assets.Scripts
 
             foreach (var detail in _details)
             {
-                var detailLinks = (DetailLinks) detail.GetLinks(offset, rotation, linksMode);
+                var detailLinks = (DetailLinks) detail.GetLinks(offset, rotationDelta, linksMode);
 
                 //              Debug.Log(detailLinks.Data + " " + linksMode + " " + offset);
 
