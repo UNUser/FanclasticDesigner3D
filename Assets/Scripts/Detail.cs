@@ -29,6 +29,7 @@ namespace Assets.Scripts
         public GameObject AxleLinkage;
         public Vector3 AlignmentPoint;
         public bool FixedColor;
+        public bool IsAxle;
 
         public override bool IsSelected
         {
@@ -49,9 +50,9 @@ namespace Assets.Scripts
             }
         }
 
-        public override Transform Lattice
+        public override Quaternion Orientation
         {
-            get { return Group == null ? GetComponent<Transform>() : Group.Lattice; }
+            get { return Group == null ? transform.rotation : Group.Orientation; }
         }
 
         public DetailColor Color
@@ -103,6 +104,7 @@ namespace Assets.Scripts
         private bool _isClick;
         private bool _isLongClick;
         private Vector3 _sourcePosition;
+        private Quaternion _sourceRotation;
 
         private static Material _selectedMaterial;
 
@@ -197,6 +199,7 @@ namespace Assets.Scripts
             if (eventData != null)
             {
                 _sourcePosition = transform.position;
+                _sourceRotation = transform.rotation;
             }
 
             //          AppController.Instance.SelectedDetails.Detach();
@@ -250,33 +253,24 @@ namespace Assets.Scripts
 
 //                        _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
 
-            var lattice = minRayHitInfo.Value.collider.transform;
-            var latticeRotation = lattice.rotation;
-            var newRotation = transform.rotation;
+            var hitLattice = minRayHitInfo.Value.collider.GetComponent<Lattice>();
+            var alignedRelativeSourceRotation = raycaster._sourceRotation;
 
-            raycaster.AlignRotation(lattice, hitPoint, ref newRotation, ref newPos);
-//            var oldPos = newPos;
-            raycaster.AlignPosition(lattice, newRotation, ref newPos);
-//            Debug.Log(oldPos + " " + newPos);
+            raycaster.AlignRotation(hitLattice, hitPoint, ref alignedRelativeSourceRotation, ref newPos);
+            raycaster.AlignPosition(hitLattice, alignedRelativeSourceRotation, ref newPos);
 
             if (newPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
 
             var offset = newPos - raycaster.transform.position;
-            var detached1 = AppController.Instance.SelectedDetails.Detach();
 
-            var links = AppController.Instance.SelectedDetails.GetLinks(offset, newRotation, LinksMode.ExceptSelected);
+//            Debug.Log(hitPoint
+//                + " " + raycaster.transform.position
+//                + " " + newPos
+//                + " " + offset);
 
-            //
-            Debug.Log("valid " + links.IsValid + " connections " + links.HasConnections);
-//                detached1.UpdateLinks(links.LinksMode, links);
-            //
+            var links = AppController.Instance.SelectedDetails.GetLinks(offset, alignedRelativeSourceRotation, LinksMode.ExceptSelected);
 
-            detached1.transform.Translate(offset, Space.World);
-            detached1.transform.rotation = newRotation;
-
-            return;
-
-            //Debug.Log(links.IsValid + " " + (hitPoint.y > 0) + " " + links.HasConnections);
+//            Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
             if (!links.IsValid || (hitPoint.y > 0 && !links.HasConnections))
             {
                 return;
@@ -286,6 +280,7 @@ namespace Assets.Scripts
 
             AppController.Instance.SelectedDetails.IsValid = links.IsValid;
             detached.transform.Translate(offset, Space.World);
+            detached.transform.rotation = alignedRelativeSourceRotation;
             detached.UpdateLinks(links.LinksMode, links); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
@@ -388,11 +383,11 @@ namespace Assets.Scripts
             return minRayHitInfo;
         }
 
-        public void AlignRotation(Transform lattice, Vector3 pivot, ref Quaternion rotation, ref Vector3 position)
+        public void AlignRotation(Lattice lattice, Vector3 pivot, ref Quaternion rotation, ref Vector3 position)
         {
             var dummy = Vector3.zero;
 
-            rotation = GetAligningRotation(rotation, lattice.rotation, out dummy) * rotation;
+            rotation = GetAligningRotation(rotation, lattice.transform.rotation, out dummy) * rotation;
 //            Debug.Log(dummy);
         }
 
@@ -496,14 +491,14 @@ namespace Assets.Scripts
 //            fr = resultRotation;
         }
 
-        public void AlignPosition(Transform lattice, Quaternion rotation, ref Vector3 pos)
+        public void AlignPosition(Lattice lattice, Quaternion rotation, ref Vector3 pos)
         {
             var rotationDelta = rotation * Quaternion.Inverse(transform.rotation);//Debug.Log("floorCorrection before " + pos);
             var bottomPointIndex = CorrectHeightAboveFloor(rotationDelta, ref pos); //Debug.Log("floorCorrection after " + pos);
             var offsetFromCurrentPos = pos - transform.position;
             var bottomPoint = transform.TransformPoint(rotationDelta * _connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
             var group = Group;
-            var alignmentPoint = (group == null ? transform.TransformPoint(rotationDelta * AlignmentPoint) : group.transform.position) + offsetFromCurrentPos;
+            var alignmentPoint = (/*group == null ? */transform.TransformPoint(rotationDelta * AlignmentPoint)/* : group.transform.position*/) + offsetFromCurrentPos;
             Vector3 alignedBottomPoint;
 
             if (Linkage != null || group != null)
@@ -697,7 +692,7 @@ namespace Assets.Scripts
 
                     layerMask = 1 << LayerMask.NameToLayer(layerPrefix + "Linkage") | selectedMask;
                 }
-
+//                Debug.Log(offset + " " + rotation.eulerAngles + " " + overlapAreaCenter + " " + overlapArea.size);
                 var neighbors = Physics.OverlapBox(overlapAreaCenter, overlapArea.size / 2, rotation, layerMask);
                 //TODO если будет жрать память, то можно заменить на NonAlloc версию
 
@@ -749,7 +744,7 @@ namespace Assets.Scripts
                 // все координаты больше 1.1
                 var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) >= 3.6;
 
-                Debug.Log(invalidTest + " " + offset + " " + overlap + " " + overlapAreaRelativeBounds + " " + neighborAreaRelativeBounds);
+//                Debug.Log(invalidTest + " " + offset + " " + overlap + " " + overlapAreaRelativeBounds + " " + neighborAreaRelativeBounds);
 
                 // TODO тут надо добавить получение и анализ двух параметров: вращение деталей относительно друг друга
                 // TODO и их смещение относительно друг друга (насколько оно соответствует узлам решетки)

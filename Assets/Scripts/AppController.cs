@@ -44,20 +44,20 @@ namespace Assets.Scripts
         public Dropdown LanguageSwitcher;
         public InstructionsLayer InstructionsLayer;
         public GameObject TutorialLayer;
-	    public ModelsSetsLayer ModelsSetsLayer;
+        public ModelsSetsLayer ModelsSetsLayer;
 
-	    public ToggleGroup ToolsToggleGroup;
+        public ToggleGroup ToolsToggleGroup;
         public Toggle MovementMode;
         public AxisMover AxisMover;
-	    public GameObject MovementController;
-	    public GameObject RotationController;
+        public GameObject MovementController;
+        public GameObject RotationController;
 
         public Session Session { get; private set; }
         public AppMode Mode { get; private set; }
 
         public AppResources Resources;
 
-		public static string DemoModelsPath { get { return Application.persistentDataPath + "/DemoModels"; } }
+        public static string DemoModelsPath { get { return Application.persistentDataPath + "/DemoModels"; } }
 
         private string LastPath
         {
@@ -87,15 +87,15 @@ namespace Assets.Scripts
 
         public void OnMovementModeChanged(bool value)
         {
-	        MovementController.SetActive(value);
-			AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
+            MovementController.SetActive(value);
+            AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
         }
 
-		public void OnRotationModeChanged(bool value) 
-		{
-			RotationController.SetActive(value);
-			AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
-		}
+        public void OnRotationModeChanged(bool value)
+        {
+            RotationController.SetActive(value);
+            AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
+        }
 
         public SelectedDetails SelectedDetails;
 
@@ -252,12 +252,12 @@ namespace Assets.Scripts
         [DllImport("user32.dll")]
         private static extern void OpenFileDialog();
 
-	    [DllImport("user32.dll")]
-	    public static extern IntPtr GetActiveWindow();
-		[DllImport("User32.dll")]
-		public static extern bool ShowWindow(IntPtr handle, int nCmdShow);
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetActiveWindow();
+        [DllImport("User32.dll")]
+        public static extern bool ShowWindow(IntPtr handle, int nCmdShow);
 
-		private IntPtr _appWindowHandle;
+        private IntPtr _appWindowHandle;
 
         public void ShowSaveFileDialog(string path)
         {
@@ -275,7 +275,7 @@ namespace Assets.Scripts
                 Save(saveFileDialog.FileName);
             }
 
-			RestoreMainWindow();
+            RestoreMainWindow();
         }
 
         public void ShowOpenFileDialog(string path)
@@ -294,7 +294,7 @@ namespace Assets.Scripts
                 LoadFile(openFileDialog.FileName);
             }
 
-			RestoreMainWindow();
+            RestoreMainWindow();
         }
 
         public void OnExportButtonClicked()
@@ -309,17 +309,17 @@ namespace Assets.Scripts
                 ExportScene(openFileDialog.FileName + ".fbx");
             }
 
-			RestoreMainWindow();
+            RestoreMainWindow();
         }
 
-	    private void RestoreMainWindow()
-	    {
+        private void RestoreMainWindow()
+        {
 #if !UNITY_EDITOR
-			const int SW_RESTORE = 9;
+            const int SW_RESTORE = 9;
 
-			ShowWindow(_appWindowHandle, SW_RESTORE);
+            ShowWindow(_appWindowHandle, SW_RESTORE);
 #endif
-		}
+        }
 
         private void ExportScene(string path)
         {
@@ -374,7 +374,7 @@ namespace Assets.Scripts
 
         public void OnModelsSetsButtonClicked()
         {
-			ModelsSetsLayer.gameObject.SetActive(true);
+            ModelsSetsLayer.gameObject.SetActive(true);
         }
 
         private void Save(string fileName)
@@ -384,18 +384,18 @@ namespace Assets.Scripts
             LastPath = Path.GetDirectoryName(fileName);
         }
 
-	    public void LoadFile(string filePath)
-	    {
-			Session = new Session(new FileInfo(filePath));
-			LastPath = Path.GetDirectoryName(filePath);
-			OnLoad();
-	    }
+        public void LoadFile(string filePath)
+        {
+            Session = new Session(new FileInfo(filePath));
+            LastPath = Path.GetDirectoryName(filePath);
+            OnLoad();
+        }
 
-	    public void LoadModel(string modelName)
-	    {
-			Session = new Session(modelName);
-			OnLoad();
-	    }
+        public void LoadModel(string modelName)
+        {
+            Session = new Session(modelName);
+            OnLoad();
+        }
 
         private void OnLoad()
         {
@@ -438,7 +438,7 @@ namespace Assets.Scripts
             CheckForFirstLaunch();
 
 #if UNITY_STANDALONE_WIN
-			_appWindowHandle = GetActiveWindow();
+            _appWindowHandle = GetActiveWindow();
 #endif
         }
 
@@ -468,7 +468,7 @@ namespace Assets.Scripts
             TutorialLayer.SetActive(true);
         }
 
-	    private IEnumerator UpdateDebugInfo()
+        private IEnumerator UpdateDebugInfo()
         {
             while (true)
             {
@@ -676,73 +676,73 @@ namespace Assets.Scripts
             AnimationContainer = new GameObject("Container");
             var container = AnimationContainer.transform;
 
-	        if (Rotation == Vector3.zero)
-	        {
-		        Pivot = GetBounds().center - Offset;
-	        }
+            if (Rotation == Vector3.zero)
+            {
+                Pivot = GetBounds().center - Offset;
+            }
 
-	        SerializableVector3Int simplifiedRotation;
-	        var simplificationKey = new SerializableVector3Int(Math.Abs(Rotation.x), 
-															   Math.Abs(Rotation.y),
-															   Math.Abs(Rotation.z));
-			var rotationSimplification = new Dictionary<SerializableVector3Int, SerializableVector3Int>
-	        {
-				{new SerializableVector3Int(0, 180, 180), new SerializableVector3Int(180, 0, 0)},
-				{new SerializableVector3Int(180, 0, 180), new SerializableVector3Int(0, 180, 0)},
-				{new SerializableVector3Int(180, 180, 0), new SerializableVector3Int(0, 0, 180)},
+            SerializableVector3Int simplifiedRotation;
+            var simplificationKey = new SerializableVector3Int(Math.Abs(Rotation.x),
+                                                               Math.Abs(Rotation.y),
+                                                               Math.Abs(Rotation.z));
+            var rotationSimplification = new Dictionary<SerializableVector3Int, SerializableVector3Int>
+            {
+                {new SerializableVector3Int(0, 180, 180), new SerializableVector3Int(180, 0, 0)},
+                {new SerializableVector3Int(180, 0, 180), new SerializableVector3Int(0, 180, 0)},
+                {new SerializableVector3Int(180, 180, 0), new SerializableVector3Int(0, 0, 180)},
 
-//				{new SerializableVector3Int(x, 180, 180), new SerializableVector3Int(-x, 0, 0)},???
+//              {new SerializableVector3Int(x, 180, 180), new SerializableVector3Int(-x, 0, 0)},???
 
-//				{new SerializableVector3Int(90, x, x), new SerializableVector3Int(90, 0, 0)},
-//				{new SerializableVector3Int(-90, x, x), new SerializableVector3Int(-90, 0, 0)},
-	        };
+//              {new SerializableVector3Int(90, x, x), new SerializableVector3Int(90, 0, 0)},
+//              {new SerializableVector3Int(-90, x, x), new SerializableVector3Int(-90, 0, 0)},
+            };
 
-	        if (rotationSimplification.TryGetValue(simplificationKey, out simplifiedRotation))
-	        {
-		        Rotation = simplifiedRotation;
-	        }
+            if (rotationSimplification.TryGetValue(simplificationKey, out simplifiedRotation))
+            {
+                Rotation = simplifiedRotation;
+            }
 
             container.position = Pivot + Offset;
 
-			//backwards
+            //backwards
             if (Offset != Vector3.zero)
             {
                 animation.Append(container.DOMove(Pivot, BackwardsAnimationTime));
             }
-			
-	        var rotationX = new Vector3(GetMinRotationAngle(Rotation.x), 0, 0);
-			var rotationY = new Vector3(0, GetMinRotationAngle(Rotation.y), 0);
-			var rotationZ = new Vector3(0, 0, GetMinRotationAngle(Rotation.z));
 
-	        if (rotationY != Vector3.zero) {
-		        animation.Append(container.DORotate( - rotationY, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
-	        }
+            var rotationX = new Vector3(GetMinRotationAngle(Rotation.x), 0, 0);
+            var rotationY = new Vector3(0, GetMinRotationAngle(Rotation.y), 0);
+            var rotationZ = new Vector3(0, 0, GetMinRotationAngle(Rotation.z));
 
-			if (rotationX != Vector3.zero) {
-				animation.Append(container.DORotate( - rotationX, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
-			}
+            if (rotationY != Vector3.zero) {
+                animation.Append(container.DORotate( - rotationY, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
+            }
 
-			if (rotationZ != Vector3.zero) {
-				animation.Append(container.DORotate( - rotationZ, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
-			}
+            if (rotationX != Vector3.zero) {
+                animation.Append(container.DORotate( - rotationX, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
+            }
 
-			//forward
-	        animation.AppendInterval(0.5f);
+            if (rotationZ != Vector3.zero) {
+                animation.Append(container.DORotate( - rotationZ, BackwardsAnimationTime / 3, RotateMode.WorldAxisAdd));
+            }
 
-			if (rotationZ != Vector3.zero) {
-				animation.Append(container.DORotate(rotationZ, 1f, RotateMode.WorldAxisAdd));
-			}
+            //forward
+            animation.AppendInterval(0.5f);
 
-			if (rotationX != Vector3.zero) {
-				animation.Append(container.DORotate(rotationX, 1f, RotateMode.WorldAxisAdd));
-			}
+            if (rotationZ != Vector3.zero) {
+                animation.Append(container.DORotate(rotationZ, 1f, RotateMode.WorldAxisAdd));
+            }
 
-			if (rotationY != Vector3.zero) {
-				animation.Append(container.DORotate(rotationY, 1f, RotateMode.WorldAxisAdd));
-			}
+            if (rotationX != Vector3.zero) {
+                animation.Append(container.DORotate(rotationX, 1f, RotateMode.WorldAxisAdd));
+            }
+
+            if (rotationY != Vector3.zero) {
+                animation.Append(container.DORotate(rotationY, 1f, RotateMode.WorldAxisAdd));
+            }
 
             animation.AppendInterval(0.5f);
-			
+
             if (Offset != Vector3.zero)
             {
                 animation.Append(container.DOMove(Pivot + Offset, 1f))
@@ -752,14 +752,14 @@ namespace Assets.Scripts
             return animation;
         }
 
-	    private int GetMinRotationAngle(int angle)
-	    {
-			var normalized = angle % 360;
+        private int GetMinRotationAngle(int angle)
+        {
+            var normalized = angle % 360;
 
-			return Mathf.Abs(normalized) > 180 
-				? (normalized - Math.Sign(normalized) * 360)
-				: normalized; 
-	    }
+            return Mathf.Abs(normalized) > 180
+                ? (normalized - Math.Sign(normalized) * 360)
+                : normalized;
+        }
 
         private Bounds GetBounds()
         {

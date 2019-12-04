@@ -8,7 +8,7 @@ namespace Assets.Scripts {
         public abstract bool IsSelected { get; }
 
         public abstract Bounds Bounds { get; }
-        public abstract Transform Lattice { get; }
+        public abstract Quaternion Orientation { get; }
 
         public abstract LinksBase GetLinks(Vector3 offset, Quaternion rotation, LinksMode linksMode = LinksMode.ExceptSelected);
 
@@ -27,6 +27,7 @@ namespace Assets.Scripts {
                 Debug.LogError("Inconsistent links mode in parameters!");
                 newLinks = GetLinks(linksMode);
             }
+//            Debug.Log(newLinks.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + newLinks.HasConnections);
 
             AppController.Instance.SelectedDetails.IsValid = newLinks.IsValid;
 
@@ -45,7 +46,7 @@ namespace Assets.Scripts {
             if (asDetail != null && asDetail.Group != null) {
                 return;
             }
-
+            Debug.Log("Merge!");
             DetailsGroup.Merge(newLinks);
         }
 

@@ -13,9 +13,9 @@ namespace Assets.Scripts {
             }
         }
 
-        public override Transform Lattice
+        public override Quaternion Orientation
         {
-            get { return GetComponent<Transform>(); }
+            get { return transform.rotation; }
         }
 
         public Detail[] Details { get { return _details.ToArray(); } }
@@ -39,10 +39,11 @@ namespace Assets.Scripts {
             detail.transform.SetParent(transform);
         }
 
-        public static DetailsGroup CreateNewGroup(Vector3? position = null)
+        public static DetailsGroup CreateNewGroup(Vector3 origin, Quaternion rotation)
         {
             var newObj = new GameObject("DetailsGroup");
-            newObj.transform.position = position ?? Vector3.zero;
+            newObj.transform.position = origin;
+            newObj.transform.rotation = rotation;
 
             return newObj.AddComponent<DetailsGroup>();
         }
@@ -139,8 +140,9 @@ namespace Assets.Scripts {
 
         private void SplitAndUpdate(List<HashSet<Detail>> subgroups)
         {
-            for (var i = 1; i < subgroups.Count; i++) {
-                var newGroup = subgroups[i].Count > 1 ? CreateNewGroup(Vector3.zero) : null;
+            for (var i = 1; i < subgroups.Count; i++)
+            {
+                var newGroup = subgroups[i].Count > 1 ? CreateNewGroup(transform.position, transform.rotation) : null;
 
                 foreach (var detail in subgroups[i]) {
                     if (newGroup != null) {
@@ -242,8 +244,13 @@ namespace Assets.Scripts {
             }
 
             if (targetGroup == null) {
-                if (details.Count > 1) {
-                    targetGroup = CreateNewGroup(Vector3.zero);
+                if (details.Count > 1)
+                {
+                    //TODO по осям выравнивание делать нельзя, считаем, что выравнивать можно по любой детали, с которой можно соединить ось.
+                    var aligningDetail = details.First(detail => !detail.IsAxle);
+                    var aligningTransform = aligningDetail.transform;
+
+                    targetGroup = CreateNewGroup(aligningTransform.TransformPoint(aligningDetail.AlignmentPoint), aligningTransform.rotation);
                     groups.Add(targetGroup);
                 } else {
                     return;
@@ -323,12 +330,13 @@ namespace Assets.Scripts {
                 return null;
             }
 
+
             DetailBase targetDetail;
             LinksBase emptyLinks;
 
             if (detailsToDetach.Count > 1)
             {
-                var newGroup = CreateNewGroup();
+                var newGroup = CreateNewGroup(transform.position, transform.rotation);
                 var emptyGroupLinks = new DetailsGroupLinks(LinksMode.ExceptSelected);
 
                 targetDetail = newGroup;

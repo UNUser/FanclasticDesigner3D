@@ -224,7 +224,7 @@ namespace Assets.Scripts
             var bottomDetail = GetBottomDetail();
             var newPos = bottomDetail.transform.position;
 
-            bottomDetail.AlignPosition(bottomDetail.Lattice, bottomDetail.Lattice.rotation, ref newPos);
+            bottomDetail.AlignPosition(bottomDetail.GetComponent<Lattice>(), bottomDetail.transform.rotation, ref newPos);
 
             alignment = newPos - bottomDetail.transform.position;
             targetDetail.transform.Translate(alignment, Space.World);

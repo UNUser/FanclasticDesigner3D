@@ -136,9 +136,9 @@ namespace Assets.Scripts
             return v;
         }
 
-        public static Vector3 AlignByCrossPoint(this Vector3 vector, Transform lattice, Vector3 alignmentPoint)
+        public static Vector3 AlignByCrossPoint(this Vector3 vector, Lattice lattice, Vector3 alignmentPoint)
         {
-            var alignmentPointLocal = lattice.InverseTransformPoint(alignmentPoint);
+            var alignmentPointLocal = lattice.transform.InverseTransformPoint(alignmentPoint) - lattice.OriginOffset;
             var oddSum = (Mathf.RoundToInt(alignmentPointLocal.x) & 1)
                        + (Mathf.RoundToInt(alignmentPointLocal.y) & 1)
                        + (Mathf.RoundToInt(alignmentPointLocal.z) & 1);
@@ -150,14 +150,15 @@ namespace Assets.Scripts
                                                 AlignValue(isOddAlignment, alignmentPointLocal.y),
                                                 AlignValue(isOddAlignment, alignmentPointLocal.z));
 
-            var alignmentOffset = lattice.TransformDirection(newAlignmentPointLocal - alignmentPointLocal);
-            /*Debug.Log("Old: " + vector + ", crossPointAlignment: " + crossPointAlignment + ", isOddAlignment: " + isOddAlignment + " " + (Mathf.RoundToInt(vector.x) & 1) + " "
-                                + (Mathf.RoundToInt(vector.y) & 1) + " "
-                                + (Mathf.RoundToInt(vector.z) & 1) + " " + oddSum
-                                 + ", isOddY: " + isOddY
-                                  + ", isFloor: " + isFloor
-                                   + ", newCrossPoint: " + newCrossPoint);*/
-//            Debug.Log("vector " + vector + " aligned " + (vector + alignmentOffset) + " alignmentOffset " + alignmentOffset + " alignmentPointLocal " + alignmentPointLocal + " newAlignmentPointLocal " + newAlignmentPointLocal);
+            var alignmentOffset = lattice.transform.TransformDirection(newAlignmentPointLocal - alignmentPointLocal);
+
+//            Debug.Log("vector " + vector
+//                    + " aligned " + (vector + alignmentOffset)
+//                    + " alignmentOffset " + alignmentOffset
+//                    + " latticeOffset " + lattice.OriginOffset
+//                    + " alignmentPoint " + alignmentPoint
+//                    + " alignmentPointLocal " + alignmentPointLocal
+//                    + " newAlignmentPointLocal " + newAlignmentPointLocal);
             return vector + alignmentOffset;
         }
 
