@@ -73,17 +73,17 @@ namespace Assets.Scripts
 
         //        public Material[] DetailColors;
 
-        //
-        //      private static int N;
-        //      protected void Update()
-        //      {
-        //          if (Input.GetKeyDown(KeyCode.P))
-        //          {
-        //              var fileName = "C:\\" + Camera.main.pixelWidth + "x" + Camera.main.pixelHeight + "(" + N++ + ").png";
-        //
-        //              ScreenCapture.CaptureScreenshot(fileName);
-        //          }
-        //      }
+//
+//              private static int N;
+//              protected void Update()
+//              {
+//                  if (Input.GetKeyDown(KeyCode.P))
+//                  {
+//                      var fileName = "C:\\" + Camera.main.pixelWidth + "x" + Camera.main.pixelHeight + "(" + N++ + ").png";
+//
+//                      ScreenCapture.CaptureScreenshot(fileName);
+//                  }
+//              }
 
         public void OnMovementModeChanged(bool value)
         {

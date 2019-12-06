@@ -196,10 +196,11 @@ namespace Assets.Scripts
 
             AppController.Instance.SelectedDetails.SetRaycastOrigins(holdingConnectorOffset);
 
+            _sourceRotation = transform.rotation;
+
             if (eventData != null)
             {
                 _sourcePosition = transform.position;
-                _sourceRotation = transform.rotation;
             }
 
             //          AppController.Instance.SelectedDetails.Detach();
@@ -246,43 +247,57 @@ namespace Assets.Scripts
 
             // Округляем координаты точки, вычисляем вектор переноса и перемещаем деталь
             var hitPoint = minRayHitInfo.Value.point;
-            //            var centerOffset = sender.transform.position - sourcePoint;
-            var curroffset = hitPoint -
-                             raycaster.transform.TransformPoint(raycaster._connectorsLocalPos[rayOriginIndex]);
-            var newPos = raycaster.transform.position + curroffset; //hitPoint + centerOffset;
+            var hitConnectorCurrentPos = raycaster.transform.TransformPoint(raycaster._connectorsLocalPos[rayOriginIndex]);;
 
 //                        _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
 
             var hitLattice = minRayHitInfo.Value.collider.GetComponent<Lattice>();
-            var alignedRelativeSourceRotation1 = raycaster._sourceRotation;
             var rotationDelta = raycaster.GetAligningRotation(hitLattice, raycaster._sourceRotation);
-//            var rotationDeltaRelativeCurrent =
 
-//            raycaster.AlignRotation(hitLattice, hitPoint, ref alignedRelativeSourceRotation, ref newPos);
-            raycaster.AlignPosition(hitLattice, rotationDelta, ref newPos);
+            var hitConnectorRotatedPos = Extentions.RotatePoint(hitConnectorCurrentPos, hitPoint, rotationDelta);
 
-            if (newPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
+            var rotatedPosOffset = hitPoint - hitConnectorRotatedPos;
 
-            var offset = newPos - raycaster.transform.position;
+            var raycasterCurrentPos = raycaster.transform.position;
+            var raycasterNewPos = Extentions.RotateAndTranslatePoint(raycasterCurrentPos, hitPoint, rotationDelta, rotatedPosOffset);
+
+            var raycasterAlignmentPointNewPos = raycaster.transform.TransformPoint(raycaster.AlignmentPoint, hitPoint, rotationDelta, rotatedPosOffset);
+            var alignmentOffset = hitLattice.GetCrossPointAlignmentOffset(raycasterAlignmentPointNewPos);
+
+            raycasterNewPos += alignmentOffset;
+
+            if (raycasterNewPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
+
+            var offset = rotatedPosOffset + alignmentOffset;
+
+//            Debug.Log(raycaster._sourceRotation.eulerAngles + " " + hitLattice.transform.rotation + " " + rotationDelta.eulerAngles);
+
 
 //            Debug.Log(hitPoint
 //                + " " + raycaster.transform.position
 //                + " " + newPos
 //                + " " + offset);
 
-            var links = AppController.Instance.SelectedDetails.GetLinks(offset, rotationDelta, LinksMode.ExceptSelected);
+            var links = AppController.Instance.SelectedDetails.GetLinks(offset, rotationDelta, hitPoint, LinksMode.ExceptSelected);
 
-//            Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
+            Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
+
+//            var detached1 = AppController.Instance.SelectedDetails.Detach();
+//            detached1.transform.rotation = rotationDelta * detached1.transform.rotation;
+//            detached1.transform.position = Extentions.RotateAndTranslatePoint(detached1.transform.position, hitPoint, rotationDelta, offset);
+//            return;
+
             if (!links.IsValid || (hitPoint.y > 0 && !links.HasConnections))
             {
                 return;
             }
 
             var detached = AppController.Instance.SelectedDetails.Detach();
+            var detachedPos = detached.transform.position;
 
             AppController.Instance.SelectedDetails.IsValid = links.IsValid;
-            detached.transform.Translate(offset, Space.World);
             detached.transform.rotation = rotationDelta * detached.transform.rotation;
+            detached.transform.position = Extentions.RotateAndTranslatePoint(detachedPos, hitPoint, rotationDelta, offset);
             detached.UpdateLinks(links.LinksMode, links); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
@@ -417,14 +432,14 @@ namespace Assets.Scripts
                 foreach (var toDirection in toDirections)
                 {
                     var possibleTargetDirection = toDirection;
-                    var angle = Vector3.Angle(fromDirection, possibleTargetDirection);//Debug.Log("!!! " + angle + " " + fromDirection + " " + possibleTargetDirection);
+                    var angle = Vector3.Angle(fromDirection, possibleTargetDirection);
 
                     if (angle > 90)
                     {
                         angle = 180 - angle;
                         possibleTargetDirection = - toDirection;
                     }
-
+//                    Debug.Log("!!! " + angle + " " + fromDirection + " " + possibleTargetDirection);
                     if (angle >= minAngle)
                     {
                         continue;
@@ -442,56 +457,20 @@ namespace Assets.Scripts
 
                 diff[i] = minAngle;
 
+//                Debug.Log("---" + resultRotation + " " + from + " " + currentFrom);
+
 //                Debug.Log(i
 //                        + ") target: " + to.eulerAngles
 //                        + ", source: " + from.eulerAngles
 //                        + ", min: " + minAngle
 //                        + ", direction: " + fromDirection
-//                        + ", targetDirection: " + targetDirection);
+//                        + ", targetDirection: " + targetDirection
+//                        + ", currentFrom: " + currentFrom.eulerAngles
+//                        + ", deltaRotation: " + resultRotation.eulerAngles
+//                        + ", resultRotation: " + (resultRotation * from).eulerAngles);
             }
 
-//            rotation = rot * rotation;
-
             return resultRotation;
-
-//            return;
-//
-//            var relativeRotaion = fr * Quaternion.Inverse(lattice.rotation);
-//
-//            var latticeRotation = lattice.rotation;
-//            var rotationDelta = - relativeRotaion.eulerAngles;//latticeRotation.eulerAngles - rotation.eulerAngles;
-//            var normalizedRotationDelta = new Vector3(rotationDelta.x % 90, rotationDelta.y % 90, rotationDelta.z % 90);
-//
-//            var minRotationX = Math.Abs(normalizedRotationDelta.x) > 45
-//                ? normalizedRotationDelta.x - 90 * Math.Sign(normalizedRotationDelta.x)
-//                : normalizedRotationDelta.x;
-//            var minRotationY = Math.Abs(normalizedRotationDelta.y) > 45
-//                ? normalizedRotationDelta.y - 90 * Math.Sign(normalizedRotationDelta.y)
-//                : normalizedRotationDelta.y;
-//            var minRotationZ = Math.Abs(normalizedRotationDelta.z) > 45
-//                ? normalizedRotationDelta.z - 90 * Math.Sign(normalizedRotationDelta.z)
-//                : normalizedRotationDelta.z;
-//
-//            var minRotation = Quaternion.Euler(minRotationX, minRotationY, minRotationZ);/*Quaternion.AngleAxis(minRotationY, Vector3.up)
-//                            * Quaternion.AngleAxis(minRotationX, Vector3.right)
-//                            * Quaternion.AngleAxis(minRotationZ, Vector3.forward);*/
-//
-//            var relativePosition = position - pivot;
-//            var newRelativePosition = minRotation * relativePosition;
-//
-//            position = pivot + newRelativePosition;
-//            Debug.Log((Quaternion.Euler(35.9f, 127.5f, 52.5f) * Quaternion.Euler(310.0f, 0.0f, 0.0f)).eulerAngles);// = Quaternion.Euler(0.0f, 90.0f, 40.0f),
-//
-//            var resultRotation = minRotation * /*relativeRotaion * latticeRotation;//*/fr;
-//
-//            Debug.Log("target: " + latticeRotation.eulerAngles
-//                    + ", source: " + fr.eulerAngles
-//                    + ", rotationDelta: " + rotationDelta
-//                    + ", min: " + new Vector3(minRotationX, minRotationY, minRotationZ)
-//                    + ", minQ: " + minRotation.eulerAngles
-//                    + ", result: " + resultRotation.eulerAngles);
-//
-//            fr = resultRotation;
         }
 
         public void AlignPosition(Lattice lattice, Quaternion rotationDelta, ref Vector3 pos)
@@ -539,18 +518,18 @@ namespace Assets.Scripts
 
         // Update is called once per frame
 //        private Ray _debugRay;
-        private void Update()
-        {
-            for (var i = 0; i < _raysOrigins.Length; i++) {
-                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], UnityEngine.Color.red, 0.1f);
-            }
-            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, UnityEngine.Color.red, 1);
+//        private void Update()
+//        {
+//            for (var i = 0; i < _raysOrigins.Length; i++) {
+//                Debug.DrawRay(_raysOrigins[i], transform.TransformPoint(_connectorsLocalPos[i]) - _raysOrigins[i], UnityEngine.Color.red, 0.1f);
+//            }
+//            Debug.DrawRay(transform.TransformPoint(-1, 1, 0), Vector3.up * 10, UnityEngine.Color.red, 1);
 //            if (IsSelected)
 //            {
 //                Debug.Log("valid " + _links.IsValid + " connections " + _links.HasConnections);
 //            }
 //            Debug.DrawRay(_debugRay.origin, _debugRay.direction, UnityEngine.Color.red, 0.1f);
-        }
+//        }
 
         public void OnPointerUp(PointerEventData eventData)
         {
@@ -645,32 +624,32 @@ namespace Assets.Scripts
         /// Имеет ли эта деталь соединения с другими деталями когда находится в позиции pos.
         /// Если pos == null, то берется текущая позиция детали.
         /// </summary>
-        public override LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, LinksMode linksMode = LinksMode.ExceptSelected)
+        public override LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, Vector3 pivot, LinksMode linksMode = LinksMode.ExceptSelected)
         {
             var links = new DetailLinks(this, linksMode);
 
-            links.IsValid = CheckOverlapping(linksMode, offset, rotationDelta);
+            links.IsValid = CheckOverlapping(linksMode, offset, rotationDelta, pivot);
 
             if (!links.IsValid)
             {
                 return links;
             }
 
-            GetConnections(_linkageColliders, offset, rotationDelta, linksMode, links);
-            Debug.Log("GetConnections " + offset + " " + rotationDelta.eulerAngles + " " + links.Data);
+            GetConnections(_linkageColliders, offset, rotationDelta, pivot, linksMode, links);
+
             if (_axisLinkageColliders != null)
             {
                 var layerPrefix = LayerMask.LayerToName(AxleLinkage.layer).Contains("Hub")
                     ? "Axle"
                     : "AxleHub";
 
-                GetConnections(_axisLinkageColliders, offset, rotationDelta, linksMode, links, layerPrefix);
+                GetConnections(_axisLinkageColliders, offset, rotationDelta, pivot, linksMode, links, layerPrefix);
             }
 
             return links;
         }
 
-        private void GetConnections(BoxCollider[] linkageColliders, Vector3 offset, Quaternion rotationDelta, LinksMode linksMode, DetailLinks links, string layerPrefix = "")
+        private void GetConnections(BoxCollider[] linkageColliders, Vector3 offset, Quaternion rotationDelta, Vector3 pivot, LinksMode linksMode, DetailLinks links, string layerPrefix = "")
         {
             if (linkageColliders == null)
             {
@@ -680,7 +659,7 @@ namespace Assets.Scripts
             foreach (var linkageCollider in linkageColliders)
             {
                 var overlapArea = linkageCollider;
-                var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center) + offset;
+                var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center, pivot, rotationDelta, offset);
                 var rotation = rotationDelta * overlapArea.transform.rotation;
                 LayerMask layerMask;
 
@@ -711,10 +690,10 @@ namespace Assets.Scripts
             }
         }
 
-        private bool CheckOverlapping(LinksMode linksMode, Vector3 offset, Quaternion rotationDelta)
+        private bool CheckOverlapping(LinksMode linksMode, Vector3 offset, Quaternion rotationDelta, Vector3 pivot)
         {
             var overlapArea = SpaceBounds;
-            var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center) + offset;
+            var overlapAreaCenter = overlapArea.transform.TransformPoint(overlapArea.center, pivot, rotationDelta, offset);
             var rotation = rotationDelta * overlapArea.transform.rotation;
 
             LayerMask layerMask;
@@ -738,18 +717,20 @@ namespace Assets.Scripts
             {
                 if (neighbor == SpaceBounds) continue;
 
-                var overlapAreaRelativeBounds = new Bounds(overlapArea.transform.InverseTransformPoint(overlapAreaCenter), overlapArea.size);
+                var overlapAreaRelativeBounds = Extentions.RelativeBounds(neighbor.transform, overlapArea, offset, rotationDelta, pivot);
                 var neighborBoxCollider = neighbor.GetComponent<BoxCollider>();
-                //TODO тут неявно считается, что overlapArea.transform.Rotatin == rotation, что не всегда верно (поправить)
-                var neighborAreaRelativeBounds = Extentions.RelativeBounds(overlapArea.transform, neighborBoxCollider);
+                var neighborAreaRelativeBounds = new Bounds(neighborBoxCollider.center, neighborBoxCollider.size);
 
                 var overlap = Extentions.Overlap(overlapAreaRelativeBounds, neighborAreaRelativeBounds);
                 var size = overlap.size;
 
                 // все координаты больше 1.1
-                var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) >= 3.6;
+                var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) > 3.599;
 
-//                Debug.Log(invalidTest + " " + offset + " " + overlap + " " + overlapAreaRelativeBounds + " " + neighborAreaRelativeBounds);
+                Debug.Log(invalidTest + " " + (Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f))
+                    + " " + offset + " " + overlap + " " + overlapAreaRelativeBounds + " " + neighborAreaRelativeBounds);
+
+
 
                 // TODO тут надо добавить получение и анализ двух параметров: вращение деталей относительно друг друга
                 // TODO и их смещение относительно друг друга (насколько оно соответствует узлам решетки)
@@ -757,6 +738,8 @@ namespace Assets.Scripts
                 if (invalidTest)
                 {
                     var neighborDetail = neighbor.GetComponent<Detail>();
+                    var relativePos = neighborDetail.transform.TransformPoint(neighborDetail.AlignmentPoint)
+                                                   - transform.TransformPoint(AlignmentPoint, pivot, rotationDelta, offset);
 
                     // исключения для деталей, которые могут проходить "сквозь" друг друга
                     var isNeighbourAxleOrBevel = neighborDetail.name.Contains(".") ||
@@ -776,7 +759,6 @@ namespace Assets.Scripts
                     if (neighborDetail.name.StartsWith("BraceLine") && isThisCommon ||
                         isNeighbourCommon && name.StartsWith("BraceLine"))
                     {
-                        var relativePos = neighborDetail.transform.TransformPoint(neighborDetail.AlignmentPoint) - transform.TransformPoint(AlignmentPoint) + offset;
 
                         if (!Mathf.RoundToInt(relativePos.x).IsOdd())
                         {
@@ -800,7 +782,6 @@ namespace Assets.Scripts
                         }
 
                         // проверяем, что ось проходит через квадратное отверстие детали, а не через крест
-                        var relativePos = neighborDetail.transform.TransformPoint(neighborDetail.AlignmentPoint) - transform.TransformPoint(AlignmentPoint) + offset;
                         var axleDetail = char.IsDigit(name[0]) ? neighborDetail : this;
                         var axleDirection = (SerializableVector3) axleDetail.transform.forward.normalized;
 
@@ -827,7 +808,6 @@ namespace Assets.Scripts
                         }
 
                         // проверяем, что ось проходит через крест
-                        var relativePos = neighborDetail.transform.TransformPoint(neighborDetail.AlignmentPoint) - transform.TransformPoint(AlignmentPoint) + offset;
                         var axleDetail = neighborDetail.name.Contains(".") ? neighborDetail : this;
                         var axleDirection = (SerializableVector3) axleDetail.transform.forward.normalized;
 
@@ -905,7 +885,6 @@ namespace Assets.Scripts
 
                 connectionsToRemove.RemoveWhere(newLinks.LinksMode == LinksMode.ExceptSelected ? exceptSelected : selectedOnly);
             }
-
 
             foreach (var newConnection in connectionsToAdd)
             {

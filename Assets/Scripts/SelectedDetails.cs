@@ -224,7 +224,7 @@ namespace Assets.Scripts
             var bottomDetail = GetBottomDetail();
             var newPos = bottomDetail.transform.position;
 
-            bottomDetail.AlignPosition(bottomDetail.GetComponent<Lattice>(), bottomDetail.transform.rotation, ref newPos);
+            bottomDetail.AlignPosition(bottomDetail.GetComponent<Lattice>(), Quaternion.identity, ref newPos);
 
             alignment = newPos - bottomDetail.transform.position;
             targetDetail.transform.Translate(alignment, Space.World);
@@ -272,12 +272,12 @@ namespace Assets.Scripts
 
 
 
-        public LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, LinksMode linksMode)
+        public LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, Vector3 pivot, LinksMode linksMode)
         {
             if (_details.Count < 2)
             {
                 return _details.Any()
-                    ? _details.First().GetLinks(offset, rotationDelta, linksMode)
+                    ? _details.First().GetLinks(offset, rotationDelta, pivot, linksMode)
                     : null;
             }
 
@@ -285,7 +285,7 @@ namespace Assets.Scripts
 
             foreach (var detail in _details)
             {
-                var detailLinks = (DetailLinks) detail.GetLinks(offset, rotationDelta, linksMode);
+                var detailLinks = (DetailLinks) detail.GetLinks(offset, rotationDelta, pivot, linksMode);
 
                 //              Debug.Log(detailLinks.Data + " " + linksMode + " " + offset);
 

@@ -28,21 +28,39 @@ namespace Assets.Scripts
             return intersection;
         }
 
-        public static Bounds RelativeBounds(Transform space, BoxCollider collider)
+        public static Vector3 TransformPoint(this Transform transform, Vector3 localPoint, Vector3 pivot, Quaternion rotation, Vector3 offset)
+        {
+            return RotateAndTranslatePoint(transform.TransformPoint(localPoint), pivot, rotation, offset);
+        }
+
+        public static Vector3 RotateAndTranslatePoint(Vector3 point, Vector3 pivot, Quaternion rotation, Vector3 offset)
+        {
+            return RotatePoint(point, pivot, rotation) + offset;
+        }
+
+        public static Vector3 RotatePoint(Vector3 point, Vector3 pivot, Quaternion rotation)
+        {
+            var relativePosition = point - pivot;
+            var newRelativePosition = rotation * relativePosition;
+
+            return pivot + newRelativePosition;
+        }
+
+        public static Bounds RelativeBounds(Transform space, BoxCollider collider, Vector3 centerOffset, Quaternion rotationDelta, Vector3 pivot)
         {
             var extents = collider.size / 2;
 
             var corners = new []
             {
-                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x,  extents.y,  extents.z))),
-                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x,  extents.y, -extents.z))),
-                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x, -extents.y,  extents.z))),
-                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x,  extents.y,  extents.z))),
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x,  extents.y,  extents.z), pivot, rotationDelta, centerOffset)),
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x,  extents.y, -extents.z), pivot, rotationDelta, centerOffset)),
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x, -extents.y,  extents.z), pivot, rotationDelta, centerOffset)),
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x,  extents.y,  extents.z), pivot, rotationDelta, centerOffset)),
 
-                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x, -extents.y, -extents.z))),
-                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x, -extents.y,  extents.z))),
-                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x,  extents.y, -extents.z))),
-                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x, -extents.y, -extents.z)))
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x, -extents.y, -extents.z), pivot, rotationDelta, centerOffset)),
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x, -extents.y,  extents.z), pivot, rotationDelta, centerOffset)),
+                (collider.transform.TransformPoint(collider.center + new Vector3(-extents.x,  extents.y, -extents.z), pivot, rotationDelta, centerOffset)),
+                (collider.transform.TransformPoint(collider.center + new Vector3( extents.x, -extents.y, -extents.z), pivot, rotationDelta, centerOffset))
             };
 
             var transformedCorners = Array.ConvertAll(corners, space.InverseTransformPoint);
@@ -136,9 +154,9 @@ namespace Assets.Scripts
             return v;
         }
 
-        public static Vector3 AlignByCrossPoint(this Vector3 vector, Lattice lattice, Vector3 alignmentPoint)
+        public static Vector3 GetCrossPointAlignmentOffset(this Lattice lattice, Vector3 point)
         {
-            var alignmentPointLocal = lattice.transform.InverseTransformPoint(alignmentPoint) - lattice.OriginOffset;
+            var alignmentPointLocal = lattice.transform.InverseTransformPoint(point) - lattice.OriginOffset;
             var oddSum = (Mathf.RoundToInt(alignmentPointLocal.x) & 1)
                        + (Mathf.RoundToInt(alignmentPointLocal.y) & 1)
                        + (Mathf.RoundToInt(alignmentPointLocal.z) & 1);
@@ -150,7 +168,12 @@ namespace Assets.Scripts
                                                 AlignValue(isOddAlignment, alignmentPointLocal.y),
                                                 AlignValue(isOddAlignment, alignmentPointLocal.z));
 
-            var alignmentOffset = lattice.transform.TransformDirection(newAlignmentPointLocal - alignmentPointLocal);
+            return lattice.transform.TransformDirection(newAlignmentPointLocal - alignmentPointLocal);
+        }
+
+        public static Vector3 AlignByCrossPoint(this Vector3 vector, Lattice lattice, Vector3 alignmentPoint)
+        {
+            var alignmentOffset = lattice.GetCrossPointAlignmentOffset(alignmentPoint);
 
 //            Debug.Log("vector " + vector
 //                    + " aligned " + (vector + alignmentOffset)

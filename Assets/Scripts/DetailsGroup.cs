@@ -367,9 +367,9 @@ namespace Assets.Scripts {
             return targetDetail;
         }
 
-        public override LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, LinksMode linksMode = LinksMode.ExceptSelected)
+        public override LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, Vector3 pivot, LinksMode linksMode = LinksMode.ExceptSelected)
         {
-            return AppController.Instance.SelectedDetails.GetLinks(offset, rotationDelta, linksMode);
+            return AppController.Instance.SelectedDetails.GetLinks(offset, rotationDelta, pivot, linksMode);
         }
 
 

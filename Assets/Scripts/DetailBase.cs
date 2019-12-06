@@ -10,11 +10,11 @@ namespace Assets.Scripts {
         public abstract Bounds Bounds { get; }
         public abstract Quaternion Orientation { get; }
 
-        public abstract LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, LinksMode linksMode = LinksMode.ExceptSelected);
+        public abstract LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, Vector3 pivot, LinksMode linksMode = LinksMode.ExceptSelected);
 
         public virtual LinksBase GetLinks(LinksMode linksMode = LinksMode.ExceptSelected)
         {
-            return GetLinks(Vector3.zero, Quaternion.identity, linksMode);
+            return GetLinks(Vector3.zero, Quaternion.identity, Vector3.zero, linksMode);
         }
 
         protected abstract void UpdateConnections(LinksBase newLinks);

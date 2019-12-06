@@ -267,7 +267,7 @@ namespace Assets.Scripts
 
             if (!offsetValue.IsOdd())
             {
-                var links = selectedDetails.GetLinks(selectedOffset - AxisMover.Correction, Quaternion.identity, LinksMode.ExceptSelected);
+                var links = selectedDetails.GetLinks(selectedOffset - AxisMover.Correction, Quaternion.identity, Vector3.zero, LinksMode.ExceptSelected);
 
                 if (!links.IsValid) {
                     return;
@@ -299,7 +299,7 @@ namespace Assets.Scripts
                         continue;
                     }
 
-                    var links = selectedDetails.GetLinks(validOffset - AxisMover.Correction, Quaternion.identity, LinksMode.ExceptSelected);
+                    var links = selectedDetails.GetLinks(validOffset - AxisMover.Correction, Quaternion.identity, Vector3.zero, LinksMode.ExceptSelected);
 
                     if (links.HasConnections) {
                         break;
