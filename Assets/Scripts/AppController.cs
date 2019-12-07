@@ -636,7 +636,7 @@ namespace Assets.Scripts
         }
 
         public SerializableVector3 Pivot;
-        public SerializableVector3Int Rotation;
+        public SerializableVector3 Rotation;
         public SerializableVector3 Offset;
 
 
@@ -699,7 +699,7 @@ namespace Assets.Scripts
 
             if (rotationSimplification.TryGetValue(simplificationKey, out simplifiedRotation))
             {
-                Rotation = simplifiedRotation;
+                Rotation = Rotation;//simplifiedRotation; TODO тут подумать что делать с упрощенными вращениями
             }
 
             container.position = Pivot + Offset;
@@ -752,7 +752,7 @@ namespace Assets.Scripts
             return animation;
         }
 
-        private int GetMinRotationAngle(int angle)
+        private float GetMinRotationAngle(float angle)
         {
             var normalized = angle % 360;
 
@@ -799,8 +799,8 @@ namespace Assets.Scripts
             get { return "Add"; }
         }
 
-        public SerializableVector3Int Rotation;
-        public SerializableVector3Int Position;
+        public SerializableVector3 Rotation;
+        public SerializableVector3 Position;
 
         [NonSerialized]
         protected Detail TargetDetail;
@@ -1045,8 +1045,8 @@ namespace Assets.Scripts
         public string Type;
         public string Color;
 
-        public SerializableVector3Int Position;
-        public SerializableVector3Int Rotation;
+        public SerializableVector3 Position;
+        public SerializableVector3 Rotation;
 
         public List<int> Connections;
 

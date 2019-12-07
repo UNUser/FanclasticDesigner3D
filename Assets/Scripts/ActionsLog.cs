@@ -170,7 +170,7 @@ namespace Assets.Scripts {
                 }
 
                 addInstruction.TargetDetails = new HashSet<int>{ sourceState.Id };
-                addInstruction.Position = sourceState.Position + resultOffset;
+                addInstruction.Position = sourceState.Position + (SerializableVector3) resultOffset;
                 addInstruction.Rotation = (resultRotation * Quaternion.Euler(sourceState.Rotation)).eulerAngles;
 
                 return addInstruction;
@@ -180,7 +180,7 @@ namespace Assets.Scripts {
 
             // убираем бессмысленные повороты и перемещения
             var resultRotationEuler = resultRotation.eulerAngles;
-            var normalizedRotation = (SerializableVector3Int) resultRotationEuler;
+            var normalizedRotation = (SerializableVector3Half) resultRotationEuler; //TODO определить какой-то эпсилон для вращений
             var normalizedOffset = resultOffset.magnitude < 0.001f ? Vector3.zero : resultOffset;
 
             if (normalizedOffset  == Vector3.zero && normalizedRotation == Vector3.zero) {
@@ -190,7 +190,7 @@ namespace Assets.Scripts {
             var moveAndRotateInstruction = new InstructionMoveAndRotate();
 
             moveAndRotateInstruction.TargetDetails = new HashSet<int>(targetDetails.Select(detail => detail.GetInstanceID()));
-            moveAndRotateInstruction.Rotation = normalizedRotation;
+            moveAndRotateInstruction.Rotation = (Vector3) normalizedRotation;
             moveAndRotateInstruction.Pivot = normalizedRotation == Vector3.zero ? Vector3.zero : rotationPivot;
             moveAndRotateInstruction.Offset = normalizedOffset;
 

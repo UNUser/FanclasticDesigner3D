@@ -770,7 +770,7 @@ namespace Assets.Scripts
 
                         // проверяем, что ось проходит через квадратное отверстие детали, а не через крест
                         var axleDetail = char.IsDigit(name[0]) ? neighborDetail : this;
-                        var axleDirection = (SerializableVector3) axleDetail.transform.forward.normalized;
+                        var axleDirection = (SerializableVector3Half) axleDetail.transform.forward.normalized;
 
 
                         if (!Mathf.RoundToInt(axleDirection.x == 0 ? relativePos.x : relativePos.y).IsOdd()) // TODO ???
@@ -796,7 +796,7 @@ namespace Assets.Scripts
 
                         // проверяем, что ось проходит через крест
                         var axleDetail = neighborDetail.name.Contains(".") ? neighborDetail : this;
-                        var axleDirection = (SerializableVector3) axleDetail.transform.forward.normalized;
+                        var axleDirection = (SerializableVector3Half) axleDetail.transform.forward.normalized;
 
                         if (Mathf.RoundToInt(axleDirection.x == 0 ? relativePos.x : relativePos.y).IsOdd())
                         {

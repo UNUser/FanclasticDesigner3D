@@ -393,14 +393,14 @@ namespace Assets.Scripts
     }
 
     [Serializable]
-    public struct SerializableVector3
+    public struct SerializableVector3Half
     {
 
         public float x;
         public float y;
         public float z;
 
-        public SerializableVector3(float rX, float rY, float rZ)
+        public SerializableVector3Half(float rX, float rY, float rZ)
         {
             // округляем дробную часть либо до ближайшего целого, либо до 0.5
             var rXDecimal = rX - (float) Math.Truncate(rX);
@@ -421,6 +421,42 @@ namespace Assets.Scripts
             return string.Format("[{0}, {1}, {2}]", x, y, z);
         }
 
+        public static implicit operator Vector3(SerializableVector3Half rValue)
+        {
+            return new Vector3(rValue.x, rValue.y, rValue.z);
+        }
+
+        public static implicit operator SerializableVector3Half(Vector3 rValue)
+        {
+            return new SerializableVector3Half(rValue.x, rValue.y, rValue.z);
+        }
+
+        public static SerializableVector3Half operator + (SerializableVector3Half lValue, SerializableVector3Half rValue)
+        {
+            return new SerializableVector3Half(lValue.x + rValue.x, lValue.y + rValue.y, lValue.z + rValue.z);
+        }
+    }
+
+    [Serializable]
+    public struct SerializableVector3
+    {
+
+        public float x;
+        public float y;
+        public float z;
+
+        public SerializableVector3(float rX, float rY, float rZ)
+        {
+            x = rX;
+            y = rY;
+            z = rZ;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("[{0}, {1}, {2}]", x, y, z);
+        }
+
         public static implicit operator Vector3(SerializableVector3 rValue)
         {
             return new Vector3(rValue.x, rValue.y, rValue.z);
@@ -431,7 +467,7 @@ namespace Assets.Scripts
             return new SerializableVector3(rValue.x, rValue.y, rValue.z);
         }
 
-        public static SerializableVector3 operator + (SerializableVector3 lValue, SerializableVector3 rValue)
+        public static SerializableVector3 operator +(SerializableVector3 lValue, SerializableVector3 rValue)
         {
             return new SerializableVector3(lValue.x + rValue.x, lValue.y + rValue.y, lValue.z + rValue.z);
         }

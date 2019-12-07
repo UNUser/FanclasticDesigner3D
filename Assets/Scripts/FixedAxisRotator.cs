@@ -72,6 +72,7 @@ namespace Assets.Scripts
 
         public void OnDrag(PointerEventData eventData)
         {
+            var selected = AppController.Instance.SelectedDetails.Detach();
             var pointerRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             Vector3 dragPoint;
 
@@ -84,21 +85,18 @@ namespace Assets.Scripts
             var qRot = Quaternion.AngleAxis(axisRotationDelta, _rotationPlaneNormal);
 
             var targetRotation = qRot * _sourceRotation;
+            var rotationDelta = targetRotation * Quaternion.Inverse(selected.transform.rotation);
 
-            AppController.Instance.SelectedDetails.Rotation = targetRotation;
+            selected.transform.Rotate(_rootPoint, rotationDelta);
         }
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            var targetDetail = AppController.Instance.SelectedDetails.Detach();
-//            var boundingBoxLocal = targetDetail.MeshBounds;
-//
-//            var pivot = targetDetail.transform.TransformPoint(boundingBoxLocal.center);
-//            var axis = targetDetail.transform.TransformVector(axisLocal);
-//            var rotationDelta = Quaternion.AngleAxis(90, axis);
-//
-//          AppController.Instance.ActionsLog.RegisterAction(new RotateAction(selected.Bounds.center - _sourcePos));
-//          selected.UpdateLinks();
+            var selected = AppController.Instance.SelectedDetails.Detach();
+            var rotationDelta = selected.transform.rotation * Quaternion.Inverse(_sourceRotation);
+
+          AppController.Instance.ActionsLog.RegisterAction(new RotateAction(rotationDelta, _rootPoint, Vector3.zero));
+          selected.UpdateLinks();
         }
     }
 }
