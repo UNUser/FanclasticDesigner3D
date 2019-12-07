@@ -28,6 +28,17 @@ namespace Assets.Scripts
             return intersection;
         }
 
+        public static void Rotate(this Transform transform, Vector3 pivot, Quaternion rotationDelta)
+        {
+            transform.RotateAndTranslate(pivot, rotationDelta, Vector3.zero);
+        }
+
+        public static void RotateAndTranslate(this Transform transform, Vector3 pivot, Quaternion rotationDelta, Vector3 offset)
+        {
+            transform.rotation = rotationDelta * transform.rotation;
+            transform.position = RotateAndTranslatePoint(transform.position, pivot, rotationDelta, offset);
+        }
+
         public static Vector3 TransformPoint(this Transform transform, Vector3 localPoint, Vector3 pivot, Quaternion rotation, Vector3 offset)
         {
             return RotateAndTranslatePoint(transform.TransformPoint(localPoint), pivot, rotation, offset);

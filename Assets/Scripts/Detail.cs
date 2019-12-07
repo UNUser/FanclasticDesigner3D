@@ -41,6 +41,28 @@ namespace Assets.Scripts
             get { return GetComponent<Renderer>().bounds; }
         }
 
+        public override Bounds MeshBounds
+        {
+            get
+            {
+                var meshBounds = GetComponent<MeshFilter>().mesh.bounds;
+                var group = Group;
+
+                if (group == null)
+                {
+                    return meshBounds;
+                }
+
+                var transformedMax = group.transform.InverseTransformPoint(transform.TransformPoint(meshBounds.max));
+                var transformedMin = group.transform.InverseTransformPoint(transform.TransformPoint(meshBounds.min));
+                var resultBounds = new Bounds();
+
+                resultBounds.SetMinMax(transformedMin, transformedMax);
+
+                return resultBounds;
+            }
+        }
+
         public DetailsGroup Group
         {
             get
@@ -293,11 +315,9 @@ namespace Assets.Scripts
             }
 
             var detached = AppController.Instance.SelectedDetails.Detach();
-            var detachedPos = detached.transform.position;
 
             AppController.Instance.SelectedDetails.IsValid = links.IsValid;
-            detached.transform.rotation = rotationDelta * detached.transform.rotation;
-            detached.transform.position = Extentions.RotateAndTranslatePoint(detachedPos, hitPoint, rotationDelta, offset);
+            detached.transform.RotateAndTranslate(hitPoint, rotationDelta, offset);
             detached.UpdateLinks(links.LinksMode, links); ///// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         }
 
@@ -409,7 +429,7 @@ namespace Assets.Scripts
             return fromCurrentToTarget;
         }
 
-        private Quaternion GetAligningRotation(Quaternion from, Quaternion to, out Vector3 diff)
+        public static Quaternion GetAligningRotation(Quaternion from, Quaternion to, out Vector3 diff)
         {
             var toDirections = new HashSet<Vector3> { to * Vector3.right,
                                                       to * Vector3.up,
@@ -473,47 +493,14 @@ namespace Assets.Scripts
             return resultRotation;
         }
 
-        public void AlignPosition(Lattice lattice, Quaternion rotationDelta, ref Vector3 pos)
+        public Vector3 GetFloorAlignment()
         {
-            var bottomPointIndex = CorrectHeightAboveFloor(rotationDelta, ref pos); //Debug.Log("floorCorrection after " + pos);
-            var offsetFromCurrentPos = pos - transform.position;
-            var bottomPoint = transform.TransformPoint(rotationDelta * _connectorsLocalPos[bottomPointIndex]) + offsetFromCurrentPos;
-            var group = Group;
-            var alignmentPoint = (/*group == null ? */transform.TransformPoint(rotationDelta * AlignmentPoint)/* : group.transform.position*/) + offsetFromCurrentPos;
-            Vector3 alignedBottomPoint;
-
-            if (Linkage != null || group != null)
-            {
-                alignedBottomPoint = bottomPoint.AlignByCrossPoint(lattice, alignmentPoint);
-//                Debug.Log("bottom: " + bottomPoint + ", aligned: " + alignedBottomPoint);
-            }
-            else
-            {
-                SerializableVector3 axleDirection = transform.forward.normalized;
-                alignedBottomPoint = bottomPoint.AlignByAxleDirection(alignmentPoint, axleDirection);
-            }
-
-            var alignment = alignedBottomPoint - bottomPoint;
-//            Debug.Log("alignment: " + alignment);
-            pos += alignment;
-        }
-
-        private int CorrectHeightAboveFloor(Quaternion rotationDelta, ref Vector3 pos)
-        {
-            var offsetFromCurrentPos = pos - transform.position;
-            var heightFirst = transform.TransformPoint(rotationDelta * _connectorsLocalPos[0]).y + offsetFromCurrentPos.y;
-            var heightLast = transform.TransformPoint(rotationDelta * _connectorsLocalPos[_connectorsLocalPos.Length - 1]).y +
-                             offsetFromCurrentPos.y;
-
-            var bottomPointIndex = heightLast < heightFirst ? _connectorsLocalPos.Length - 1 : 0;
+            var heightFirst = transform.TransformPoint(_connectorsLocalPos[0]).y;
+            var heightLast = transform.TransformPoint(_connectorsLocalPos[_connectorsLocalPos.Length - 1]).y;
             var heightMin = Mathf.Min(heightFirst, heightLast);
+            var length = heightMin < 0 ? Mathf.Abs(heightMin) : 0;
 
-            if (heightMin < 0)
-            {
-                pos.y += Mathf.Abs(heightMin);
-            }
-
-            return bottomPointIndex;
+            return Vector3.up * length;
         }
 
         // Update is called once per frame

@@ -4,253 +4,253 @@ using UnityEngine;
 
 namespace Assets.Scripts {
 
-	public class ActionsLog : MonoBehaviour
-	{
+    public class ActionsLog : MonoBehaviour
+    {
 
-		public GameObject UndoButton;
-		public GameObject RedoButton;
-
-
-		public void Clear()
-		{
-			_history.Clear();
-			_actionIndex = 0;
-			AppController.Instance.SelectedDetails.Clear();
-			UndoButton.SetActive(false);
-			RedoButton.SetActive(false);
-		}
-
-		public List<InstructionBase> GetInstructions(out HashSet<Detail> invalidDetails)
-		{
-			var instructions = new List<InstructionBase>();
-			var actionIndex = _actionIndex;
-
-			invalidDetails = new HashSet<Detail>();
-
-			while (--actionIndex >= 0)
-			{
-				var nextInstruction = GetInstruction(ref actionIndex, invalidDetails);
-
-				if (nextInstruction == null) {
-					continue;
-				}
-
-				instructions.Add(nextInstruction);
-			}
-
-			instructions.Reverse();
-
-			return instructions;
-		}
-
-		//TODO наверняка можно как-то сделать через yield
-		private InstructionBase GetInstruction(ref int actionIndex, HashSet<Detail> invalidDetails)
-		{
-			var isDeleteInstruction = false;
-			var noChanges = true;
-			var resultRotation = Quaternion.identity;
-			var rotationPivot = Vector3.zero;
-			var resultOffset = Vector3.zero;
-
-			while (actionIndex >= 0 && _history[actionIndex].Type != ActionType.Selection 
-									&& _history[actionIndex].Type != ActionType.Creation)
-			{
-				var currentAction = _history[actionIndex];
-
-				actionIndex--;
-
-				if (isDeleteInstruction) {
-					continue;
-				}
-
-				switch (currentAction.Type) {
-					case ActionType.Deleting:
-						isDeleteInstruction = true;
-						break;
-
-					case ActionType.Movement:
-						var moveAction = (MoveAction) currentAction;
-
-						resultOffset += moveAction.Offset;
-						if (resultRotation != Quaternion.identity) {
-							rotationPivot -= moveAction.Offset;
-						}
-						break;
-
-					case ActionType.Rotation:
-						var rotateAction = (RotateAction) currentAction;
-
-						resultRotation *= Quaternion.Euler(90 * rotateAction.Axis);
-						resultOffset += rotateAction.Alignment;
-						rotationPivot = rotateAction.Pivot;
-						break;
-
-					case ActionType.Coloring:
-						continue;
-
-					default:
-						Debug.LogError("Unhandled action type: " + currentAction.Type);
-						continue;
-				}
-
-				noChanges = false;
-			}
-
-			var targetDetails = new HashSet<Detail>();
-			var initialAction = _history[actionIndex];
-
-			if (noChanges && initialAction.Type != ActionType.Creation) {
-				return null;
-			}
-
-			switch (initialAction.Type)
-			{
-				case ActionType.Creation:
-					var createAction = (CreateAction) initialAction;
-
-					targetDetails.Add(createAction.Detail);
-					break;
-				case ActionType.Selection:
-					var selectAction = (SelectAction) initialAction;
-
-					targetDetails.UnionWith(selectAction.SelectedDetails);
-					break;
-				default:
-					Debug.LogError("Invalid initial action type: " + initialAction.Type);
-					break;
-			}
+        public GameObject UndoButton;
+        public GameObject RedoButton;
 
 
-			if (isDeleteInstruction) {
-				if (initialAction.Type != ActionType.Creation) {
-					invalidDetails.UnionWith(targetDetails);
-				}
-				return null;
-			}
-			
-			var isInvalidCreation = initialAction.Type == ActionType.Creation && targetDetails.IsSubsetOf(invalidDetails);		
+        public void Clear()
+        {
+            _history.Clear();
+            _actionIndex = 0;
+            AppController.Instance.SelectedDetails.Clear();
+            UndoButton.SetActive(false);
+            RedoButton.SetActive(false);
+        }
 
-			// тут невалидная деталь впервые появилась на сцене и в предыдущих действиях ее быть не может
-			// поэтому для оптимизации удаляем ее из списка невалидных деталей
-			if (isInvalidCreation) {
-				invalidDetails.ExceptWith(targetDetails);
-				return null;
-			}
+        public List<InstructionBase> GetInstructions(out HashSet<Detail> invalidDetails)
+        {
+            var instructions = new List<InstructionBase>();
+            var actionIndex = _actionIndex;
 
-			var isSingleDetailAction = targetDetails.Count == 1;
+            invalidDetails = new HashSet<Detail>();
 
-			targetDetails.ExceptWith(invalidDetails);
+            while (--actionIndex >= 0)
+            {
+                var nextInstruction = GetInstruction(ref actionIndex, invalidDetails);
 
-			if (!targetDetails.Any()) {
-				return null;
-			}
+                if (nextInstruction == null) {
+                    continue;
+                }
 
-			// обработка операций с единичными деталями
-			if (isSingleDetailAction)
-			{
-				var addInstruction = new InstructionAdd();
-				DetailData sourceState;
-				var selectAction = initialAction as SelectAction;
+                instructions.Add(nextInstruction);
+            }
 
-				if (selectAction != null)
-				{
-					sourceState = selectAction.SourceState;
+            instructions.Reverse();
 
-					if (sourceState == null) {
-						Debug.LogError("Source state for selected detail is null!");
-						return null;
-					}
+            return instructions;
+        }
 
-					invalidDetails.Add(targetDetails.First());
-				} else if (initialAction is CreateAction) {
-					sourceState = ((CreateAction) initialAction).SourceState;
-				} else {
-					Debug.LogError("Invalid initial action: " + initialAction.Type);
-					return null;
-				}
+        //TODO наверняка можно как-то сделать через yield
+        private InstructionBase GetInstruction(ref int actionIndex, HashSet<Detail> invalidDetails)
+        {
+            var isDeleteInstruction = false;
+            var noChanges = true;
+            var resultRotation = Quaternion.identity;
+            var rotationPivot = Vector3.zero;
+            var resultOffset = Vector3.zero;
 
-				addInstruction.TargetDetails = new HashSet<int>{ sourceState.Id };
-				addInstruction.Position = sourceState.Position + resultOffset;
-				addInstruction.Rotation = (resultRotation * Quaternion.Euler(sourceState.Rotation)).eulerAngles;
+            while (actionIndex >= 0 && _history[actionIndex].Type != ActionType.Selection
+                                    && _history[actionIndex].Type != ActionType.Creation)
+            {
+                var currentAction = _history[actionIndex];
 
-				return addInstruction;
-			}
+                actionIndex--;
 
-			// далее обработка групповых операций
+                if (isDeleteInstruction) {
+                    continue;
+                }
 
-			// убираем бессмысленные повороты и перемещения
-			var resultRotationEuler = resultRotation.eulerAngles;
-			var normalizedRotation = (SerializableVector3Int) resultRotationEuler;
-			var normalizedOffset = resultOffset.magnitude < 0.001f ? Vector3.zero : resultOffset;
+                switch (currentAction.Type) {
+                    case ActionType.Deleting:
+                        isDeleteInstruction = true;
+                        break;
 
-			if (normalizedOffset  == Vector3.zero && normalizedRotation == Vector3.zero) {
-				return null;
-			}
+                    case ActionType.Movement:
+                        var moveAction = (MoveAction) currentAction;
 
-			var moveAndRotateInstruction = new InstructionMoveAndRotate();
+                        resultOffset += moveAction.Offset;
+                        if (resultRotation != Quaternion.identity) {
+                            rotationPivot -= moveAction.Offset;
+                        }
+                        break;
 
-			moveAndRotateInstruction.TargetDetails = new HashSet<int>(targetDetails.Select(detail => detail.GetInstanceID()));
-			moveAndRotateInstruction.Rotation = normalizedRotation;
-			moveAndRotateInstruction.Pivot = normalizedRotation == Vector3.zero ? Vector3.zero : rotationPivot;
-			moveAndRotateInstruction.Offset = normalizedOffset;
+                    case ActionType.Rotation:
+                        var rotateAction = (RotateAction) currentAction;
 
-			return moveAndRotateInstruction;
-		}
+                        resultRotation *= rotateAction.RotationDelta;
+                        resultOffset += rotateAction.Alignment;
+                        rotationPivot = rotateAction.Pivot;
+                        break;
 
-		private readonly List<ActionBase> _history = new List<ActionBase>();
-		private int _actionIndex;
+                    case ActionType.Coloring:
+                        continue;
 
-		public void Start()
-		{
-			UndoButton.SetActive(false);
-			RedoButton.SetActive(false);
-		}
+                    default:
+                        Debug.LogError("Unhandled action type: " + currentAction.Type);
+                        continue;
+                }
 
-		public void RegisterAction(ActionBase action)
-		{
-			var tailLength = _history.Count - _actionIndex;
+                noChanges = false;
+            }
 
-			if (tailLength > 0) {
-				for (var i = _actionIndex; i < _history.Count; i++) {
-					var actionCreate = _history[i] as CreateAction;
+            var targetDetails = new HashSet<Detail>();
+            var initialAction = _history[actionIndex];
 
-					if (actionCreate == null) continue;
+            if (noChanges && initialAction.Type != ActionType.Creation) {
+                return null;
+            }
 
-					Destroy(actionCreate.Detail.gameObject);
-				}
-				_history.RemoveRange(_actionIndex, tailLength);
-			}
+            switch (initialAction.Type)
+            {
+                case ActionType.Creation:
+                    var createAction = (CreateAction) initialAction;
 
-			_history.Add(action);
-			_actionIndex++;
+                    targetDetails.Add(createAction.Detail);
+                    break;
+                case ActionType.Selection:
+                    var selectAction = (SelectAction) initialAction;
 
-			RedoButton.SetActive(false);
-			UndoButton.SetActive(true);
+                    targetDetails.UnionWith(selectAction.SelectedDetails);
+                    break;
+                default:
+                    Debug.LogError("Invalid initial action type: " + initialAction.Type);
+                    break;
+            }
 
-			Debug.Log("Registered: " + action.GetType() + " " + _actionIndex + "/" + _history.Count);
-		}
 
-		public void OnUndoButtonClicked()
-		{
-			_actionIndex--;
-			_history[_actionIndex].Undo();
+            if (isDeleteInstruction) {
+                if (initialAction.Type != ActionType.Creation) {
+                    invalidDetails.UnionWith(targetDetails);
+                }
+                return null;
+            }
 
-			UndoButton.SetActive(_actionIndex > 0);
-			RedoButton.SetActive(true);
+            var isInvalidCreation = initialAction.Type == ActionType.Creation && targetDetails.IsSubsetOf(invalidDetails);
 
-			Debug.Log("Undo: " + _actionIndex + "/" + _history.Count);
-		}
+            // тут невалидная деталь впервые появилась на сцене и в предыдущих действиях ее быть не может
+            // поэтому для оптимизации удаляем ее из списка невалидных деталей
+            if (isInvalidCreation) {
+                invalidDetails.ExceptWith(targetDetails);
+                return null;
+            }
 
-		public void OnRedoButtonClicked()
-		{
-			_history[_actionIndex].Do();
-			_actionIndex++;
+            var isSingleDetailAction = targetDetails.Count == 1;
 
-			RedoButton.SetActive(_actionIndex < _history.Count);
-			UndoButton.SetActive(true);
+            targetDetails.ExceptWith(invalidDetails);
 
-			Debug.Log("Redo: " + _actionIndex + "/" + _history.Count);
-		}
+            if (!targetDetails.Any()) {
+                return null;
+            }
 
-	}
+            // обработка операций с единичными деталями
+            if (isSingleDetailAction)
+            {
+                var addInstruction = new InstructionAdd();
+                DetailData sourceState;
+                var selectAction = initialAction as SelectAction;
+
+                if (selectAction != null)
+                {
+                    sourceState = selectAction.SourceState;
+
+                    if (sourceState == null) {
+                        Debug.LogError("Source state for selected detail is null!");
+                        return null;
+                    }
+
+                    invalidDetails.Add(targetDetails.First());
+                } else if (initialAction is CreateAction) {
+                    sourceState = ((CreateAction) initialAction).SourceState;
+                } else {
+                    Debug.LogError("Invalid initial action: " + initialAction.Type);
+                    return null;
+                }
+
+                addInstruction.TargetDetails = new HashSet<int>{ sourceState.Id };
+                addInstruction.Position = sourceState.Position + resultOffset;
+                addInstruction.Rotation = (resultRotation * Quaternion.Euler(sourceState.Rotation)).eulerAngles;
+
+                return addInstruction;
+            }
+
+            // далее обработка групповых операций
+
+            // убираем бессмысленные повороты и перемещения
+            var resultRotationEuler = resultRotation.eulerAngles;
+            var normalizedRotation = (SerializableVector3Int) resultRotationEuler;
+            var normalizedOffset = resultOffset.magnitude < 0.001f ? Vector3.zero : resultOffset;
+
+            if (normalizedOffset  == Vector3.zero && normalizedRotation == Vector3.zero) {
+                return null;
+            }
+
+            var moveAndRotateInstruction = new InstructionMoveAndRotate();
+
+            moveAndRotateInstruction.TargetDetails = new HashSet<int>(targetDetails.Select(detail => detail.GetInstanceID()));
+            moveAndRotateInstruction.Rotation = normalizedRotation;
+            moveAndRotateInstruction.Pivot = normalizedRotation == Vector3.zero ? Vector3.zero : rotationPivot;
+            moveAndRotateInstruction.Offset = normalizedOffset;
+
+            return moveAndRotateInstruction;
+        }
+
+        private readonly List<ActionBase> _history = new List<ActionBase>();
+        private int _actionIndex;
+
+        public void Start()
+        {
+            UndoButton.SetActive(false);
+            RedoButton.SetActive(false);
+        }
+
+        public void RegisterAction(ActionBase action)
+        {
+            var tailLength = _history.Count - _actionIndex;
+
+            if (tailLength > 0) {
+                for (var i = _actionIndex; i < _history.Count; i++) {
+                    var actionCreate = _history[i] as CreateAction;
+
+                    if (actionCreate == null) continue;
+
+                    Destroy(actionCreate.Detail.gameObject);
+                }
+                _history.RemoveRange(_actionIndex, tailLength);
+            }
+
+            _history.Add(action);
+            _actionIndex++;
+
+            RedoButton.SetActive(false);
+            UndoButton.SetActive(true);
+
+            Debug.Log("Registered: " + action.GetType() + " " + _actionIndex + "/" + _history.Count);
+        }
+
+        public void OnUndoButtonClicked()
+        {
+            _actionIndex--;
+            _history[_actionIndex].Undo();
+
+            UndoButton.SetActive(_actionIndex > 0);
+            RedoButton.SetActive(true);
+
+            Debug.Log("Undo: " + _actionIndex + "/" + _history.Count);
+        }
+
+        public void OnRedoButtonClicked()
+        {
+            _history[_actionIndex].Do();
+            _actionIndex++;
+
+            RedoButton.SetActive(_actionIndex < _history.Count);
+            UndoButton.SetActive(true);
+
+            Debug.Log("Redo: " + _actionIndex + "/" + _history.Count);
+        }
+
+    }
 }

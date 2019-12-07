@@ -7,7 +7,10 @@ namespace Assets.Scripts {
     {
         public abstract bool IsSelected { get; }
 
+        // World space bounds
         public abstract Bounds Bounds { get; }
+        // Parent space bounds
+        public abstract Bounds MeshBounds { get; }
         public abstract Quaternion Orientation { get; }
 
         public abstract LinksBase GetLinks(Vector3 offset, Quaternion rotationDelta, Vector3 pivot, LinksMode linksMode = LinksMode.ExceptSelected);

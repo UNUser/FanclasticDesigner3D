@@ -29,6 +29,28 @@ namespace Assets.Scripts
 
         public bool IsValid { get; set; }
 
+        private Bounds GetMeshBounds(out Transform parent)
+        {
+            var first = First;
+
+            if (_details.Count == 1)
+            {
+                parent = first.transform;
+                return first.GetComponent<MeshFilter>().mesh.bounds;
+            }
+
+            var firstGroup = first.Group;
+            var combinedBounds = first.MeshBounds;
+
+            parent = firstGroup == null ? first.transform : firstGroup.transform;
+
+            foreach (var child in _details) {
+                combinedBounds.Encapsulate(child.MeshBounds);
+            }
+
+            return combinedBounds;
+        }
+
         public void Add(HashSet<Detail> selection)
         {
             foreach (var detail in selection)
@@ -170,70 +192,36 @@ namespace Assets.Scripts
             AppController.Instance.ColorSetter.CurrentColor.enabled = true;
         }
 
-        public void AppRotate(Vector3 axis)
+        public void AppRotate(Vector3 axisLocal)
         {
-            Vector3 pivot;
-            Vector3 alignment;
-
-            Rotate(axis, true, out pivot, out alignment);
-            AppController.Instance.ActionsLog.RegisterAction(new RotateAction(axis, pivot, alignment));
-        }
-
-
-        public void Rotate(Vector3 axis, bool clockwise, Vector3 pivot, Vector3 alignment)
-        {
-            var targetDetail = Detach();
-            var angle = clockwise ? 90 : -90;
-
-            if (clockwise)
-            {
-                targetDetail.transform.RotateAround(pivot, axis, angle);
-                targetDetail.transform.Translate(alignment, Space.World);
-            }
-            else
-            {
-                targetDetail.transform.Translate(-alignment, Space.World);
-                targetDetail.transform.RotateAround(pivot, axis, angle);
-            }
-        }
-
-        public void Rotate(Vector3 axis, bool clockwise = true)
-        {
-            var dummy = new Vector3();
-
-            Rotate(axis, clockwise, out dummy, out dummy);
-        }
-
-        public void Rotate(Vector3 axis, bool clockwise, out Vector3 pivot, out Vector3 alignment)
-        {
-            if (!_details.Any())
-            {
-                pivot = Vector3.zero;
-                alignment = Vector3.zero;
-
+            if (!_details.Any()) {
                 return;
             }
 
             var targetDetail = Detach();
-            var boundingBox = targetDetail.Bounds;
-            var angle = clockwise ? 90 : -90;
+            var boundingBoxLocal = targetDetail.MeshBounds;
 
-            pivot = boundingBox.center;
-            targetDetail.transform.RotateAround(pivot, axis, angle);
+            var pivot = targetDetail.transform.TransformPoint(boundingBoxLocal.center);
+            var axis = targetDetail.transform.TransformVector(axisLocal);
+            var rotationDelta = Quaternion.AngleAxis(90, axis);
+
+            targetDetail.transform.Rotate(pivot, rotationDelta);
 
             var bottomDetail = GetBottomDetail();
-            var newPos = bottomDetail.transform.position;
+            var alignment = bottomDetail.GetFloorAlignment();
 
-            bottomDetail.AlignPosition(bottomDetail.GetComponent<Lattice>(), Quaternion.identity, ref newPos);
-
-            alignment = newPos - bottomDetail.transform.position;
             targetDetail.transform.Translate(alignment, Space.World);
+            targetDetail.UpdateLinks();
 
-            var links = targetDetail.GetLinks();
-            IsValid = links.IsValid;
-
-            targetDetail.UpdateLinks(LinksMode.ExceptSelected, links);
+            AppController.Instance.ActionsLog.RegisterAction(new RotateAction(rotationDelta, pivot, alignment));
         }
+
+//        public void Rotate(Vector3 axis, bool clockwise = true)
+//        {
+//            var dummy = new Vector3();
+//
+//            Rotate(axis, clockwise, out dummy, out dummy);
+//        }
 
 
         public Detail GetBottomDetail()
@@ -447,12 +435,15 @@ namespace Assets.Scripts
 
             if (!_details.Any()) return;
 
-            var combinedBounds = First.Bounds;//new Bounds();
-            //            combinedBounds.center = First.transform.position;
-            foreach (var child in _details)
-            {
-                combinedBounds.Encapsulate(child.Bounds);
-            }
+            Transform parentTransform;
+//            var dummy = Vector3.zero;
+            var combinedBounds = GetMeshBounds(out parentTransform);
+//            var rotation = Detail.GetAligningRotation(Quaternion.identity, parentTransform.rotation, out dummy);
+
+//            foreach (var child in _details)
+//            {
+//                combinedBounds.Encapsulate(child.MeshBounds);
+//            }
 
             var axisColors = new[] { Color.red, Color.green, Color.blue };
             var protrusion = 2f;
@@ -466,11 +457,23 @@ namespace Assets.Scripts
             for (var i = 0; i < 3; i++)
             {
                 var offset = (combinedBounds.extents[i] + protrusion) * new Vector3(i == 0 ? 1 : 0, i == 1 ? 1 : 0, i == 2 ? 1 : 0);
+                var point1 = new Vector3(combinedBounds.center.x + offset.x,
+                                         combinedBounds.center.y + offset.y,
+                                         combinedBounds.center.z + offset.z);
+                var point2 = new Vector3(combinedBounds.center.x - offset.x,
+                                         combinedBounds.center.y - offset.y,
+                                         combinedBounds.center.z - offset.z);
+                //TODO Важно чтобы ориентация осей, которую мы показываем тут, соответствовала ориентации после Detach(). Касается случаев, когда в
+                //TODO группе выделена одна деталь. Сейчас это решается костылями в GetMeshBounds, надо будет переделать.
+//                var transformedPoint1 = parentTransform.TransformPoint(Extentions.RotatePoint(point1, combinedBounds.center, rotation));
+//                var transformedPoint2 = parentTransform.TransformPoint(Extentions.RotatePoint(point2, combinedBounds.center, rotation));
+                var transformedPoint1 = parentTransform.TransformPoint(point1);
+                var transformedPoint2 = parentTransform.TransformPoint(point2);
 
                 GL.Color(axisColors[i]);
-                GL.Vertex3(combinedBounds.center.x + offset.x, combinedBounds.center.y + offset.y, combinedBounds.center.z + offset.z);
-                offset *= -1;
-                GL.Vertex3(combinedBounds.center.x + offset.x, combinedBounds.center.y + offset.y, combinedBounds.center.z + offset.z);
+
+                GL.Vertex3(transformedPoint1.x, transformedPoint1.y, transformedPoint1.z);
+                GL.Vertex3(transformedPoint2.x, transformedPoint2.y, transformedPoint2.z);
             }
 
             GL.End();

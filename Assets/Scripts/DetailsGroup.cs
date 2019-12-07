@@ -316,6 +316,18 @@ namespace Assets.Scripts {
             }
         }
 
+        public override Bounds MeshBounds
+        {
+            get
+            {
+                var combinedBounds = new Bounds();
+                combinedBounds.center = _details.First().transform.GetComponent<DetailBase>().MeshBounds.center;
+                foreach (Transform child in transform) {
+                    combinedBounds.Encapsulate(child.GetComponent<DetailBase>().MeshBounds);
+                }
+                return combinedBounds;
+            }
+        }
 
         public DetailBase Detach(HashSet<Detail> detailsToDetach)
         {
