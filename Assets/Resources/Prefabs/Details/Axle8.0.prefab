@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4601783080535628}
   - component: {fileID: 65523532802233362}
+  - component: {fileID: 3621863407399091407}
   m_Layer: 18
   m_Name: AxleItem
   m_TagString: Untagged
@@ -44,6 +45,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.25, y: 1.25, z: 16.1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &3621863407399091407
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1435835351999560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19585f565709358409d39913e600f4c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OriginOffset: {x: 0, y: 0, z: 0}
 --- !u!1 &1616494847679776
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,7 +214,6 @@ MonoBehaviour:
   Linkage: {fileID: 0}
   AxleLinkage: {fileID: 1616494847679776}
   AlignmentPoint: {x: 0, y: 0, z: 0}
-  LocalAlignmentPoint: {x: 0, y: 0, z: 0}
   FixedColor: 1
   IsAxle: 1
 --- !u!114 &1808698919234146939

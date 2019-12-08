@@ -157,7 +157,6 @@ MonoBehaviour:
   Linkage: {fileID: 1196606035920920}
   AxleLinkage: {fileID: 1040741360529906}
   AlignmentPoint: {x: 0, y: 0, z: 0}
-  LocalAlignmentPoint: {x: 0, y: 0, z: 0}
   FixedColor: 1
   IsAxle: 0
 --- !u!114 &8361100200547638932
@@ -255,6 +254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4344133649512068}
   - component: {fileID: 65097791532157802}
+  - component: {fileID: 6773765694772050500}
   m_Layer: 17
   m_Name: AxleHubItem
   m_TagString: Untagged
@@ -289,3 +289,16 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5.2, y: 1.1, z: 1.1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &6773765694772050500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237018480245016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19585f565709358409d39913e600f4c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OriginOffset: {x: 0, y: 0, z: 0}
