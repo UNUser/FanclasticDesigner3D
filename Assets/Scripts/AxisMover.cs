@@ -1,74 +1,90 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace Assets.Scripts 
+namespace Assets.Scripts
 {
-	public class AxisMover : MonoBehaviour
-	{
-		public GameObject Root;
-		public Canvas Canvas;
+    public class AxisMover : MonoBehaviour
+    {
+        public GameObject Root;
+        public Canvas Canvas;
 
-		public int PointsCount;
-		public FixedAxisRotator[] FixedAxisRotators;
+        public GameObject Rotator;
+        public GameObject Mover;
 
-		private SelectedDetails Selected { get { return _selected ?? (_selected = AppController.Instance.SelectedDetails); } }
-		private SelectedDetails _selected;
-		private readonly Vector3 _screenOriginOffset = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
+        public int PointsCount;
+        public FixedAxisRotator[] FixedAxisRotators;
 
-		protected void OnDisable()
-		{
-			Root.SetActive(false);
-		}
+        private SelectedDetails Selected { get { return _selected ?? (_selected = AppController.Instance.SelectedDetails); } }
+        private SelectedDetails _selected;
+        private readonly Vector3 _screenOriginOffset = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
 
-		public Vector3 Correction { get; set; }
+        protected void OnDisable()
+        {
+            Root.SetActive(false);
+        }
+
+        public Vector3 Correction { get; set; }
 
 
-		public void Update()
-		{
-			if (!Selected.Selected.Any()) {
-				Root.SetActive(false);
-				return;
-			}
+        public void Update()
+        {
+            if (!Selected.Selected.Any()) {
+                Root.SetActive(false);
+                return;
+            }
 
-			var bounds = Selected.First.Bounds;
+            var first = Selected.First;
+            var firstGroup = first.Group;
+            var bounds = first.Bounds;
 
-			foreach (var detail in Selected.Selected) {
-				bounds.Encapsulate(detail.Bounds);
-			}
+            foreach (var detail in Selected.Selected) {
+                bounds.Encapsulate(detail.Bounds);
+            }
 
-			var centerToScreenPoint = Camera.main.WorldToScreenPoint(bounds.center - Correction);
+            var centerToScreenPoint = Camera.main.WorldToScreenPoint(bounds.center - Correction);
 
-			if (centerToScreenPoint.z < 0) {
-				Root.SetActive(false);
-				return;
-			}
+            if (centerToScreenPoint.z < 0) {
+                Root.SetActive(false);
+                return;
+            }
 
-			var rootLocalPos = centerToScreenPoint - _screenOriginOffset;
+            var rootLocalPos = centerToScreenPoint - _screenOriginOffset;
+            Transform targetTransform;
 
-			rootLocalPos.z = 0;
+            rootLocalPos.z = 0;
 
-			Root.transform.localPosition = rootLocalPos;
-			Root.transform.rotation = Selected.First.transform.rotation;//Quaternion.identity;
+            if (Selected.Count == 1)
+            {
+                targetTransform = first.transform;
+            }
+            else
+            {
+                targetTransform = firstGroup == null ? first.transform : firstGroup.transform;
 
-			Root.SetActive(true);
-		}
+            }
+
+            Root.transform.localPosition = rootLocalPos;
+            Root.transform.rotation = Rotator.activeSelf ? targetTransform.rotation : Quaternion.identity;
+
+            Root.SetActive(true);
+        }
 
 #if UNITY_EDITOR
 
-		private int _prevPointsCount;
+        private int _prevPointsCount;
 
-		protected void OnValidate() {
-			if (_prevPointsCount == PointsCount) {
-				return;
-			}
+        protected void OnValidate() {
+            if (_prevPointsCount == PointsCount) {
+                return;
+            }
 
-			foreach (var fixedAxisRotator in FixedAxisRotators) {
-				fixedAxisRotator.DrawArc(PointsCount);
-			}
+            foreach (var fixedAxisRotator in FixedAxisRotators) {
+                fixedAxisRotator.DrawArc(PointsCount);
+            }
 
-			_prevPointsCount = PointsCount;
-		}
+            _prevPointsCount = PointsCount;
+        }
 
 #endif
-	}
+    }
 }
