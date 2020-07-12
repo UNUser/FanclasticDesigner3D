@@ -51,6 +51,7 @@ namespace Assets.Scripts
         public AxisMover AxisMover;
         public GameObject MovementController;
         public GameObject RotationController;
+        public GameObject Handles;
 
         public Session Session { get; private set; }
         public AppMode Mode { get; private set; }
@@ -95,6 +96,24 @@ namespace Assets.Scripts
         {
             RotationController.SetActive(value);
             AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
+        }
+
+        public void OnPartRotationModeChanged(bool value)
+        {
+            Handles.SetActive(value);
+            AxisMover.gameObject.SetActive(ToolsToggleGroup.AnyTogglesOn());
+
+            if (!value)
+            {
+                return;
+            }
+
+            var axileConnections = SelectedDetails.Detach();
+
+            foreach (var handle in Handles.transform)
+            {
+
+            }
         }
 
         public SelectedDetails SelectedDetails;
@@ -1017,13 +1036,13 @@ namespace Assets.Scripts
         }
     }
 
-
     [Serializable]
     public class SceneData
     {
         // 1.1 - добавлена группа вспомогательных деталей (скобочки, рельсы, переходники на Lego и т.п.)
         // 1.2 - добавлены оси, колеса и т.п.
-        public string Version = "1.2";
+        // 1.3 - добавлены повороты частей, соединенных осями
+        public string Version = "1.3";
         public List<DetailData> SingleDetails = new List<DetailData>();
         public List<ConnectedGroup> ConnectedGroups = new List<ConnectedGroup>();
     }
@@ -1032,6 +1051,7 @@ namespace Assets.Scripts
     public class ConnectedGroup
     {
         public List<DetailData> Details = new List<DetailData>();
+        public List<List<int>> HardConnectedGroups = new List<List<int>>();
         public List<InstructionBase> Instructions = new List<InstructionBase>();
     }
 

@@ -28,6 +28,7 @@ namespace Assets.Scripts
         public GameObject Linkage;
         public GameObject AxleLinkage;
         public Vector3 AlignmentPoint;
+        public Vector3 AxisLocalDirection {get { return gameObject.name.Contains("Axle") ?  Vector3.forward : Vector3.up;}}
         public bool FixedColor;
         public bool IsAxle;
 
@@ -302,7 +303,7 @@ namespace Assets.Scripts
 
             var links = AppController.Instance.SelectedDetails.GetLinks(offset, rotationDelta, hitPoint, LinksMode.ExceptSelected);
 
-            Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
+//            Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
 
 //            var detached1 = AppController.Instance.SelectedDetails.Detach();
 //            detached1.transform.rotation = rotationDelta * detached1.transform.rotation;
@@ -671,8 +672,27 @@ namespace Assets.Scripts
                     if (neighbor.gameObject == linkageCollider.gameObject) continue;
 
                     var neighborDetail = neighbor.GetComponentInParent<Detail>();
+                    var isAxleConnection = layerPrefix.Contains("Axle");
 
-                    links.Connections.Add(neighborDetail);
+                    if (isAxleConnection)
+                    {
+                        var overlapAreaRelativeBounds = Extentions.RelativeBounds(neighbor.transform, overlapArea, offset, rotationDelta, pivot);
+                        var relativeOverlapBounds = Extentions.Overlap(overlapAreaRelativeBounds, neighbor.bounds);
+                        var axleConnectionPivot = neighbor.transform.TransformPoint(relativeOverlapBounds.center);
+                        var axleConnectionPivotSource = Extentions.RotatePoint(axleConnectionPivot - offset, pivot,
+                            Quaternion.Inverse(rotation));
+                        var axleConnectionPivotLocal = transform.InverseTransformPoint(axleConnectionPivotSource);
+
+                        links.AxisConnections.Add(new AxisConnection
+                        {
+                            Detail = neighborDetail,
+                            PivotLocalPos = axleConnectionPivotLocal.AlignByAxleDirection(AlignmentPoint, transform.TransformDirection(AxisLocalDirection)),
+                        });
+                    }
+                    else
+                    {
+                        links.Connections.Add(neighborDetail);
+                    }
                 }
             }
         }
@@ -860,32 +880,66 @@ namespace Assets.Scripts
         protected override void UpdateConnections(LinksBase newLinks)
         {
             var connectionsToAdd = new HashSet<Detail>(newLinks.Connections);
+            var axisConnectionsToAdd = new HashSet<AxisConnection>(newLinks.AxisConnections);
+
             connectionsToAdd.ExceptWith(_links.Connections);
+            axisConnectionsToAdd.ExceptWith(_links.AxisConnections);
 
             var connectionsToRemove = new HashSet<Detail>(_links.Connections);
+            var axisConnectionsToRemove = new HashSet<AxisConnection>(_links.AxisConnections);
+
             connectionsToRemove.ExceptWith(newLinks.Connections);
+            axisConnectionsToRemove.ExceptWith(newLinks.AxisConnections);
 
             if (newLinks.LinksMode != LinksMode.All)
             {
                 Predicate<Detail> exceptSelected = detail => detail.IsSelected;
                 Predicate<Detail> selectedOnly = detail => !detail.IsSelected;
 
+                Predicate<AxisConnection> axisExceptSelected = connection => connection.Detail.IsSelected;
+                Predicate<AxisConnection> axisSelectedOnly = connection => !connection.Detail.IsSelected;
+
                 connectionsToRemove.RemoveWhere(newLinks.LinksMode == LinksMode.ExceptSelected ? exceptSelected : selectedOnly);
+                axisConnectionsToRemove.RemoveWhere(newLinks.LinksMode == LinksMode.ExceptSelected ? axisExceptSelected : axisSelectedOnly);
             }
 
-            foreach (var newConnection in connectionsToAdd)
-            {
-                newConnection._links.Connections.Add(this);
-            }
-
-            _links.Connections.UnionWith(connectionsToAdd);
-
+            // removing
             foreach (var removeConnection in connectionsToRemove)
             {
                 removeConnection._links.Connections.Remove(this);
+                _links.Connections.Remove(removeConnection);
             }
 
-            _links.Connections.ExceptWith(connectionsToRemove);
+            foreach (var removeConnection in axisConnectionsToRemove)
+            {
+                var removeConnectionDetail = removeConnection.Detail;
+
+                removeConnectionDetail._links.AxisConnections.RemoveWhere(connection => connection.Detail == this);
+                _links.AxisConnections.RemoveWhere(connection => connection.Detail == removeConnectionDetail);
+            }
+
+            // adding
+            foreach (var newConnection in connectionsToAdd)
+            {
+                newConnection._links.Connections.Add(this);
+                _links.Connections.Add(newConnection);
+            }
+
+            foreach (var newConnection in axisConnectionsToAdd)
+            {
+                var detail = newConnection.Detail;
+                var pivotPos = transform.TransformPoint(newConnection.PivotLocalPos);
+                var pivotLocalPos = detail.transform.InverseTransformPoint(pivotPos)
+                    .AlignByAxleDirection(detail.AlignmentPoint, detail.transform.TransformDirection(detail.AxisLocalDirection));
+                var axisConnection = new AxisConnection
+                {
+                    Detail = this,
+                    PivotLocalPos = pivotLocalPos
+                };
+
+                detail._links.AxisConnections.Add(axisConnection);
+                _links.AxisConnections.Add(newConnection);
+            }
 
             if (!_links.HasConnections && Group != null)
             {
