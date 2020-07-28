@@ -6,4 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Main - Copy (BCKP).unity
+    path: Assets/Main.unity
+    guid: 1644d2652374fb7488ad63c5d9b3eb71
+  m_configObjects: {}
