@@ -370,10 +370,7 @@ namespace Assets.Scripts
                 {"ModelsSetsLayer.SetsNames.Kids200", "Kids 200"},
                 {"ModelsSetsLayer.SetsNames.Kids100", "Kids 100"},
                 {"ModelsSetsLayer.SetsNames.Kids40", "Kids 40"},
-                {"ModelsSetsLayer.SetsNames.TestCategory_lvl_0", "Уровень 0"},
-                {"ModelsSetsLayer.SetsNames.TestCategory_lvl_1", "Уровень 1"},
 
-                {"ModelsSetsLayer.ModelsNames.TestFile", "Файл"},
                 {"ModelsSetsLayer.ModelsNames.GiraffeGulliver", "Жираф Гулливер"},
                 {"ModelsSetsLayer.ModelsNames.DeltaSpaceship", "Дельта"},
                 {"ModelsSetsLayer.ModelsNames.InfinitySpaceship", "Инфинити"},
