@@ -9738,6 +9738,8 @@ MonoBehaviour:
       m_Image: {fileID: 0}
     - m_Text: "\u05EA\u05D9\u05E8\u05D1\u05E2"
       m_Image: {fileID: 0}
+    - m_Text: "\u0423\u0437\u0431\u0435\u043A"
+      m_Image: {fileID: 0}
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -10799,7 +10801,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: -180.9, y: 33.003}
-  m_SizeDelta: {x: -40, y: 180}
+  m_SizeDelta: {x: -40, y: 210}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &801059918
 MonoBehaviour:
