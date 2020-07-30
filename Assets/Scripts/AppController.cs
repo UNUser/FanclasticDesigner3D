@@ -7,13 +7,12 @@ using System.Runtime.InteropServices;
 using System.Text;
 using DG.Tweening;
 using UnityEngine.SceneManagement;
+using UnityFBXExporter;
 #if UNITY_STANDALONE_WIN
 using System.Windows.Forms;
 #endif
 using UnityEngine;
-using UnityEngine.Networking;
 using UnityEngine.UI;
-using UnityFBXExporter;
 using Newtonsoft.Json.Utilities;
 using Application = UnityEngine.Application;
 using Group = System.Collections.Generic.List<Assets.Scripts.Detail>;
@@ -358,7 +357,8 @@ namespace Assets.Scripts
 
             var detailId = targetGroup.Details.First().Id;
             var targetGameObject = Session.GetDetail(detailId).Group.gameObject;
-            var success = FBXExporter.ExportGameObjToFBX(targetGameObject, path, true);
+            var normalizedPath = path.Replace("\\", "/");
+            var success = FBXExporter.ExportGameObjToFBX(targetGameObject, normalizedPath, true);
 
             if (success)
             {

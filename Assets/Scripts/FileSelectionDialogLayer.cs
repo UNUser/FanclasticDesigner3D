@@ -8,98 +8,98 @@ using Application = UnityEngine.Application;
 namespace Assets.Scripts {
     public class FileSelectionDialogLayer : MonoBehaviour
     {
-	    public Text Path;
+        public Text Path;
         public InputField InputField;
         public GameObject SaveButton;
-	    public GameObject UpButton;
-	    public GameObject DownloadsButton;
+        public GameObject UpButton;
+        public GameObject DownloadsButton;
         public ScrollRect ScrollRect;
 
 
-	    private void Awake()
-	    {
-		    DownloadsButton.SetActive(Application.platform == RuntimePlatform.Android);
-	    }
+        private void Awake()
+        {
+            DownloadsButton.SetActive(Application.platform == RuntimePlatform.Android);
+        }
 
 
-	    public void OnDownloadsButtonClick()
-	    {
-		    var plugin = new AndroidJavaClass("ru.fanclastic.androidplugin.AndroidPlugin");
-			var downloadsPath = plugin.CallStatic<string>("GetDownloadsPath");
+        public void OnDownloadsButtonClick()
+        {
+            var plugin = new AndroidJavaClass("ru.fanclastic.Fanclastic3DDesigner.AndroidPlugin");
+            var downloadsPath = plugin.CallStatic<string>("GetDownloadsPath");
 
-		    CurrentPath = downloadsPath;
-	    }
+            CurrentPath = downloadsPath;
+        }
 
-	    public string CurrentPath
-	    {
-		    get {
-			    if (_currentPath == null) {
-				    CurrentPath = PlayerPrefs.GetString("LastPath", Application.persistentDataPath);
-			    }
-			    if (Directory.Exists(_currentPath)) {
-				    return _currentPath;
-			    }
-				return (CurrentPath = Application.persistentDataPath);
-		    }
-			private set {
-				if (value == null || value == _currentPath) {
-					return;
-				}
+        public string CurrentPath
+        {
+            get {
+                if (_currentPath == null) {
+                    CurrentPath = PlayerPrefs.GetString("LastPath", Application.persistentDataPath);
+                }
+                if (Directory.Exists(_currentPath)) {
+                    return _currentPath;
+                }
+                return (CurrentPath = Application.persistentDataPath);
+            }
+            private set {
+                if (value == null || value == _currentPath) {
+                    return;
+                }
 
-				var prevPath = _currentPath;
-				var parent = Directory.GetParent(value);
+                var prevPath = _currentPath;
+                var parent = Directory.GetParent(value);
 
-				_currentPath = value.Replace('\\', '/');
-				_currentPathParent = parent != null ? parent.FullName : null;
-				try {
-					UpdateFilesList();
-				}
-				catch (Exception) {
-					Debug.LogError("Access denied: " + _currentPath);
-					CurrentPath = prevPath;
-				}
-				UpButton.gameObject.SetActive(_currentPathParent != null);
-			}
-	    }
+                _currentPath = value.Replace('\\', '/');
+                _currentPathParent = parent != null ? parent.FullName : null;
+                try {
+                    UpdateFilesList();
+                }
+                catch (Exception) {
+                    Debug.LogError("Access denied: " + _currentPath);
+                    CurrentPath = prevPath;
+                }
+                UpButton.gameObject.SetActive(_currentPathParent != null);
+            }
+        }
 
-	    private string _currentPath;
-	    private string _currentPathParent;
+        private string _currentPath;
+        private string _currentPathParent;
         private bool _isSaveFileDialog;
         private Action<string> _fileSelectedAction;
 
-	    public void ShowFileSelectionDialog(string path, Action<string> fileSelectedAction, bool isSaveFileDialog)
-	    {
-		    _isSaveFileDialog = isSaveFileDialog;
-		    _fileSelectedAction = fileSelectedAction;
+        public void ShowFileSelectionDialog(string path, Action<string> fileSelectedAction, bool isSaveFileDialog)
+        {
+            _isSaveFileDialog = isSaveFileDialog;
+            _fileSelectedAction = fileSelectedAction;
 
-		    InputField.gameObject.SetActive(_isSaveFileDialog);
-		    SaveButton.SetActive(_isSaveFileDialog);
+            InputField.gameObject.SetActive(_isSaveFileDialog);
+            SaveButton.SetActive(_isSaveFileDialog);
 
-		    if (_isSaveFileDialog)
-		    {
-			    InputField.text = string.Empty;
-		    }
+            if (_isSaveFileDialog)
+            {
+                InputField.text = string.Empty;
+            }
 
-		    if (CurrentPath != path) {
-			    CurrentPath = path;
-		    } else {
-			    UpdateFilesList();
-		    }
+            if (CurrentPath != path) {
+                CurrentPath = path;
+            } else {
+                UpdateFilesList();
+            }
 
-		    gameObject.SetActive(true);
+            gameObject.SetActive(true);
         }
 
         private void UpdateFilesList(bool resetScrollPosition = true)
         {
             var files = Directory.GetFiles(CurrentPath);
-	        var directories = Directory.GetDirectories(CurrentPath);
+            var directories = Directory.GetDirectories(CurrentPath);
             var itemPrefab = ScrollRect.content.GetChild(0).gameObject;
 
             var createdItems = ScrollRect.content.childCount - 1;
             var neededItems = files.Length + directories.Length;
             var loopEnd = Math.Max(createdItems, neededItems);
 
-			Path.text = CurrentPath;
+            Path.text = CurrentPath;
 
             for (var i = 0; i < loopEnd; i++) {
                 DirectoryContentItem newItem;
@@ -111,55 +111,55 @@ namespace Assets.Scripts {
                     newItem.transform.SetParent(ScrollRect.content, false);
                 }
 
-				newItem.gameObject.SetActive(i < neededItems);
+                newItem.gameObject.SetActive(i < neededItems);
 
                 if (newItem.gameObject.activeSelf) {
-	                var isDirectory = i < directories.Length;
-					var source = isDirectory ? directories : files;
-					var sourceIndex = isDirectory ? i : i - directories.Length;
-					var itemFullPath = source[sourceIndex];
+                    var isDirectory = i < directories.Length;
+                    var source = isDirectory ? directories : files;
+                    var sourceIndex = isDirectory ? i : i - directories.Length;
+                    var itemFullPath = source[sourceIndex];
 
-					newItem.Set(itemFullPath, isDirectory);
+                    newItem.Set(itemFullPath, isDirectory);
                 }
             }
 
-	        if (resetScrollPosition) {
-				ScrollRect.verticalNormalizedPosition = 1;
-	        }
+            if (resetScrollPosition) {
+                ScrollRect.verticalNormalizedPosition = 1;
+            }
         }
 
         public void OnSaveButtonClicked()
         {
-	        var fileName = InputField.text;
+            var fileName = InputField.text;
 
-	        if (!IsValidFileName(fileName)) {
-				Debug.LogError("Invalid file name: " + fileName);
-				return;
-	        }
+            if (!IsValidFileName(fileName)) {
+                Debug.LogError("Invalid file name: " + fileName);
+                return;
+            }
 
-	        var fullPath = string.Format("{0}/{1}", CurrentPath, fileName);
+            var fullPath = string.Format("{0}/{1}", CurrentPath, fileName);
 
             gameObject.SetActive(false);
-			_fileSelectedAction.SafeInvoke(fullPath);
+            _fileSelectedAction.SafeInvoke(fullPath);
         }
 
         public void OnCancelButtonClicked() {
             gameObject.SetActive(false);
         }
 
-	    public void OnUpButtonClicked()
-	    {
-			CurrentPath = _currentPathParent;
-	    }
+        public void OnUpButtonClicked()
+        {
+            CurrentPath = _currentPathParent;
+        }
 
         public void OnItemButtonClicked(DirectoryContentItem item)
         {
-	        var itemPath = item.ItemPath;
+            var itemPath = item.ItemPath;
 
-	        if (item.IsDirectory) {
-		        CurrentPath = itemPath;
-				return;
-	        }
+            if (item.IsDirectory) {
+                CurrentPath = itemPath;
+                return;
+            }
 
             if (_isSaveFileDialog) {
                 InputField.text = item.ItemRawName;
@@ -168,32 +168,32 @@ namespace Assets.Scripts {
 
             gameObject.SetActive(false);
 
-			_fileSelectedAction.SafeInvoke(itemPath);
+            _fileSelectedAction.SafeInvoke(itemPath);
         }
 
-		public void OnRemoveItemButtonClick(DirectoryContentItem item)
-		{
-			var fullPath = item.ItemPath;
+        public void OnRemoveItemButtonClick(DirectoryContentItem item)
+        {
+            var fullPath = item.ItemPath;
 
-			try {
-				if (item.IsDirectory) {
-					Directory.Delete(fullPath, true);
-				} else {
-					File.Delete(fullPath);
-				}
-			}
-			catch (Exception)
-			{
-				Debug.LogError("Access denied: " + fullPath);
-				return;
-			}
+            try {
+                if (item.IsDirectory) {
+                    Directory.Delete(fullPath, true);
+                } else {
+                    File.Delete(fullPath);
+                }
+            }
+            catch (Exception)
+            {
+                Debug.LogError("Access denied: " + fullPath);
+                return;
+            }
 
-			UpdateFilesList(false);
+            UpdateFilesList(false);
         }
 
-	    private bool IsValidFileName(string fileName)
-	    {
-		    return fileName.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) < 0;
-	    }
+        private bool IsValidFileName(string fileName)
+        {
+            return fileName.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) < 0;
+        }
     }
 }

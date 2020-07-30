@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="ru.fanclastic.Fanclastic3DDesigner">
-  <application android:icon="@drawable/app_icon" android:label="Fanclastic 3D Designer" android:allowBackup="true" android:supportsRtl="true" android:name="io.fabric.unity.android.FabricApplication">
+  <application android:icon="@drawable/app_icon" android:allowBackup="true" android:supportsRtl="true">
     <activity android:name="com.unity3d.player.UnityPlayerActivity" android:label="Fanclastic 3D Designer">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
@@ -9,4 +9,5 @@
     </activity>
   </application>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 </manifest>

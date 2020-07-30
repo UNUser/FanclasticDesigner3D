@@ -1,9 +1,9 @@
-Library/
 *.apk
+*.aab
+*.suo
+*.csproj
+*.sln
+Library/
 Temp/
 ProjectBuilds/
 obj/
-Assets/StreamingAssets/crashlytics-build.properties
-FanclasticDesigner3D.v12.suo
-Assembly-CSharp.csproj
-Assembly-CSharp-Editor.csproj
