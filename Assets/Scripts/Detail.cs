@@ -708,15 +708,15 @@ namespace Assets.Scripts
                 var neighborBoxCollider = neighbor.GetComponent<BoxCollider>();
                 var neighborAreaRelativeBounds = new Bounds(neighborBoxCollider.center, neighborBoxCollider.size);
 
-                var overlap = Extentions.Overlap(overlapAreaRelativeBounds, neighborAreaRelativeBounds);
-                var size = overlap.size;
+                var relativeOverlap = Extentions.Overlap(overlapAreaRelativeBounds, neighborAreaRelativeBounds);
+                var size = relativeOverlap.size;
 
                 // все координаты больше 1.1
                 var invalidTest = Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f) > 3.599;
 
-                Debug.Log(invalidTest + " " + (Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f))
-                    + " " + offset + " " + overlap + " " + overlapAreaRelativeBounds + " " + neighborAreaRelativeBounds);
-
+//                Debug.Log(invalidTest + " " + (Mathf.Min(size.x, 1.2f) + Mathf.Min(size.y, 1.2f) + Mathf.Min(size.z, 1.2f))
+//                    + " " + offset + " " + relativeOverlap + " " + overlapAreaRelativeBounds + " " + neighborAreaRelativeBounds);
+//
 
 
                 // TODO тут надо добавить получение и анализ двух параметров: вращение деталей относительно друг друга
@@ -816,12 +816,17 @@ namespace Assets.Scripts
                                 ? neighborDetail
                                 : this;
                             var bevelGearTransform = bevelGearDetail.transform;
-                            var directionsDot = Vector3.Dot((bevelGearTransform.position + (bevelGearDetail == this ? offset : Vector3.zero) - overlap.center).normalized,
-                                                           -(bevelGearTransform.forward.normalized));
+                            var bevelGearPosition = bevelGearTransform.position +
+                                                    (bevelGearDetail == this ? offset : Vector3.zero);
+                            var bevelGearOverlapCenter = neighbor.transform.TransformPoint(relativeOverlap.center);
+                            var bevelGearOverlapDirection = (bevelGearPosition - bevelGearOverlapCenter).normalized;
+
+                            var bevelGearConnectorDirection = - bevelGearTransform.forward;
+
+                            var directionsDot = Vector3.Dot(bevelGearOverlapDirection, bevelGearConnectorDirection);
                             var directionTest = directionsDot > 0;
 
-                            if (!directionTest)
-                            {
+                            if (!directionTest) {
                                 return false;
                             }
                         }
@@ -837,8 +842,14 @@ namespace Assets.Scripts
                                 ? neighborDetail
                                 : this;
                             var tipTransform = tipDetail.transform;
-                            var directionsDot = Vector3.Dot((tipTransform.position + (tipDetail == this ? offset : Vector3.zero) - overlap.center).normalized,
-                                                            -(tipTransform.forward.normalized));
+                            var tipPosition = tipTransform.position +
+                                                    (tipDetail == this ? offset : Vector3.zero);
+                            var tipOverlapCenter = neighbor.transform.TransformPoint(relativeOverlap.center);
+                            var tipOverlapDirection = (tipPosition - tipOverlapCenter).normalized;
+
+                            var tipConnectorDirection = - tipTransform.forward;
+
+                            var directionsDot = Vector3.Dot(tipOverlapDirection, tipConnectorDirection);
                             var directionTest = directionsDot > 0;
 
                             if (!directionTest)
