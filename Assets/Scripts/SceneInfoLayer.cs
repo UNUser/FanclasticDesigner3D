@@ -26,35 +26,35 @@ namespace Assets.Scripts
         private const float UnitPhysicalSize = 0.8f; //cm
 
         private readonly Dictionary<string, float> Weights = new Dictionary<string, float>
-		{
-			{"1x1", 0.983f},
-			{"2x1", 1.709f},
-			{"2x2", 3.476f},
-			{"3x1", 2.474f},
-			{"3x2", 5.39f},
-			{"3x3", 7.748f},
-			{"4x1", 3.382f},
-			{"4x2", 6.848f},
-			{"5x1", 4.22f},
-			{"5x2", 8.556f},
-			{"6x1", 5.0f},
-			{"6x2", 10.214f},
+        {
+            {"1x1", 0.983f},
+            {"2x1", 1.709f},
+            {"2x2", 4.25f},
+            {"3x1", 2.474f},
+            {"3x2", 5.33f},
+            {"3x3", 9.2976f},
+            {"4x1", 3.382f},
+            {"4x2", 8.5f},
+            {"5x1", 4.22f},
+            {"5x2", 10.63f},
+            {"6x1", 5.0f},
+            {"6x2", 12.2568f},
 
-			{"BraceLineX2", 0.67f},
-			{"BraceLineX3", 0.96f},
-			{"BraceSquareX2", 0.92f},
-			{"BraceSquareX3", 1.35f},
-			{"Lego1x1", 1.33f},
-			{"Lego2x1", 2.42f},
-			{"RailX2", 0.85f},
-			{"Roll", 0.92f},
+            {"BraceLineX2", 0.67f},
+            {"BraceLineX3", 0.96f},
+            {"BraceSquareX2", 0.92f},
+            {"BraceSquareX3", 1.35f},
+            {"Lego1x1", 1.33f},
+            {"Lego2x1", 2.42f},
+            {"RailX2", 0.85f},
+            {"Roll", 0.92f},
 
-			{"Axle1.0", 0.207f},
-			{"Axle2.0", 0.413f},
-			{"Axle2.5", 0.516f},
-			{"Axle3.0", 0.619f},
-			{"Axle3.5", 0.722f},
-			{"Axle8.0", 1.65f},
+            {"Axle1.0", 0.207f},
+            {"Axle2.0", 0.413f},
+            {"Axle2.5", 0.516f},
+            {"Axle3.0", 0.619f},
+            {"Axle3.5", 0.722f},
+            {"Axle8.0", 1.65f},
 
             {"AxleBevelGear", 0.4f},
             {"AxleCoupling", 0.7f},
@@ -65,7 +65,7 @@ namespace Assets.Scripts
             {"AxleWasherToothed", 0.078f},
             {"AxleWheelBig", 12.3f},
             {"AxleWheelSmall", 1.5f},
-		};
+        };
 
         public void OnCopyButtonClicked()
         {
