@@ -52,6 +52,10 @@ namespace Assets.Scripts {
             var rotationPivot = Vector3.zero;
             var resultOffset = Vector3.zero;
 
+            // Тут неявно предполагается, что все повороты происходят вокруг одной и той же точки относительно
+            // выделенных деталей (это центр общего BoundingBox'a, мешей этих деталей). За счет этого, вращения
+            // и перемещения деталей можно просуммировать и сжать все промежуточные действия в одну инструкцию
+            // (суммарное вращение в исходной точке и последующее суммарное перемещение).
             while (actionIndex >= 0 && _history[actionIndex].Type != ActionType.Selection
                                     && _history[actionIndex].Type != ActionType.Creation)
             {
@@ -72,6 +76,9 @@ namespace Assets.Scripts {
                         var moveAction = (MoveAction) currentAction;
 
                         resultOffset += moveAction.Offset;
+                        // Поскольку в инструкциях мы сперва применям вращение, а потом перемещение, то при суммировании действий мы все вращения
+                        // должны выполнить в исходной точке выделения деталей (до начала перемещений). Соответственно, если до первого вращения
+                        // были какие-то перемещения, то их нужно вычесть из точки вращения, чтобы получить ее положение в момент выделения деталей.
                         if (resultRotation != Quaternion.identity) {
                             rotationPivot -= moveAction.Offset;
                         }
@@ -82,6 +89,9 @@ namespace Assets.Scripts {
 
                         resultRotation *= rotateAction.RotationDelta;
                         resultOffset += rotateAction.Alignment;
+                        // Тут нам нужно исходное положение точки вращения, которое у нее было в момент выделения деталей.
+                        // Если до первого вращения не было перемещений, то это будет просто Pivot первого вращения.
+                        // Если были, то учтем их позже при обработке ActionType.Movement.
                         rotationPivot = rotateAction.Pivot;
                         break;
 
@@ -119,7 +129,6 @@ namespace Assets.Scripts {
                     Debug.LogError("Invalid initial action type: " + initialAction.Type);
                     break;
             }
-
 
             if (isDeleteInstruction) {
                 if (initialAction.Type != ActionType.Creation) {
@@ -170,7 +179,10 @@ namespace Assets.Scripts {
                 }
 
                 addInstruction.TargetDetails = new HashSet<int>{ sourceState.Id };
-                addInstruction.Position = sourceState.Position + (SerializableVector3) resultOffset;
+                // Для некоторых деталей их геометрический центр, который всегда берется за центральную точку всех вращений,
+                // не совпадает с локальным нулем модели. Поэтому чтобы понять, какая итоговая позиция будет у детали, нужно
+                // применить к ее исходной позиции все суммарные вращения и перемещения
+                addInstruction.Position = Extentions.RotateAndTranslatePoint(sourceState.Position, rotationPivot, resultRotation, resultOffset);
                 addInstruction.Rotation = (resultRotation * Quaternion.Euler(sourceState.Rotation)).eulerAngles;
 
                 return addInstruction;
