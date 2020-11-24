@@ -162,7 +162,6 @@ namespace Assets.Scripts
         private void OnGroupSelected(ConnectedGroup selectedGroup)
         {
             ModeSwitcher.gameObject.SetActive(true);
-            Destroy(ModeSwitcher.GetComponentInChildren<Canvas>().gameObject); ///// TODO проверить баг в новых версиях юнити!!!
 
             if (selectedGroup == null)
             {
