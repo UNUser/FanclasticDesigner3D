@@ -59,6 +59,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -70,6 +71,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -111,7 +113,7 @@ MonoBehaviour:
   AxleSpaceBounds: {fileID: 65093942588555350}
   Linkage: {fileID: 0}
   AxleLinkage: {fileID: 1975343119262560}
-  AlignmentPoint: {x: 0, y: 0, z: 0}
+  AlignmentPoint: {x: 0, y: 0, z: 1}
   FixedColor: 1
   IsAxle: 0
 --- !u!114 &7176971945354938698
@@ -126,7 +128,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19585f565709358409d39913e600f4c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  OriginOffset: {x: 0, y: 0, z: 0}
+  OriginOffset: {x: 0, y: 0, z: 1}
 --- !u!1 &1487141563696664
 GameObject:
   m_ObjectHideFlags: 0
