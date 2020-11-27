@@ -218,8 +218,6 @@ namespace Assets.Scripts
 
             AppController.Instance.SelectedDetails.SetRaycastOrigins(holdingConnectorOffset);
 
-            _sourceRotation = transform.rotation;
-
             if (eventData != null)
             {
                 _sourcePosition = transform.position;
@@ -235,6 +233,7 @@ namespace Assets.Scripts
             {
                 _raysOrigins[i] = transform.TransformPoint(_connectorsLocalPos[i]) + offset;
             }
+            _sourceRotation = transform.rotation;
         }
 
 
@@ -267,13 +266,35 @@ namespace Assets.Scripts
             if (minRayHitInfo == null)
                 return;
 
+            var selectedDetails = AppController.Instance.SelectedDetails.Selected;
+
             // Округляем координаты точки, вычисляем вектор переноса и перемещаем деталь
             var hitPoint = minRayHitInfo.Value.point;
+            var isFloorHit = hitPoint.y <= 0;
             var hitConnectorCurrentPos = raycaster.transform.TransformPoint(raycaster._connectorsLocalPos[rayOriginIndex]);;
 
 //                        _debugRay = new Ray(raycaster._raysOrigins[rayOriginIndex], hitPoint);
+            // АЛГОРИТМ СЛЕДУЮЩИЙ:
+            // Смотрим что раньше всего встретилось на пути проекции детали (это хит поинт кратчайшего луча). Берем решетку у этого объекта и смотрим,
+            // как она сориентирована относительно решетки той детали, от которой шла проекция. Находим то минимальное вращение, которое
+            // нужно применить к исходной решетке, чтобы она имела допустимую ориентацию в пространстве новой решетки (выравнивающее вращение).
+            // Дальше нам нужно определить новые положения деталей относительно текущего положения. Для этого нужно к текущему положению применить
+            // выравнивающие вращение с центром в той точке, куда попала проекция, а затем переместить на определенное расстояние так, чтобы
+            // исходная точка кратчайшего луча
 
-            var hitLattice = minRayHitInfo.Value.collider.GetComponent<Lattice>();
+            // Есть как-бы три положения детали:
+            // 1) положение, определяющее начало проекции, которая идет от камеры в сторону, указанную пользователем;
+            // 2) текущее положение детали на сцене, где реально находится деталь в данный момент;
+            // 3) новое положение детали, которое указывает пользователь пальцем;
+            // Мы должны сделать каст детали из первого положения, вычислить на его основе новое положение и если оно отличается от текущего, то найти перобразование,
+            // которое переводит деталь из текущего положения в новое.
+
+            // Есть исходные точки лучей проекции, идущей от камеры. Они устанавливаются и запоминаются в момент начала драга.
+            // Юзер указывает пальцем направление проекции. В этом направлении кидаются лучи и ищется самый короткий из них.
+            // Этот луч определяет какая точка детали (начало луча) в каком месте (конец луча) должна оказаться.
+            // Теперь нужно найти преобразование (вращение и перенос), которое переведет эту точку детали из ее текущего положения в новое и при этом
+            // задаст детали необходимую ориентацию.
+            var hitLattice = AppController.Instance.WorkspaceLattice;//minRayHitInfo.Value.collider.GetComponent<Lattice>();
             var rotationDelta = raycaster.GetAligningRotation(hitLattice, raycaster._sourceRotation);
 
             var hitConnectorRotatedPos = Extentions.RotatePoint(hitConnectorCurrentPos, hitPoint, rotationDelta);
@@ -283,12 +304,21 @@ namespace Assets.Scripts
             var raycasterCurrentPos = raycaster.transform.position;
             var raycasterNewPos = Extentions.RotateAndTranslatePoint(raycasterCurrentPos, hitPoint, rotationDelta, rotatedPosOffset);
 
-            var raycasterAlignmentPointNewPos = raycaster.transform.TransformPoint(raycaster.AlignmentPoint, hitPoint, rotationDelta, rotatedPosOffset);
-            var alignmentOffset = hitLattice.GetCrossPointAlignmentOffset(raycasterAlignmentPointNewPos);
+            var aligningDetail = (!raycaster.IsAxle || selectedDetails.Count == 1)
+                ? raycaster
+                : selectedDetails.First(detail => !detail.IsAxle);
+
+            var alignmentPointNewPos = aligningDetail.transform.TransformPoint(aligningDetail.AlignmentPoint, hitPoint, rotationDelta, rotatedPosOffset);
+            var direction = raycaster.IsAxle
+                ? (SerializableVector3Int) hitLattice.transform.InverseTransformDirection(rotationDelta*aligningDetail.transform.forward)
+                : (SerializableVector3Int) Vector3.zero;
+            var alignmentOffset = aligningDetail.IsAxle
+                ? hitLattice.GetCrossPointAlignmentOffsetByAxleDirection(alignmentPointNewPos, direction)
+                : hitLattice.GetCrossPointAlignmentOffset(alignmentPointNewPos, isFloorHit);
 
             raycasterNewPos += alignmentOffset;
 
-            if (raycasterNewPos == raycaster.transform.position) return;  //Debug.Log("Old pos: " + transform.position + ", new pos: " + newPos);
+            if (raycasterNewPos == raycaster.transform.position || (hitPoint + alignmentOffset).y < -0.1f) return;
 
             var offset = rotatedPosOffset + alignmentOffset;
 
@@ -302,14 +332,14 @@ namespace Assets.Scripts
 
             var links = AppController.Instance.SelectedDetails.GetLinks(offset, rotationDelta, hitPoint, LinksMode.ExceptSelected);
 
-            Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
+            //Debug.Log(links.IsValid + /*" " + (hitPoint.y > 0) +*/ " " + links.HasConnections);
 
 //            var detached1 = AppController.Instance.SelectedDetails.Detach();
 //            detached1.transform.rotation = rotationDelta * detached1.transform.rotation;
 //            detached1.transform.position = Extentions.RotateAndTranslatePoint(detached1.transform.position, hitPoint, rotationDelta, offset);
 //            return;
 
-            if (!links.IsValid || (hitPoint.y > 0 && !links.HasConnections))
+            if (!links.IsValid || (!isFloorHit && !links.HasConnections))
             {
                 return;
             }
@@ -493,14 +523,12 @@ namespace Assets.Scripts
             return resultRotation;
         }
 
-        public Vector3 GetFloorAlignment()
+        public float GetBottomPointFloorOffset()
         {
             var heightFirst = transform.TransformPoint(_connectorsLocalPos[0]).y;
             var heightLast = transform.TransformPoint(_connectorsLocalPos[_connectorsLocalPos.Length - 1]).y;
-            var heightMin = Mathf.Min(heightFirst, heightLast);
-            var length = heightMin < 0 ? Mathf.Abs(heightMin) : 0;
 
-            return Vector3.up * length;
+            return Mathf.Min(heightFirst, heightLast);
         }
 
         // Update is called once per frame

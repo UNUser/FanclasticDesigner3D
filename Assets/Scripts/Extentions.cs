@@ -165,15 +165,14 @@ namespace Assets.Scripts
             return v;
         }
 
-        public static Vector3 GetCrossPointAlignmentOffset(this Lattice lattice, Vector3 point)
+        public static Vector3 GetCrossPointAlignmentOffset(this Lattice lattice, Vector3 point, bool isFloorAlignment = false)
         {
-            var alignmentPointLocal = lattice.transform.InverseTransformPoint(point) - lattice.OriginOffset;
+            var alignmentPointLocal = lattice.transform.InverseTransformPoint(point) * lattice.transform.lossyScale.x - lattice.OriginOffset;
             var oddSum = (Mathf.RoundToInt(alignmentPointLocal.x) & 1)
                        + (Mathf.RoundToInt(alignmentPointLocal.y) & 1)
                        + (Mathf.RoundToInt(alignmentPointLocal.z) & 1);
-//            var isOddY = Mathf.RoundToInt(alignmentPoint.y).IsOdd();
-//            var isFloor = Mathf.RoundToInt(vector.y) == 0;
-            var isOddAlignment = /*isFloor ? isOddY : */(oddSum > 1);
+            var isOddY = Mathf.RoundToInt(point.y).IsOdd();
+            var isOddAlignment = isFloorAlignment ? isOddY : (oddSum > 1);
 
             var newAlignmentPointLocal = new Vector3(AlignValue(isOddAlignment, alignmentPointLocal.x),
                                                 AlignValue(isOddAlignment, alignmentPointLocal.y),
@@ -196,32 +195,33 @@ namespace Assets.Scripts
             return vector + alignmentOffset;
         }
 
-        public static Vector3 AlignByAxleDirection(this Vector3 vector, Vector3 alignmentPoint, Vector3 direction)
+        public static Vector3 GetCrossPointAlignmentOffsetByAxleDirection(this Lattice lattice, Vector3 alignmentPoint, Vector3 direction)
         {
+            var alignmentPointLocal = lattice.transform.InverseTransformPoint(alignmentPoint) * lattice.transform.lossyScale.x - lattice.OriginOffset;
             var directionIndex = Mathf.Abs(direction.x) == 1 ? 0 : (Mathf.Abs(direction.y) == 1 ? 1 : 2);
             var alignedIndex1 = directionIndex == 0 ? 1 : 0;
             var alignedIndex2 = directionIndex == 2 ? 1 : 2;
 
-            var oddAlignment1 = AlignValue(true, alignmentPoint[alignedIndex1]);
-            var oddAlignment2 = AlignValue(true, alignmentPoint[alignedIndex2]);
+            var oddAlignment1 = AlignValue(true, alignmentPointLocal[alignedIndex1]);
+            var oddAlignment2 = AlignValue(true, alignmentPointLocal[alignedIndex2]);
 
-            var evenAlignment1 = AlignValue(false, alignmentPoint[alignedIndex1]);
-            var evenAlignment2 = AlignValue(false, alignmentPoint[alignedIndex2]);
+            var evenAlignment1 = AlignValue(false, alignmentPointLocal[alignedIndex1]);
+            var evenAlignment2 = AlignValue(false, alignmentPointLocal[alignedIndex2]);
 
-            var oddAlignmentDiff = Mathf.Abs(oddAlignment1 - alignmentPoint[alignedIndex1]) +
-                                   Mathf.Abs(oddAlignment2 - alignmentPoint[alignedIndex2]);
-            var evenAlignmentDiff = Mathf.Abs(evenAlignment1 - alignmentPoint[alignedIndex1]) +
-                                    Mathf.Abs(evenAlignment2 - alignmentPoint[alignedIndex2]);
+            var oddAlignmentDiff = Mathf.Abs(oddAlignment1 - alignmentPointLocal[alignedIndex1]) +
+                                   Mathf.Abs(oddAlignment2 - alignmentPointLocal[alignedIndex2]);
+            var evenAlignmentDiff = Mathf.Abs(evenAlignment1 - alignmentPointLocal[alignedIndex1]) +
+                                    Mathf.Abs(evenAlignment2 - alignmentPointLocal[alignedIndex2]);
             var isOddAlignment = oddAlignmentDiff < evenAlignmentDiff;
-            var newAlignmentPoint = new Vector3();
+            var newAlignmentPointLocal = new Vector3();
 
-            newAlignmentPoint[directionIndex] = Mathf.RoundToInt(alignmentPoint[directionIndex]);
-            newAlignmentPoint[alignedIndex1] = isOddAlignment ? oddAlignment1 : evenAlignment1;
-            newAlignmentPoint[alignedIndex2] = isOddAlignment ? oddAlignment2 : evenAlignment2;
+            newAlignmentPointLocal[directionIndex] = Mathf.RoundToInt(alignmentPointLocal[directionIndex]);
+            newAlignmentPointLocal[alignedIndex1] = isOddAlignment ? oddAlignment1 : evenAlignment1;
+            newAlignmentPointLocal[alignedIndex2] = isOddAlignment ? oddAlignment2 : evenAlignment2;
 
-            var alignmentOffset = newAlignmentPoint - alignmentPoint;
+            var alignmentOffset = newAlignmentPointLocal - alignmentPointLocal;
 
-            return vector + alignmentOffset;
+            return lattice.transform.TransformDirection(alignmentOffset);
         }
 
         /// <summary>

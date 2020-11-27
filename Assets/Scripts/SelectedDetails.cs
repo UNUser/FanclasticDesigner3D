@@ -208,21 +208,17 @@ namespace Assets.Scripts
             targetDetail.transform.Rotate(pivot, rotationDelta);
 
             var bottomDetail = GetBottomDetail();
-            var alignment = bottomDetail.GetFloorAlignment();
+            var floorOffset = bottomDetail.GetBottomPointFloorOffset();
+            var floorAlignment = Vector3.up * (floorOffset < 0 ? Mathf.Abs(floorOffset) : 0);
+            var alignmentPoint = bottomDetail.transform.TransformPoint(bottomDetail.AlignmentPoint) + floorAlignment;
+            var latticeAlignment = AppController.Instance.WorkspaceLattice.GetCrossPointAlignmentOffset(alignmentPoint, floorOffset <= 0);
+            var resultAlignment = floorAlignment + latticeAlignment;
 
-            targetDetail.transform.Translate(alignment, Space.World);
+            targetDetail.transform.Translate(resultAlignment, Space.World);
             targetDetail.UpdateLinks();
 
-            AppController.Instance.ActionsLog.RegisterAction(new RotateAction(rotationDelta, pivot, alignment));
+            AppController.Instance.ActionsLog.RegisterAction(new RotateAction(rotationDelta, pivot, resultAlignment));
         }
-
-//        public void Rotate(Vector3 axis, bool clockwise = true)
-//        {
-//            var dummy = new Vector3();
-//
-//            Rotate(axis, clockwise, out dummy, out dummy);
-//        }
-
 
         public Detail GetBottomDetail()
         {

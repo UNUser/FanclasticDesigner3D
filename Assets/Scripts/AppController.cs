@@ -30,6 +30,7 @@ namespace Assets.Scripts
     public class AppController : MonoBehaviour
     {
         public CameraController CameraController;
+        public Lattice WorkspaceLattice;
         public FileSelectionDialogLayer FileSelectionDialogLayer;
         public Text DebugTextGroups;
         public Text DebugTextDetail;
