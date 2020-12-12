@@ -9,10 +9,10 @@ namespace Assets.Scripts {
     public class CameraController : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         public Camera Camera;
-	    public Transform DirectionalLight;
-	    public Transform DirectionalLight1;
-	    public Vector3 LightRotation;
-	    public Vector3 LightRotation1;
+        public Transform DirectionalLight;
+        public Transform DirectionalLight1;
+        public Vector3 LightRotation;
+        public Vector3 LightRotation1;
 
         public float RotationFloorSpeed = 0.3f;
         public float TiltingFloorSpeed = 0.3f;
@@ -101,24 +101,24 @@ namespace Assets.Scripts {
                     ? Math.Min(Mathf.Min(TiltingFloorAngelMax, alpha) - curr, angel)
                     : Math.Max(angel, TiltingFloorAngelMin - curr);
             }
-           
+
 
             Camera.transform.RotateAround(_focus, axis, -angel);
             Camera.transform.RotateAround(_focus, Vector3.up, offset.x * RotationFloorSpeed);
 
-			SetLight();
+            SetLight();
 
             _prevMousePos = newMousePos;
         }
 
-	    private void SetLight()
-	    {
-			var sightDirection = Camera.transform.forward;
-		    var lookRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(sightDirection, Vector3.up));
+        private void SetLight()
+        {
+            var sightDirection = Camera.transform.forward;
+            var lookRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(sightDirection, Vector3.up));
 
-			DirectionalLight.rotation = lookRotation *  Quaternion.Euler(LightRotation);
-			DirectionalLight1.rotation = lookRotation * Quaternion.Euler(LightRotation1);
-	    }
+            DirectionalLight.rotation = lookRotation *  Quaternion.Euler(LightRotation);
+            DirectionalLight1.rotation = lookRotation * Quaternion.Euler(LightRotation1);
+        }
 
         private void Focusing()
         {
@@ -130,7 +130,7 @@ namespace Assets.Scripts {
                 Time.deltaTime * FocusingSpeed, Mathf.Infinity);
 
             Camera.transform.LookAt(cameraPos + newDirection);
-			SetLight();
+            SetLight();
 
             var distanceExcess = Mathf.Max((Focus - cameraPos).magnitude - MaxDistance, 0f);
             var targetPosition = cameraPos + Camera.transform.forward * distanceExcess;
@@ -152,41 +152,37 @@ namespace Assets.Scripts {
             Focusing();
 
             var oldCameraPos = Camera.transform.position - _focus;
+            var scrollDelta = -Input.mouseScrollDelta.y;
             float distanceDelta;
 
-#if UNITY_STANDALONE || UNITY_EDITOR
+            if (scrollDelta != 0)
+            {
+                distanceDelta = scrollDelta * ScrollZoomSpeed;
+            }
+            else if (Input.touchSupported && Input.touchCount == 2)
+            {
+                // Store both touches.
+                Touch touchZero = Input.GetTouch(0);
+                Touch touchOne = Input.GetTouch(1);
 
-            var scrollDelta = -Input.mouseScrollDelta.y;
+                // Find the position in the previous frame of each touch.
+                Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
+                Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
 
-            if (scrollDelta == 0) return;
+                // Find the magnitude of the vector (the distance) between the touches in each frame.
+                float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
+                float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
 
-            distanceDelta = scrollDelta * ScrollZoomSpeed;
+                // Find the difference in the distances between each frame.
+                float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
 
-#else
+                distanceDelta = deltaMagnitudeDiff * PinchZoomSpeed;
+            }
+            else
+                return;
 
-            // If there are two touches on the device...
-            if (Input.touchCount != 2) return;
-            
-            // Store both touches.
-            Touch touchZero = Input.GetTouch(0);
-            Touch touchOne = Input.GetTouch(1);
-
-            // Find the position in the previous frame of each touch.
-            Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
-            Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
-
-            // Find the magnitude of the vector (the distance) between the touches in each frame.
-            float prevTouchDeltaMag = (touchZeroPrevPos - touchOnePrevPos).magnitude;
-            float touchDeltaMag = (touchZero.position - touchOne.position).magnitude;
-
-            // Find the difference in the distances between each frame.
-            float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
-
-            distanceDelta = deltaMagnitudeDiff * PinchZoomSpeed;
-            
-#endif
             var curr = Vector3.Angle(oldCameraPos, Vector3.up);
-			var maxDistance = curr > 90 ? (_focus.y - MinHeight) / (Mathf.Cos((180 - curr) * Mathf.Deg2Rad)) : MaxZoomDistance;
+            var maxDistance = curr > 90 ? (_focus.y - MinHeight) / (Mathf.Cos((180 - curr) * Mathf.Deg2Rad)) : MaxZoomDistance;
             var newDistance = Mathf.Clamp(oldCameraPos.magnitude + distanceDelta, MinDistance, maxDistance);
 
             Camera.transform.position = _focus + oldCameraPos.normalized * newDistance;
