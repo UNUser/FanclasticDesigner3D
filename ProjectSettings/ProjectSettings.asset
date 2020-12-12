@@ -175,7 +175,7 @@ PlayerSettings:
     tvOS: ru.fanclastic.Fanclastic3DDesigner
   buildNumber:
     iPhone: 0
-  AndroidBundleVersionCode: 106020
+  AndroidBundleVersionCode: 106030
   AndroidMinSdkVersion: 19
   AndroidTargetSdkVersion: 0
   AndroidPreferredInstallLocation: 0
